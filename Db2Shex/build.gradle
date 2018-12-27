@@ -42,6 +42,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-dependencies:2.1.1.RELEASE'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	
+	implementation 'org.hibernate:hibernate-core:3.6.7.Final'
+	
 	def tomcatVersion = '8.0.46'
 	tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
 	"org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}",
