@@ -6,26 +6,35 @@
  * user guide available at https://docs.gradle.org/4.3/userguide/java_library_plugin.html
  */
 
+
+
+buildscript {
+       repositories {
+            jcenter()
+			maven {
+				url "https://plugins.gradle.org/m2/"
+			}
+       }
+       dependencies {
+            classpath 'com.bmuschko:gradle-tomcat-plugin:2.4.1'			 
+			classpath "org.springframework.boot:spring-boot-gradle-plugin:2.1.1.RELEASE"  
+       }
+}
 // Apply the java-library plugin to add support for Java Library
 apply plugin: 'com.bmuschko.tomcat'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'java-library'
 apply plugin: 'war'
 apply plugin: 'org.springframework.boot'
-
-buildscript {
-       repositories {
-             jcenter()
-       }
-       dependencies {
-             classpath 'com.bmuschko:gradle-tomcat-plugin:2.4.1'
-       }
-}
-
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'jacoco'
 repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+    mavenLocal()
+    maven { url("https://plugins.gradle.org/m2/") }
+    maven { url "https://repo.spring.io/snapshot" }
 }
 
 
