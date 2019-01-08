@@ -28,6 +28,7 @@ apply plugin: 'war'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
+apply plugin: 'antlr'
 repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
@@ -37,12 +38,20 @@ repositories {
     maven { url "https://repo.spring.io/snapshot" }
 }
 
+configurations {
+    compile {
+        extendsFrom = extendsFrom.findAll { it != configurations.antlr }
+    }
+}
+
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-dependencies:2.1.1.RELEASE'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	
 	implementation 'org.hibernate:hibernate-core:3.6.7.Final'
+	antlr "org.antlr:antlr4:4.7.1"
+    implementation "org.antlr:antlr4-runtime:4.7.1"
 	
 	def tomcatVersion = '8.0.46'
 	tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
@@ -56,6 +65,23 @@ dependencies {
  // Use JUnit test framework
  	testImplementation 'junit:junit:4.12'       
  	testImplementation 'org.springframework.boot:spring-boot-starter-test'  
+}
+
+generateGrammarSource {
+    maxHeapSize = "64m"
+
+    // Keep a copy of generated sources
+    doLast {
+        println "Copying generated grammar lexer/parser files to main directory."
+        copy {
+            from "${buildDir}/generated-src/antlr/main"
+            into "generated-src/main/java"
+        }
+    }
+}
+
+clean.doLast {
+    file('generated-src').deleteDir()
 }
 
 
