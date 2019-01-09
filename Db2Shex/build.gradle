@@ -50,8 +50,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	
 	implementation 'org.hibernate:hibernate-core:3.6.7.Final'
-	antlr "org.antlr:antlr4:4.7.1"
-    implementation "org.antlr:antlr4-runtime:4.7.1"
+	antlr "org.antlr:antlr4:4.5.3"
+    implementation "org.antlr:antlr4-runtime:4.5.3"
 	
 	def tomcatVersion = '8.0.46'
 	tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
@@ -69,7 +69,6 @@ dependencies {
 
 generateGrammarSource {
     maxHeapSize = "64m"
-
     // Keep a copy of generated sources
     doLast {
         println "Copying generated grammar lexer/parser files to main directory."
@@ -80,9 +79,9 @@ generateGrammarSource {
     }
 }
 
-clean.doLast {
-    file('generated-src').deleteDir()
-}
+//clean.doLast {
+//    file('generated-src').deleteDir()
+//}
 
 
 tomcat {

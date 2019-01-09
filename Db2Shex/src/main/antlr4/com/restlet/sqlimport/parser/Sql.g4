@@ -28,7 +28,12 @@
  *                https://github.com/bkiers/sqlite-parser
  * Developed by : Bart Kiers, bart@big-o.nl
  */
+ 
 grammar Sql;
+
+@header {
+    package com.restlet.sqlimport.parser;
+}
 
 parse
  : ( sql_stmt_list | error )* EOF
