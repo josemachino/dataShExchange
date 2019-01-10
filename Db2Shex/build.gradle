@@ -74,14 +74,14 @@ generateGrammarSource {
         println "Copying generated grammar lexer/parser files to main directory."
         copy {
             from "${buildDir}/generated-src/antlr/main"
-            into "generated-src/main/java"
+            into "src/main/java"
         }
     }
 }
 
-//clean.doLast {
-//    file('generated-src').deleteDir()
-//}
+clean.doLast {
+    file('generated-src').deleteDir()
+}
 
 
 tomcat {
