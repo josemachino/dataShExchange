@@ -1,3 +1,4 @@
+package des;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,7 +38,7 @@ public class FileUploadTests {
 
 	@Test
 	public void shouldUploadFile() throws Exception {
-		ClassPathResource resource = new ClassPathResource("test.txt", getClass());
+		ClassPathResource resource = new ClassPathResource("resources/test.txt", getClass());
 
 		MultiValueMap<String, Object> map = new LinkedMultiValueMap<String, Object>();
 		map.add("file", resource);
