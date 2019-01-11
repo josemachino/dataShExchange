@@ -21,7 +21,7 @@ buildscript {
        }
 }
 // Apply the java-library plugin to add support for Java Library
-apply plugin: 'com.bmuschko.tomcat'
+//apply plugin: 'com.bmuschko.tomcat'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'java-library'
 apply plugin: 'war'
@@ -53,10 +53,10 @@ dependencies {
 	antlr "org.antlr:antlr4:4.5.3"
     implementation "org.antlr:antlr4-runtime:4.5.3"
 	
-	def tomcatVersion = '8.0.46'
-	tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
-	"org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}",
-	"org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
+	//def tomcatVersion = '8.0.46'
+	//tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+	//"org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}",
+	//"org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
 	api 'org.apache.commons:commons-math3:3.6.1'
  // This dependency is used internally, and not exposed to consumers on their own compile classpath.
  	implementation 'com.google.guava:guava:23.0'
@@ -74,7 +74,7 @@ generateGrammarSource {
         println "Copying generated grammar lexer/parser files to main directory."
         copy {
             from "${buildDir}/generated-src/antlr/main"
-            into "src/main/java"
+            into "generate-src/main/java"
         }
     }
 }
@@ -84,8 +84,12 @@ clean.doLast {
 }
 
 
-tomcat {
-         httpPort = 8080
-         enableSSL = true
-         contextPath = '/library-spring'
+//tomcat {
+ //        httpPort = 8084
+  //       enableSSL = true
+  //       contextPath = '/library-spring'
+//}
+
+war {
+    enabled = true
 }
