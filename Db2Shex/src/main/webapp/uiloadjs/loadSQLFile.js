@@ -1,3 +1,4 @@
+//https://carminecarella.wordpress.com/2014/04/07/uploading-file-html5-backbonejs-and-restful-services/
 //https://stackoverflow.com/questions/37919393/layout-directedgraph-dagre-only-on-a-subset-of-nodes
 //https://github.com/dagrejs/dagre/releases?after=v0.5.1
 //Returns in the first positions the tables that do not contain references, then the rest
@@ -33,7 +34,33 @@ render: function(){
     this.$el.html( template );
 },
 events: {
-    "change input[type=file]": "doSearch"
+    "change input[type=file]": "doSearch",
+    "submit":"uploadFile"
+},
+uploadFile:function (event){
+	var fileName= $('#sqlFile')[0].files[0];
+	console.log(fileName)
+		
+	var form = new FormData();
+	form.append("file", fileName);	
+	$.ajax({
+        url: "uploadFile",
+        type: "POST",
+        data: form,
+        processData: false,
+        contentType: false,
+        enctype: 'multipart/form-data'
+      })
+      .done(function(data) {
+        console.log(data)
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {        
+        console.log(textStatus);
+      })
+      .always(function() {
+        console.log("oshitaa")
+      });
+	event.preventDefault();
 },
 doSearch: function( event ){
     // Button clicked, you can access the element that was clicked with event.currentTarget      

@@ -49,10 +49,10 @@ public class FileUploadController {
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 	
-	@PostMapping("/")
+	@PostMapping("/uploadFile")
     public String handleFileUpload(@RequestParam("file") MultipartFile file,
             RedirectAttributes redirectAttributes) {
-
+		System.out.println("te amooooo");
         storageService.store(file);
         //create the database in a parallel process
         //Return the structure that will draw the graphic
