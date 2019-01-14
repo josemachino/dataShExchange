@@ -974,31 +974,10 @@ function loadModalTypeReferenced(currentLink,iris, parameters,functionsMap,value
             valueIRI=valueIRI.concat(valueReference);
             valueIRI=valueIRI.concat(")");
             var joinPath=$("#ddParameter .btn").text().trim();
-            if (currentLink.labels().length==0){
-            
-            currentLink.appendLabel({
-                        attrs: {
-                            text: {
-                                text: valueIRI
-                            }
-                        },
-                        position: {
-                            offset: 10
-                        }
-                    });
-            
-            currentLink.appendLabel({
-                        attrs: {
-                            text: {
-                                text: joinPath
-                            }
-                        },
-                        position: {
-                            offset: -10
-                        }
-                    }); 
-            }else{
-                
+            if (currentLink.labels().length==0){            
+            	currentLink.appendLabel({attrs: {text: {text: valueIRI}},position: {offset: 10}});            
+            	currentLink.appendLabel({attrs: {text: {text: joinPath}},position: {offset: -10}}); 
+            }else{                
                 currentLink.label(0,{attrs: {text: {text: valueIRI}}}); 
                 currentLink.label(1,{attrs: {text: {text: joinPath}},position: {offset: -10}}) ;               
             }
@@ -1676,133 +1655,7 @@ function getNameAttribute(attributes,id){
     }
 }
 
-function stTGD(graph,paper,mapTables){
-    tgds={functions:{},mappingST:[]};
-    for (var link of graph.getLinks()){
-        var linkView=link.findView(paper);
-        if (linkView.sourceView.model.attributes.type=="db.Table" && linkView.targetView.model.attributes.type=="shex.Type"){ 
-            //construct body terms
-            var bodyterms=[];
-            var functerm=[];
-            for (var lab of link.labels()){
-                var annotation=lab.attrs.text.text;                
-                if (annotation.includes('(')){
-                    var fterm=annotation.split('(');
-                    functerm.push({name:fterm[0],type:"function"});
-                    functerm.push({name:fterm[1].slice(0,-1),type:"variable"});
-                    if (link.labels().length==1){											
-                        var atom={atom:linkView.sourceView.model.attributes.question};
-                        bodyterms.push(atom);
-                    }                    
-                }else{
-                    var relNames=getTokens(annotation);                    
-                    if (relNames.length==1){
-                        bodyterms.push({atom:relNames[0]});
-                    }else{                        
-                        for (var i=0;i<relNames.length-1;i++){
-                            var name=relNames[i];
-                            var mapFD=new Map();
-                            var mapBFD=new Map();
-                            for (var element of graph.getElements()){                            
-                                if (mapTables.get(name)==element.id){
-                                    var elementView=element.findView(paper);  
-                                    mapFD.set(name,[]);
-                                    mapFD.set(relNames[i+1],[]);
-                                    for (var opt of elementView.model.attributes.options){
-                                        console.log(opt)
-                                        if ( 'ref' in opt){
-                                            if (opt.ref.name==relNames[i+1]){
-                                                var joinsA=mapFD.get(name);
-                                                joinsA.push({name:opt.text,value:""});
-                                                
-                                                //obtain the attribute to which goes
-                                                var nameAttRef="";
-                                                for (var taElem of graph.getElements()){
-                                                    if (mapTables.get(opt.ref.name)==taElem.id){
-                                                        var taView=taElem.findView(paper);
-                                                        nameAttRef=getNameAttribute(taView.model.attributes.options,opt.ref.id);
-                                                        break;
-                                                    }
-                                                }                                                
-                                                var joinsB=mapFD.get(opt.ref.name);
-                                                joinsB.push({name:nameAttRef,value:""});                                                                                                                        
-                                            }else if (typeof(relNames[i-1])!=='undefined' && opt.ref.name==relNames[i-1]){
-                                                if (mapBFD.has(name)){
-                                                    var joinsA=mapBFD.get(name);
-                                                    joinsA.push({name:opt.text,value:""});
-                                                }else
-                                                    mapBFD.set(name,[{name:opt.text,value:""}])
-                                                //obtain the attribute to which goes
-                                                var nameAttRef="";
-                                                for (var taElem of graph.getElements()){
-                                                    if (mapTables.get(opt.ref.name)==taElem.id){
-                                                        var taView=taElem.findView(paper);
-                                                        nameAttRef=getNameAttribute(taView.model.attributes.options,opt.ref.id);
-                                                        break;
-                                                    }
-                                                }
-                                                if (mapBFD.has(relNames[i-2])){
-                                                    var joinsB=mapBFD.get(relNames[i-2])
-                                                    joinsB.push({name:nameAttRef,value:""})
-                                                }else
-                                                    mapBFD.set(relNames[i-2],[{name:nameAttRef,value:""}]);
-                                            }
-                                        }
-                                    }
-                                    break;
-                                }
-                            }                                                 
-                            if (mapBFD.has(relNames[i-2])){
-                                bodyterms[bodyterms.length-1].terms=mapBFD.get(name)
-                                bodyterms[bodyterms.length-2].terms=mapBFD.get(relNames[i-2]);
-                            }
-                            bodyterms.push({atom:name,terms:mapFD.get(name)});
-							bodyterms.push({atom:relNames[i+1],terms:mapFD.get(relNames[i+1])});
-                            
-                        }
-                    }
-                }
-            }
-            var headterms;
-            if (linkView.targetView.model.getPort(link.attributes.target.port).group=='inType'){
-                headterms={atom:linkView.targetView.model.attributes.question,terms:functerm};        
-            }else{  
-                var iriProperty=link.attributes.target.port.split(",")[0];                                
-                //get the subject
-                var s_fterm=[];
-                if (bodyterms.length==1){		
-                    getSubjectFunctionTerm(graph,linkView.sourceView.model,s_fterm, linkView.targetView.model.attributes.ports.items[0].id);
-                }else if (typeof bodyterms[bodyterms.length-1] !== 'undefined'){//obtain the last  table because that one contains the id  				
-                    for (var element of graph.getElements()){						
-                        if (mapTables.get(bodyterms[bodyterms.length-1].atom)==element.id){
-                            var elementView=element.findView(paper);                            
-                            getSubjectFunctionTerm(graph,elementView.model,s_fterm,linkView.targetView.model.attributes.ports.items[0].id)
-                        }
-                    };
-                }
-                var tripleTerm;
-                if (functerm.length==0){
-                //get from relational table the selected attribute
-                    var obj={name:"",type:"variable"};
-                    for (var opt of linkView.sourceView.model.attributes.options){                        
-                        if (opt.id==V(linkView.sourceMagnet.parentNode).attr('port')){
-                            obj.name=opt.text;
-                            break;
-                        }
-                    }
-                    tripleTerm={s:s_fterm,p:{name:iriProperty, type:"constant"},o:obj}
-                }else{                    
-                    tripleTerm={s:s_fterm,p:{name:iriProperty, type:"constant"},o:functerm}    ;
-                }                                                
-                headterms={atom:'triple',terms:tripleTerm};
-            }
-                
-            tgds.mappingST.push({body:bodyterms,head:headterms});
-        }
-    }    
-    return tgds;
-    
-}
+
 function getKeys(rows){	
 	var keys=[];
 	for (var row of rows){
@@ -1859,6 +1712,7 @@ function stTGD2(graph,paper,mapTables){
             var objterm=[];
             var s_fterm=[];
 			var relNames;
+			console.log(link.labels())
             for (var lab of link.labels()){
                 var annotation=lab.attrs.text.text;                
                 if (annotation.includes('(')){
