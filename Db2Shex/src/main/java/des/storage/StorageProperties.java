@@ -1,4 +1,4 @@
-package storage;
+package des.storage;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

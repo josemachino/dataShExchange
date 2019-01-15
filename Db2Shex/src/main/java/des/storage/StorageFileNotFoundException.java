@@ -1,4 +1,4 @@
-package storage;
+package des.storage;
 
 public class StorageFileNotFoundException extends StorageException {
     public StorageFileNotFoundException(String message) {

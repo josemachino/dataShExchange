@@ -1,7 +1,9 @@
-package services;
+package des.services;
 
-import Controllers.FullyTypedModel;
+import org.springframework.stereotype.Service;
 
+import des.controllers.FullyTypedModel;
+@Service
 public class DBService {
 	public FullyTypedModel getResult() {
 		FullyTypedModel ftm=new FullyTypedModel();
