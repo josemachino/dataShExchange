@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ import com.restlet.sqlimport.parser.SqlImport;
 import com.restlet.sqlimport.report.Report;
 import com.restlet.sqlimport.util.Util;
 
+import des.models.SchemaTableJSON;
 import des.services.DBService;
 import des.storage.StorageFileNotFoundException;
 import des.storage.StorageService;
@@ -73,21 +75,18 @@ public class FileUploadController {
     }
 	
 	@PostMapping("/uploadFile")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file,
-            RedirectAttributes redirectAttributes) throws FileNotFoundException, IOException, SQLException {
+    public @ResponseBody List<SchemaTableJSON> handleFileUpload(@RequestParam("file") MultipartFile file) throws FileNotFoundException, IOException, SQLException {
         storageService.store(file);
         Resource sqlFile = storageService.loadAsResource(file.getOriginalFilename());        
         final InputStream in = new FileInputStream(sqlFile.getFile());
 		final String sqlContent = util.read(in);
 		final Database database = sqlImport.getDatabase(sqlContent);
-		dbService.createH2DB(database);
+		
 		System.out.println(database.getTables().size());
         //create the database in a parallel process
-        //Return the structure that will draw the graphic
-        redirectAttributes.addFlashAttribute("message",
-                "You successfully uploaded " + file.getOriginalFilename() + "!");
+        //Return the structure that will draw the graphic        
 
-        return "redirect:/listFiles";
+        return dbService.createH2DB(database);
     }
 	
 	@ExceptionHandler(StorageFileNotFoundException.class)
