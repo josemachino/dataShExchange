@@ -28,6 +28,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
 apply plugin: 'antlr'
+
 repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
@@ -51,6 +52,7 @@ bootJar {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-dependencies:2.1.1.RELEASE'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework:spring-jdbc'
 	implementation 'com.h2database:h2:1.4.193'	
 		
 	antlr "org.antlr:antlr4:4.5.3"
@@ -61,8 +63,7 @@ dependencies {
 	//"org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}",
 	//"org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"	
  // This dependency is used internally, and not exposed to consumers on their own compile classpath. 	
- 	implementation 'org.apache.commons:commons-lang3:3.6'
- 	implementation 'org.projectlombok:lombok:1.16.20'
+ 	implementation 'org.apache.commons:commons-lang3:3.6' 	
  	implementation 'org.apache.logging.log4j:log4j-api:2.10.0'
  	implementation 'org.apache.logging.log4j:log4j-core:2.10.0'
  // Use JUnit test framework

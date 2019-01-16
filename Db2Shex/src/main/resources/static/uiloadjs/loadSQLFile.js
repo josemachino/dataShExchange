@@ -17,7 +17,7 @@ function getLayoutOptions(){
 function drawReferences(g,tables,map){    
     for (var i=0;i< tables.length ;i++){        
         for (var j=0;j< tables[i].items.length ;j++){                        
-            if (typeof(tables[i].items[j].ref)!=='undefined'){                                                
+            if (tables[i].items[j].ref){                                                
                 linkDataBase(g,map.get(tables[i].key),tables[i].items[j].id,map.get(tables[i].items[j].ref.name),tables[i].items[j].ref.id);                
             }
         }
@@ -53,6 +53,22 @@ uploadFile:function (event){
       })
       .done(function(data) {
         console.log(data)
+        positionTable= { x: 70, y: 10 };
+        graphTGDs.clear();        
+        mapTableIdCanvas=new Map();
+        //Add the tables
+        for (var i=0;i< data.length ;i++){      
+            var tableCanvas=createTable(data[i].key,data[i].items,positionTable);           
+            mapTableIdCanvas.set(data[i].key,tableCanvas.id);
+            graphTGDs.addCell(tableCanvas);    
+        }
+        drawReferences(graphTGDs,data,mapTableIdCanvas);
+        //drawLayout(graphTGDs);
+        joint.layout.DirectedGraph.layout(graphTGDs.getCells(),getLayoutOptions());
+		paperTGDs.fitToContent({
+                padding: 50,
+                allowNewOrigin: 'any'
+            });
       })
       .fail(function(jqXHR, textStatus, errorThrown) {        
         console.log(textStatus);

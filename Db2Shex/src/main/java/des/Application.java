@@ -19,9 +19,7 @@ public class Application {
 	@Bean
     CommandLineRunner init(StorageService storageService) {
         return (args) -> {
-        	System.out.println("Let's inspect the beans provided by Spring Boot:");
-
-            
+        	System.out.println("Storage service running...");
             storageService.deleteAll();
             storageService.init();
         };
