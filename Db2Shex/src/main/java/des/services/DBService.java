@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.restlet.sqlimport.model.sql.Database;
 
 import des.controllers.FullyTypedModel;
+import des.models.SchemaTableJSON;
 
 @Service
 public class DBService {
@@ -20,6 +21,7 @@ public class DBService {
 	}
 
 	public void createH2DB(Database db) throws SQLException {
+		SchemaTableJSON schema=new SchemaTableJSON();
 		Connection conn = DriverManager.getConnection("jdbc:h2:mem:", "admin", "");
 		Statement st = conn.createStatement();
 		st.execute("create table esposa(id integer)");
