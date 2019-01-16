@@ -76,14 +76,14 @@ public class CreateTableParseListener extends SqlBaseListener {
 	@Override
 	public void exitAny_name(final Any_nameContext ctx) {
 		if(DEBUG) {
-			System.out.println(ctx.getText() + " - ctx : " + ctx.toInfoString(sqlParser));
+			//System.out.println(ctx.getText() + " - ctx : " + ctx.toInfoString(sqlParser));
 		}
 	}
 
 	@Override
 	public void exitUnknown(final UnknownContext ctx) {
 		if(DEBUG) {
-			System.out.println(ctx.getText() + " - ctx : " + ctx.toInfoString(sqlParser));
+			//System.out.println(ctx.getText() + " - ctx : " + ctx.toInfoString(sqlParser));
 		}
 	}
 

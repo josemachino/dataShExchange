@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,19 +29,22 @@ import com.restlet.sqlimport.parser.SqlImport;
 import com.restlet.sqlimport.report.Report;
 import com.restlet.sqlimport.util.Util;
 
+import des.services.DBService;
 import des.storage.StorageFileNotFoundException;
 import des.storage.StorageService;
 
 @RestController
 public class FileUploadController {
 	private final StorageService storageService;
+	private final DBService dbService;
 	private Util util = new Util();
 	private Report report = new Report();
 	private SqlImport sqlImport = new SqlImport(report);
 
 	@Autowired
-	public FileUploadController(StorageService storageService) {
+	public FileUploadController(StorageService storageService,DBService dbService) {
 		this.storageService = storageService;
+		this.dbService=dbService;
 	}
 	@GetMapping(path="/listFiles")
     public String listUploadedFiles(Model model) throws IOException {
@@ -70,16 +74,13 @@ public class FileUploadController {
 	
 	@PostMapping("/uploadFile")
     public String handleFileUpload(@RequestParam("file") MultipartFile file,
-            RedirectAttributes redirectAttributes) throws FileNotFoundException, IOException {
-		System.out.println("te amooooooooooo");
+            RedirectAttributes redirectAttributes) throws FileNotFoundException, IOException, SQLException {
         storageService.store(file);
-        System.out.println("archivo "+file.getOriginalFilename());
-        System.out.println("archivo "+file.getName());
-        Resource sqlFile = storageService.loadAsResource(file.getOriginalFilename());
-        System.out.println("archivo "+sqlFile.getFilename());
+        Resource sqlFile = storageService.loadAsResource(file.getOriginalFilename());        
         final InputStream in = new FileInputStream(sqlFile.getFile());
 		final String sqlContent = util.read(in);
 		final Database database = sqlImport.getDatabase(sqlContent);
+		dbService.createH2DB(database);
 		System.out.println(database.getTables().size());
         //create the database in a parallel process
         //Return the structure that will draw the graphic

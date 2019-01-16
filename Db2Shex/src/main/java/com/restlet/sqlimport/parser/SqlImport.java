@@ -46,7 +46,7 @@ public class SqlImport {
 
 			hasError = true;
 
-			if(LOG_ACTIVATED) {
+			/*if(LOG_ACTIVATED) {
 				System.out.println("------------");
 				System.out.println("Error on query : \n"+query);
 				System.out.println("=> line " + line + " : " + msg);
@@ -58,7 +58,7 @@ public class SqlImport {
 						System.out.println("Context : "+e.getCtx());
 					}
 				}
-			}
+			}*/
 
 			final ReportLine reportLine = getReport().getReportLineForQuery(query);
 			reportLine.setReportLineStatus(ReportLineStatus.PARSING_ERROR);
@@ -135,7 +135,7 @@ public class SqlImport {
 		p.addErrorListener(listener);
 
 		if(LOG_ACTIVATED) {
-			System.out.println("Parse the query : \n"+query);
+			//System.out.println("Parse the query : \n"+query);
 		}
 
 		// Fill database schema from SQL input stream read by ANTLR
