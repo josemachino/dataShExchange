@@ -3,7 +3,7 @@ var loadTGDView = Backbone.View.extend({
 	    this.render();
 	},
 	render: function(){    
-		var template = _.template( $("#exchange_template").html(), {} );
+		var template = _.template( $("#tgd_template").html(), {} );
 	    this.$el.html( template );
 	}
 });

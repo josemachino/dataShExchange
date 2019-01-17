@@ -53,7 +53,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-dependencies:2.1.1.RELEASE'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework:spring-jdbc'
-	implementation 'com.h2database:h2:1.4.193'	
+	implementation 'com.h2database:h2:1.4.197'	
 		
 	antlr "org.antlr:antlr4:4.5.3"
     implementation "org.antlr:antlr4-runtime:4.5.3"

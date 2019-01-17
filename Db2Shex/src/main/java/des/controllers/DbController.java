@@ -24,7 +24,7 @@ public class DbController {
 	@PostMapping("/chase")
     @ResponseBody
     public FullyTypedModel chaseRule(@RequestBody TGDS tgds) {
-		System.out.print("processing");
+		System.out.print("processing "+tgds.getRules().toString());
         return dbService.getResult();         
     }
 }

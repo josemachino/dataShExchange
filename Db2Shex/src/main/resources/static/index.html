@@ -12,7 +12,11 @@
 	<link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" rel="stylesheet" /><!--Dependencies JointJs --><script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.10.1/lodash.js"></script><script src="js/graphlib.min.js"></script><script src="js/dagre.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.3.3/backbone.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jointjs/2.2.1/joint.js"></script><script type="text/javascript" src="js/backbone-bootstrap-modals.min.js"></script><!--Math Jax for render formulas-->
 	<link href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel="stylesheet" type="text/css" />
 	<link href="css/jquery.rainbowJSON.css" rel="stylesheet" /><!--D3--><script type="text/javascript" src="js/d3.js"></script><!--Table bootstrap--><script type="text/javascript" src="js/bootstrap-table.js"></script>
-	<link href="css/bootstrap-table.css" rel="stylesheet" type="text/css" /><!--
+	<link href="css/bootstrap-table.css" rel="stylesheet" type="text/css" />
+	<!-- JSON Editor -->
+	<link href="jsoneditor/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <script src="jsoneditor/jsoneditor.min.js"></script>
+	<!--
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
 
@@ -75,12 +79,12 @@
                     Mappings
                 </a>
             </li>
-            <!--<li>
-                <a href="#materialize" role="tab" data-toggle="tab">                    
+            <li>
+                <a href="#exchange" role="tab" data-toggle="tab">                    
                     <i class="fas fa-file-export"></i>
                     Materialize
                 </a>
-            </li>-->
+            </li>
         </ul>
     </script>
 <script type="text/template" id="search_template">
@@ -161,11 +165,7 @@
         
     </script>
 <script type="text/template" id="tgd_template">
-<form>
-	<div class="form-group">    
-    <button type="submit" class="btn btn-primary form-control">Edit TGDs</button>        		
-	</div>
-	</form>
+<div id="tgds_list" style="400px"></div>
 </script>
 <script type="text/javascript" src="uiloadjs/loadMenuNav.js"></script>
 <script type="text/javascript" src="uiloadjs/loadSideNav.js"></script>

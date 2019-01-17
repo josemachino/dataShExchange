@@ -1,5 +1,7 @@
 //TODO
-/*Edit TGDs mapping view
+/*
+ * Set the functions iris in the variable in stTGD2 and in jsoneditor
+ * Edit TGDs mapping view
  * Deleting link green many times , it arrives when it does not remove the blue links
  * Deleting red links cause problems
  * Recommend what to do when user is going to exchange
