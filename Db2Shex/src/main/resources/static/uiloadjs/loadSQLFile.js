@@ -16,7 +16,8 @@ function getLayoutOptions(){
 }
 function drawReferences(g,tables,map){    
     for (var i=0;i< tables.length ;i++){        
-        for (var j=0;j< tables[i].items.length ;j++){                        
+        for (var j=0;j< tables[i].items.length ;j++){   
+        	console.log(tables[i].items[j].ref)
             if (tables[i].items[j].ref){                                                
                 linkDataBase(g,map.get(tables[i].key),tables[i].items[j].id,map.get(tables[i].items[j].ref.name),tables[i].items[j].ref.id);                
             }
@@ -63,7 +64,6 @@ uploadFile:function (event){
             graphTGDs.addCell(tableCanvas);    
         }
         drawReferences(graphTGDs,data,mapTableIdCanvas);
-        //drawLayout(graphTGDs);
         joint.layout.DirectedGraph.layout(graphTGDs.getCells(),getLayoutOptions());
 		paperTGDs.fitToContent({
                 padding: 50,
@@ -92,8 +92,7 @@ doSearch: function( event ){
             mapTableIdCanvas.set(obj.data[i].key,tableCanvas.id);
             graphTGDs.addCell(tableCanvas);    
         }
-        drawReferences(graphTGDs,obj.data,mapTableIdCanvas);
-        //drawLayout(graphTGDs);
+        drawReferences(graphTGDs,obj.data,mapTableIdCanvas);        
         joint.layout.DirectedGraph.layout(graphTGDs.getCells(),getLayoutOptions());
 		paperTGDs.fitToContent({
                 padding: 50,

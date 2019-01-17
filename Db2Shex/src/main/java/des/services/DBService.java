@@ -21,6 +21,7 @@ import des.models.SchemaTableJSON;
 public class DBService {	
 	public FullyTypedModel getResult() {
 		FullyTypedModel ftm = new FullyTypedModel();
+		
 		return ftm;
 	}
 
@@ -47,18 +48,18 @@ public class DBService {
 					atts[i]=new AttRel(ta.getName().substring(0, 2)+i,col.getName(),pks.contains(col.getName()));	
 				}else {
 					Table refTa=db.getTableForName(ta.getForeignKeyForColumnNameOrigin(col).getTableNameTarget());
-					//refTa.getColumnByNames().get(key)
+					System.out.println(refTa.getName());
 					int j=0;
 					String refColName=ta.getForeignKeyForColumnNameOrigin(col).getColumnNameTargets().get(0);
 					for (Column refCol: refTa.getColumnByNames().values()) {
-						if (refCol.getName()==refColName) {
+						System.out.print(refCol.getName() + " "+ refColName);
+						if (refCol.getName().equals(refColName)) {
 							break;
 						}
 						j++;
 					}					
-					//Set id of the column
-					String refTaName=ta.getForeignKeyForColumnNameOrigin(col).getTableNameTarget();
-					atts[i]=new AttRel(ta.getName().substring(0, 2)+i,col.getName(),pks.contains(col.getName()),new ReFK(refTaName,refTaName.substring(0, 2)+j));					
+					//Set id of the column					
+					atts[i]=new AttRel(ta.getName().substring(0, 2)+i,col.getName(),pks.contains(col.getName()),new ReFK(refTa.getName(),refTa.getName().substring(0, 2)+j));					
 				}								
 				rString.append(col.getName()).append(" ").append(col.getType()).append(sep);
 				i++;

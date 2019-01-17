@@ -1,4 +1,10 @@
 //TODO
+/*Edit TGDs mapping view
+ * Deleting link green many times , it arrives when it does not remove the blue links
+ * Deleting red links cause problems
+ * Recommend what to do when user is going to exchange
+ */
+//https://github.com/josdejong/jsoneditor
 //https://github.com/Rathachai/d3rdf
 //link red verify editing
 //https://github.com/ejgallego/jscoq
@@ -29,7 +35,6 @@
 let comparisonOp=["le","leq","gt","geq"]
 var graphTGDs = new joint.dia.Graph;
 var paperTGDs = new joint.dia.Paper({
-
     el: document.getElementById('mydb'),
     width: 2000,
     height: 2000,    
@@ -43,8 +48,7 @@ var paperTGDs = new joint.dia.Paper({
     /*snapLinks: true,*/
     interactive: { labelMove: true },
     linkPinning: false,
-    embeddingMode: true,	
-    clickThreshold: 5,
+    embeddingMode: true,	    
     defaultConnectionPoint: { name: 'boundary' },
     highlighting: {
         'default': {
@@ -74,6 +78,7 @@ paperTGDs.on('link:mouseenter', function(linkView) {
 paperTGDs.on('link:mouseleave', function(linkView) {
     linkView.hideTools();
 });
+
 paperTGDs.on('link:pointerdblclick', function(linkView){  
     var currentLink=linkView.model;
     if (linkView.sourceMagnet.nodeName=='rect'){
@@ -1608,7 +1613,8 @@ function link(g,source, portSource, target,portTarget,color,vertices){
     return link;
 }
 
-function linkDataBase(g,source, portSource, target,portTarget,vertices) {        
+function linkDataBase(g,source, portSource, target,portTarget,vertices) {      
+	console.log(target+ " "+ portTarget+ " source " + source + " "+ portSource)
     var link = new joint.shapes.standard.Link({
         source: { id: target , port:'pk-'.concat(portTarget)},
         target: { id: source , port:'fk-'.concat(portSource)}, 

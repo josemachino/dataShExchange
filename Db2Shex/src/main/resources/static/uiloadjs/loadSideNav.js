@@ -1,4 +1,4 @@
-var sideView = Backbone.View.extend({
+var sideLeftView = Backbone.View.extend({
 initialize: function(){
     this.render();
 },
@@ -26,4 +26,4 @@ hideOthers:function(e){
 }
 });
 
-var side_view = new sideView({ el: $("#sidebar") });
+var side_left_view = new sideLeftView({ el: $("#sidebar") });

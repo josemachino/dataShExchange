@@ -2,6 +2,7 @@ package des.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,6 +13,7 @@ import des.services.DBService;
 //https://www.callicoder.com/spring-boot-file-upload-download-jpa-hibernate-mysql-database-example/
 //https://github.com/husseinterek/spring-boot-jpa-hibernate/blob/master/src/main/resources/application.properties
 //https://github.com/lchaboud-restlet/antlr-sqlparser
+//https://stackoverflow.com/questions/44550020/json-object-and-spring-requestparam
 @RestController
 public class DbController {
 	private final DBService dbService;
@@ -19,10 +21,10 @@ public class DbController {
 	public DbController(DBService dbService) {
 		this.dbService = dbService;
 	}	
-	@PostMapping("/chase/")
+	@PostMapping("/chase")
     @ResponseBody
-    public FullyTypedModel chaseRule(TGDS tgds) {
-		
+    public FullyTypedModel chaseRule(@RequestBody TGDS tgds) {
+		System.out.print("processing");
         return dbService.getResult();         
     }
 }

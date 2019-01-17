@@ -26,22 +26,22 @@
 <nav id="sidebar">&nbsp;</nav>
 
 <div id="content">
-<div id="menu">&nbsp;</div>
+	<div id="menu">&nbsp;</div>
 
-<div class="tab-content">
-<div class="tab-pane fade" id="database">
-<div id="sql_container">&nbsp;</div>
-</div>
-
-<div class="tab-pane fade" id="shex">
-<div id="search_container">&nbsp;</div>
-</div>
-
-<div class="tab-pane fade" id="mappings">
-<div id="tgds_container">&nbsp;</div>
-</div>
-<!--<div class="tab-pane fade" id="exchange">
-			</div>--></div>
+	<div class="tab-content">
+		<div class="tab-pane fade" id="database">
+			<div id="sql_container">&nbsp;</div>
+		</div>
+		<div class="tab-pane fade" id="shex">
+			<div id="search_container">&nbsp;</div>
+		</div>
+		<div class="tab-pane fade" id="mappings">
+			<div id="tgds_container">&nbsp;</div>
+		</div>
+		<div class="tab-pane fade" id="exchange">
+			<div id="result_container"></div>
+		</div>
+	</div>
 
 <div id="mydb">&nbsp;</div>
 <!--<div id="paper-container"></div>--></div>
@@ -91,6 +91,14 @@
 	</div>
 	</form>
 </script>
+<script type="text/template" id="exchange_template">
+	<form>
+	<div class="form-group">    
+    <button type="submit" class="btn btn-primary form-control">Exchange</button>        		
+	</div>
+	</form>
+	<div class="result"></div>
+</script>
 <script type="text/template" id="sql_template">
         <form id="data" method="post" enctype="multipart/form-data">
         <div class="form-group">
@@ -107,7 +115,7 @@
         </form>
 		<div class="result"></div>
     </script>
-    <script type="text/template" id="menu_template">
+<script type="text/template" id="menu_template">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <button type="button" id="sidebarCollapse" class="btn btn-info">
@@ -129,7 +137,8 @@
             </div>
         </div>
     </nav>
-    </script><script type="text/template" id="sideright_template">
+    </script>
+<script type="text/template" id="sideright_template">
         <div class="sidebar-header">
             <h3>Set of Mappings</h3>            
         </div>
@@ -150,7 +159,23 @@
         </table>                   
         <div id="syntax_tgds"> </div>
         
-    </script><script type="text/javascript" src="uiloadjs/loadMenuNav.js"></script><script type="text/javascript" src="uiloadjs/loadSideNav.js"></script><script type="text/javascript" src="uiloadjs/loadSideRightNav.js"></script><script type="text/javascript" src="uiloadjs/loadShExFile.js"></script><script type="text/javascript" src="uiloadjs/loadSQLFile.js"></script><script type="text/javascript" src="uiloadjs/loadTGDView.js"></script><script src="js/jquery.rainbowJSON.js"></script><script type="text/javascript">
+    </script>
+<script type="text/template" id="tgd_template">
+<form>
+	<div class="form-group">    
+    <button type="submit" class="btn btn-primary form-control">Edit TGDs</button>        		
+	</div>
+	</form>
+</script>
+<script type="text/javascript" src="uiloadjs/loadMenuNav.js"></script>
+<script type="text/javascript" src="uiloadjs/loadSideNav.js"></script>
+<script type="text/javascript" src="uiloadjs/loadSideRightNav.js"></script>
+<script type="text/javascript" src="uiloadjs/loadShExFile.js"></script>
+<script type="text/javascript" src="uiloadjs/loadSQLFile.js"></script>
+<script type="text/javascript" src="uiloadjs/loadTGDView.js"></script>
+<script type="text/javascript" src="uiloadjs/loadExchangeView.js"></script>
+<script src="js/jquery.rainbowJSON.js"></script>
+    <script type="text/javascript">
 	var $table = $('#table');
 	$table.bootstrapTable({    
     columns:[{field:'id',title:'IdLink',class:"w-25",visible:false},{field:'ex',title:'Expression',sortable:"true",searchable:true}]

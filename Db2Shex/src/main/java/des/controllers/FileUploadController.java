@@ -58,13 +58,7 @@ public class FileUploadController {
         System.out.println(model.asMap().values());
         return "greeting";
     }
-	
-	@PostMapping("/hello")
-	public String postHello(@RequestBody final String hola) {
-	  return "Hello " + hola;
-	}
-
-	
+		
 	@GetMapping("/files/{filename:.+}")
     @ResponseBody
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
@@ -80,12 +74,9 @@ public class FileUploadController {
         Resource sqlFile = storageService.loadAsResource(file.getOriginalFilename());        
         final InputStream in = new FileInputStream(sqlFile.getFile());
 		final String sqlContent = util.read(in);
-		final Database database = sqlImport.getDatabase(sqlContent);
-		
-		System.out.println(database.getTables().size());
-        //create the database in a parallel process
+		//create the database in a parallel process
+		final Database database = sqlImport.getDatabase(sqlContent);			        
         //Return the structure that will draw the graphic        
-
         return dbService.createH2DB(database);
     }
 	
