@@ -12,7 +12,7 @@ public class Rule {
 
 	private Map<String, String> bind;
 	private Map<String, Object>[] constraints;
-	private RelAtom[] yield;
+	private Object yield;
 
 	public Map<String, String> getBind() {
 		return bind;
@@ -23,7 +23,7 @@ public class Rule {
 	}
 
 
-	public RelAtom[] getYield() {
+	public Object getYield() {
 		return yield;
 	}
 

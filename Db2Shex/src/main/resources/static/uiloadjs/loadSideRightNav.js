@@ -31,11 +31,22 @@ render: function(){
     this.$el.html( template );
 },
 events: {
-     "click #exportst":"export",
+     "click #exportst":"export",     
+     "change #importst input[type=file]":"import",
      "click .edit_tgd":"modifyTGD",
      "click .edit_green_tgd":"modifyLinkGreen",
      "click .edit_red_tgd":"modifyLinkRed",
      "click .rem_param_blue_tgd":"removeParam",
+},
+import:function(e){
+	var reader = new FileReader();
+    reader.onload = function onReaderLoad(event){        
+    	var obj = JSON.parse(event.target.result);        
+    	graphTGDs.fromJSON(obj);
+    };
+    reader.readAsText(e.currentTarget.files[0]);
+	
+	
 },
 export:function(e){
     var graphJson=graphTGDs.toJSON()

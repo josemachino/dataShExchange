@@ -101,7 +101,7 @@
     <button type="submit" class="btn btn-primary form-control">Exchange</button>        		
 	</div>
 	</form>
-	<div class="result"></div>
+	<div id="result_exchange"></div>
 </script>
 <script type="text/template" id="sql_template">
         <form id="data" method="post" enctype="multipart/form-data">
@@ -146,6 +146,13 @@
         <div class="sidebar-header">
             <h3>Set of Mappings</h3>            
         </div>
+		<div class="form-group">
+		   <button id="exportst" type="button"> Export</button>
+		</div>
+		<div class="form-group">
+			<label for="importst">Import Graphic File</label>
+		   <input id="importst" type="file" placeholder="Import Graphics" class="form-control-file form-control> 
+		</div>
         <div id="toolbar">
             <div class="form-inline" role="form">
 				<div class="form-group">
@@ -153,10 +160,7 @@
 					<select class="form-control">
 						<option>F1</option>
 					</select>
-                </div>				
-				<div class="form-group">
-				   <button id="exportst" type="button"> Export</button>
-				</div>
+                </div>								
 			</div>
 		</div>
         <table id="table" class="table table-striped" data-toggle="table" data-toolbar="#toolbar" data-search="true" data-unique-id="id">            

@@ -21,10 +21,9 @@ public class DbController {
 	public DbController(DBService dbService) {
 		this.dbService = dbService;
 	}	
-	@PostMapping("/chase")
-    @ResponseBody
-    public FullyTypedModel chaseRule(@RequestBody TGDS tgds) {
-		System.out.print("processing "+tgds.getRules().toString());
-        return dbService.getResult();         
+	@PostMapping(path="/chase",consumes = "application/json")    
+    public @ResponseBody byte[] chaseRule(@RequestBody TGDS tgds) {
+		System.out.print("processing "+tgds.getRules());
+        return dbService.getResultFile("RDF/JSON");         
     }
 }

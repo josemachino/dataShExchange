@@ -4,6 +4,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Service;
@@ -12,17 +14,31 @@ import com.restlet.sqlimport.model.sql.Column;
 import com.restlet.sqlimport.model.sql.Database;
 import com.restlet.sqlimport.model.sql.Table;
 
-import des.controllers.FullyTypedModel;
 import des.models.AttRel;
+import des.models.RdfInstance;
 import des.models.ReFK;
 import des.models.SchemaTableJSON;
 
 @Service
 public class DBService {	
-	public FullyTypedModel getResult() {
-		FullyTypedModel ftm = new FullyTypedModel();
+	public byte[] getResultFile(String format) {
+		//create the triple store
+		RdfInstance rdfInstance=new RdfInstance();
+		//Read the Shex schema file
 		
-		return ftm;
+		//proceed to the chase with sql inserting the values in the triple store
+		Resource rSubject = ResourceFactory.createResource("http://inria.fr");
+		rdfInstance.putTypes(rSubject, "T1");
+		rdfInstance.getTripleSet().add(rSubject, ResourceFactory.createProperty("hello"), ResourceFactory.createResource("http://person/f1"));
+		
+		
+		//Write to file of the format specified
+		org.apache.jena.riot.RIOT.init();
+		java.io.ByteArrayOutputStream os = null;
+		// Serialize over an outputStream
+		os = new java.io.ByteArrayOutputStream();
+		rdfInstance.getTripleSet().write(os,format);		
+		return os.toByteArray();
 	}
 
 	public List<SchemaTableJSON> createH2DB(Database db) throws SQLException {

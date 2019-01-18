@@ -78,7 +78,29 @@ doSearch: function( event ){
                 allowNewOrigin: 'any'
             });
     };
-    reader.readAsText(event.currentTarget.files[0]);       
+    reader.readAsText(event.currentTarget.files[0]);    
+    
+    var form = new FormData();
+	form.append("file", event.currentTarget.files[0]);	
+	$.ajax({
+        url: "uploadShexFile",
+        type: "POST",
+        data: form,
+        processData: false,
+        contentType: false,
+        enctype: 'multipart/form-data'
+      })
+      .done(function(data) {        
+    	  
+		alert("File Uploaded")
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {        
+        console.log(textStatus);
+      })
+      .always(function() {
+        
+      });
+    
 }
 });
 

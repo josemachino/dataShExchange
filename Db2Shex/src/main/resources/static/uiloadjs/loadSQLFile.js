@@ -16,8 +16,7 @@ function getLayoutOptions(){
 }
 function drawReferences(g,tables,map){    
     for (var i=0;i< tables.length ;i++){        
-        for (var j=0;j< tables[i].items.length ;j++){   
-        	console.log(tables[i].items[j].ref)
+        for (var j=0;j< tables[i].items.length ;j++){           	
             if (tables[i].items[j].ref){                                                
                 linkDataBase(g,map.get(tables[i].key),tables[i].items[j].id,map.get(tables[i].items[j].ref.name),tables[i].items[j].ref.id);                
             }
@@ -39,9 +38,7 @@ events: {
     "submit":"uploadFile"
 },
 uploadFile:function (event){
-	var fileName= $('#sqlFile')[0].files[0];
-	console.log(fileName)
-		
+	var fileName= $('#sqlFile')[0].files[0];			
 	var form = new FormData();
 	form.append("file", fileName);	
 	$.ajax({
@@ -52,8 +49,7 @@ uploadFile:function (event){
         contentType: false,
         enctype: 'multipart/form-data'
       })
-      .done(function(data) {
-        console.log(data)
+      .done(function(data) {        
         positionTable= { x: 70, y: 10 };
         graphTGDs.clear();        
         mapTableIdCanvas=new Map();
@@ -69,12 +65,13 @@ uploadFile:function (event){
                 padding: 50,
                 allowNewOrigin: 'any'
             });
+		alert("File Uploaded")
       })
       .fail(function(jqXHR, textStatus, errorThrown) {        
         console.log(textStatus);
       })
       .always(function() {
-        console.log("oshitaa")
+        
       });
 	event.preventDefault();
 },
