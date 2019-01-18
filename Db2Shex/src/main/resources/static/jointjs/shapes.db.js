@@ -315,8 +315,7 @@ paperTGDs.on('link:connect',function(linkView){
                         }else{                    
 							console.log("oshaa te amo")
                             loadModalPathAttribute(currentLink,tablesConnected);
-                        }
-                        
+                        }                        
                         /*$('<div>').append($('<tr>').append($('<td>').append($('<h5>').append("Rule"))).append($('<td>').append($('<span>').attr('class', '').append(linkView.sourceView.model.attributes.question.concat('.').concat(getSourceOptionNameLinkView(currentLink.findView(paperTGDs))))).append($('<button>').attr({'class':'','type':'button',id:currentLink.id}).append(currentLink.labels()[0].attrs.text.text)).append($('<span>').attr('class', '').append(linkView.targetView.model.attributes.question.concat('.').concat(currentLink.attributes.target.port.split(",")[0]))))).remove().html();
                         
                         d3.select(`#${CSS.escape(currentLink.id)}`).append('svg').attr('height',17).attr('width','80').append('line').attr('class','arrow').attr('x1',0).attr('x2',60).attr('y1',10).attr('y2',10);                        
@@ -329,13 +328,9 @@ paperTGDs.on('link:connect',function(linkView){
                         //var part1=$('<span>').attr('class', '').append(linkView.sourceView.model.attributes.question.concat('.').concat(getSourceOptionNameLinkView(currentLink.findView(paperTGDs)))).html()						
                         /*console.log($('<div>').append($('<span>').attr('class','').append(linkView.sourceView.model.attributes.question.concat('.').concat(getSourceOptionNameLinkView(currentLink.findView(paperTGDs))))).append($('<div>').attr('class','').append(currentLink.labels()[0].attrs.text.text).append($('<svg>').attr({height:'17px',width:'80px'}).append($('<line>').attr({class:'arrow',x1:0,x2:60,y1:10,y2:10})))).append($('<span>').attr('class', '').append(linkView.targetView.model.attributes.question.concat('.').concat(currentLink.attributes.target.port.split(",")[0]))))).remove().html())*/						
                         //part1=part1.concat($('<div>').append($('<svg>').attr({height:'17px',width:'90px'}).append($('<line>').attr({class:'arrow',x1:0,x2:80,y1:10,y2:10}))).remove().html());
-                        //part1=part1.concat($('<span>').attr('class', '').append(linkView.targetView.model.attributes.question.concat('.').concat(currentLink.attributes.target.port.split(",")[0])).html());   
-                        
-                    }
-                    
-                    
-                }                
-            
+                        //part1=part1.concat($('<span>').attr('class', '').append(linkView.targetView.model.attributes.question.concat('.').concat(currentLink.attributes.target.port.split(",")[0])).html());                           
+                    }                                        
+                }                            
         }               
     }else{//remove the link from the canvas            
         currentLink.remove();

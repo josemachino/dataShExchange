@@ -3,6 +3,13 @@ package des.models;
 import java.util.Map;
 
 public class Rule {
+	public Rule(Map<String, String> bind, Map<String, Object>[] constraints, RelAtom[] yield) {
+		super();
+		this.bind = bind;
+		this.constraints = constraints;
+		this.yield = yield;
+	}
+
 	private Map<String, String> bind;
 	private Map<String, Object>[] constraints;
 	private RelAtom[] yield;
