@@ -65,7 +65,7 @@ uploadFile:function (event){
                 padding: 50,
                 allowNewOrigin: 'any'
             });
-		alert("File Uploaded")
+		console.log("File Uploaded")
       })
       .fail(function(jqXHR, textStatus, errorThrown) {        
         console.log(textStatus);

@@ -6,6 +6,9 @@
  * Deleting red links cause problems
  * Recommend what to do when user is going to exchange
  */
+//https://www.cs.ox.ac.uk/boris.motik/pubs/bkmmpst17becnhmarking-chase.pdf
+//http://www.dia.uniroma3.it/~papotti/Projects/DataExchange/pdf/vldb10.pdf
+//https://perso.liris.cnrs.fr/angela.bonifati/teaching/dbdm/DBDM-dataIntegration3.pdf
 //https://github.com/josdejong/jsoneditor
 //https://github.com/Rathachai/d3rdf
 //link red verify editing
@@ -126,8 +129,7 @@ graphTGDs.on('remove', function(cell, collection, opt) {
 			var links=graphTGDs.getLinks();			
 			for (var link of links){
 				var linkView=link.findView(paperTGDs);
-				if (linkView.sourceView.model.id== cell.attributes.source.id && linkView.targetView.model.id==cell.attributes.target.id){
-					console.log(linkView.model.attributes.id)					
+				if (linkView.sourceView.model.id== cell.attributes.source.id && linkView.targetView.model.id==cell.attributes.target.id){									
 					link.remove()
 				}				
 			}								
@@ -185,8 +187,7 @@ paperTGDs.on('link:connect',function(linkView){
                     }
                 };
                 //obtain the join paths
-                var tablesConnected=[{id:linkView.sourceView.model.id,text:linkView.sourceView.model.attributes.question}];
-                console.log(linkView.targetView.model)
+                var tablesConnected=[{id:linkView.sourceView.model.id,text:linkView.sourceView.model.attributes.question}];                
                 var intargetLinks=graphTGDs.getConnectedLinks(linkView.targetView.model, {inbound:true});                
                 var tLink;
                 var visited=[];
@@ -1705,9 +1706,9 @@ function stTGD2(graph,paper,mapTables){
         if (element.attributes.type=="db.Table"){
             bindNames[element.attributes.question]=element.attributes.question;
         }
-    });
-    
-    var sigma={functions:{},rules:[]};
+    });    
+    var sigma={functions:convert_map_to_obj(mapSymbols),rules:[]};
+    console.log(sigma)
     for (var link of graph.getLinks()){
         var linkView=link.findView(paper);
         if (linkView.sourceView.model.attributes.type=="db.Table" && linkView.targetView.model.attributes.type=="shex.Type" && linkView.sourceMagnet.nodeName=='circle'){ 
@@ -1760,7 +1761,7 @@ function stTGD2(graph,paper,mapTables){
                                     mapFD.set(name,[]);
                                     mapFD.set(relNames[i+1],[]);
                                     for (var opt of elementView.model.attributes.options){                                        
-                                        if ( 'ref' in opt){											
+                                        if (!!opt.ref){											
                                             if (i<relNames.length && opt.ref.name==relNames[i+1]){
                                                 var joinsA=mapFD.get(name);
                                                 joinsA.push({name:opt.text});
@@ -1881,3 +1882,8 @@ function filterKeyParam(params){
     }
     return keyparams;
 }
+const convert_map_to_obj = ( aMap => {
+    const obj = {};
+    aMap.forEach ((v,k) => { obj[k] = v });
+    return obj;
+});

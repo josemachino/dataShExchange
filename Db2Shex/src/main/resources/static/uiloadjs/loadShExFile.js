@@ -92,7 +92,7 @@ doSearch: function( event ){
       })
       .done(function(data) {        
     	  
-		alert("File Uploaded")
+		console.log("File Uploaded")
       })
       .fail(function(jqXHR, textStatus, errorThrown) {        
         console.log(textStatus);
