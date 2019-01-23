@@ -14,17 +14,18 @@ events: {
 },
 exchange:function(e){
 	e.preventDefault();
-    // verify that every triple constraint that has multiplicity 1 is linked
+    // verify that every triple constraint that has multiplicity 1 is linked	
 	graphTGDs.getElements().forEach(function(element){		
 		if (element.attributes.type=="shex.Type"){			
 			element.attributes.options.forEach(function(tc) {	
-				console.log(tc)
-				  if (tc.mult=="1"){
+				  console.log(tc.mult==1)
+				  if (tc.mult==="1" || tc.mult==="+"){
 					  var elementView=element.findView(paperTGDs);
 					  var intargetLinks=graphTGDs.getConnectedLinks(elementView.model, {inbound:true});
-					  if (intargetLinks.length==0)
-						  alert("Need "+tc.label)
-					  console.log(intargetLinks)
+					  if (intargetLinks.length==0){						  
+						  let msg='<div class="alert alert-info fade in"> <a href="#" class="close" data-dismiss="alert">&times;</a>  <strong>Note!</strong> Triple constraint with label '+tc.label +' needs to be linked.</div>'
+						  $("#ls_todo").append(msg);
+					  }						  					  
 					  //add to a list to show what needs to be achieved in order to obtain a correct chase
 					  
 				  }

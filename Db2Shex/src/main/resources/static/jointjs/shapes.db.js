@@ -103,10 +103,11 @@ paperTGDs.on('link:pointerdblclick', function(linkView){
             var tView=tlink.findView(paperTGDs);  							
             var visited=[];
             getJoinsTableFromTo(linkView.sourceView.model,tablesConnected,tView.sourceView.model.id,visited,tablesConnected[0]);	
-        }
-        if (tablesConnected.length>1)
+        }               
+        if (tablesConnected.length>1){
+        	
             loadModalPathAttribute(currentLink,tablesConnected);
-        else{            
+        }else{            
             loadModalFunctions(currentLink);
         }    
     }
@@ -161,6 +162,18 @@ var createShexType=function(name,triConstraints,position){
     return typeShex;
 }
 
+var invertPaths=function(tablesConnected){
+	var reverseTablesConnected=[]
+	tablesConnected.forEach(function(path){
+		var idxPath=path.id.split(",")
+		var textPath=path.text.split(",")
+		var reverseIdxP=idxPath.reverse()
+		var reverseTextP=textPath.reverse()
+		reverseTablesConnected.push({id:reverseIdxP.join(),text:reverseTextP.join()})
+	});
+	return reverseTablesConnected
+}
+
 paperTGDs.on('link:connect',function(linkView){  
     if (typeof(linkView.targetView)==='null'){
         console.log("no element selected");
@@ -195,12 +208,10 @@ paperTGDs.on('link:connect',function(linkView){
                 if (intargetLinks.length==1){
                     console.log("un link")
                     loadModalTypeReferenced(currentLink,auxKeySymbols,tablesConnected,mapSymbols,attributeSelected,intargetLinks);
-                }else{					
-                    console.log(intargetLinks)
+                }else{					                    
                     for (var aux of intargetLinks){                                                
                         if (linkView.targetView.model.getPort(aux.attributes.target.port).group=='inType'){
-                            tLink=aux;
-                            console.log(tLink)
+                            tLink=aux;                            
                             break;
                         }
                     }                                       
@@ -225,6 +236,8 @@ paperTGDs.on('link:connect',function(linkView){
                     }else{
 						console.log(intargetLinks)
 						console.log("review all the process")
+						tablesConnected=invertPaths(tablesConnected)
+						
                         loadModalTypeReferenced(currentLink,auxKeySymbols,tablesConnected,mapSymbols,attributeSelected,intargetLinks);
                     }                    
                 }                                                              
@@ -1497,9 +1510,7 @@ function getLinkTarget(links,port){
 }
 // for obtaining the links that are related to types
 function getLinkTargetType(links,port){
-	var linksPort=[];
-    console.log(port)
-    console.log(links)
+	var linksPort=[];    
     for (var tLink of links){                                            
         if (tLink.attributes.target.port==port.id){
             linksPort.push(tLink);
@@ -1611,8 +1622,7 @@ function link(g,source, portSource, target,portTarget,color,vertices){
     return link;
 }
 
-function linkDataBase(g,source, portSource, target,portTarget,vertices) {      
-	console.log(target+ " "+ portTarget+ " source " + source + " "+ portSource)
+function linkDataBase(g,source, portSource, target,portTarget,vertices) {      	
     var link = new joint.shapes.standard.Link({
         source: { id: target , port:'pk-'.concat(portTarget)},
         target: { id: source , port:'fk-'.concat(portSource)}, 
@@ -1707,8 +1717,7 @@ function stTGD2(graph,paper,mapTables){
             bindNames[element.attributes.question]=element.attributes.question;
         }
     });    
-    var sigma={functions:convert_map_to_obj(mapSymbols),rules:[]};
-    console.log(sigma)
+    var sigma={functions:convert_map_to_obj(mapSymbols),rules:[]};    
     for (var link of graph.getLinks()){
         var linkView=link.findView(paper);
         if (linkView.sourceView.model.attributes.type=="db.Table" && linkView.targetView.model.attributes.type=="shex.Type" && linkView.sourceMagnet.nodeName=='circle'){ 
@@ -1887,3 +1896,4 @@ const convert_map_to_obj = ( aMap => {
     aMap.forEach ((v,k) => { obj[k] = v });
     return obj;
 });
+
