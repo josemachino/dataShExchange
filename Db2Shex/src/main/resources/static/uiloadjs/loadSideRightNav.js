@@ -41,8 +41,9 @@ events: {
 import:function(e){
 	var reader = new FileReader();
     reader.onload = function onReaderLoad(event){        
-    	var obj = JSON.parse(event.target.result);        
-    	graphTGDs.fromJSON(obj);
+    	var obj = JSON.parse(event.target.result);
+    	console.log(obj)
+    	graphTGDs.fromJSON(obj);    	
     };
     reader.readAsText(e.currentTarget.files[0]);
 	
@@ -61,6 +62,7 @@ export:function(e){
     var link = document.createElement("a");
     link.download = 'gstgds.json';
     link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonStr);
+    //link.href=window.URL.createObjectURL('data:text/plain;charset=utf-8,' + encodeURIComponent(jsonStr))
     link.click();
 },
 modifyTGD: function(e){    

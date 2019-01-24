@@ -15,9 +15,12 @@ events: {
 exchange:function(e){
 	e.preventDefault();
 	miShex=new Map();
+	schShex=new Map();
     // verify that every triple constraint that has multiplicity 1 is linked	
+	let missing=false;
 	graphTGDs.getElements().forEach(function(element){		
 		if (element.attributes.type=="shex.Type"){
+			
 			miShex.set(element.attributes.question,[])
 			var elementView=element.findView(paperTGDs);
 			var intargetLinks=graphTGDs.getConnectedLinks(elementView.model, {inbound:true});
@@ -28,6 +31,7 @@ exchange:function(e){
 					  $("#ls_todo").append(msg);					  					 					  					 
 					  var tcs=miShex.get(element.attributes.question);
 					  tcs.push(tc)
+					  missing=true;
 				  }
 				});
 			}else{				
@@ -42,19 +46,30 @@ exchange:function(e){
 								$("#ls_todo").append(msg);
 								var tcs=miShex.get(element.attributes.question);
 								tcs.push({label:tc[0],type:tc[1],mult:tc[2]})
+								missing=true;
 							}
 						}
 					}					  
 				});
 			}
+			var constraints=[];
+			element.attributes.options.forEach(function(tc) {
+				constraints.push(tc)
+			})
+			schShex.set(element.attributes.question,constraints)
+			
 		}        	
     });	
+			
 	//construct sql query
 	let tgds=editorJSON.get();
 	let TyName="TypesFact";
 	let TriName="Triples";
-	let c1="create table Triples(s varchar,p varchar, o varchar)"
-	let c2="create table TypesFact(term varchar,type varchar)"	
+	let ShName="Expression";
+	let c1="CREATE TABLE "+ TriName +" (s varchar,p varchar, o varchar);";
+	let c2="CREATE TABLE "+TyName +" (term varchar,type varchar);";
+	let c3="CREATE TABLE "+ShName+ "(typeS varchar,label varchar,typeO varchar, mult varchar;)";	
+	let chase=c1.concat(c2).concat(c3);
 	tgds.rules.forEach(function(rule){
 		
 		rule.yield.forEach(function(atom){
@@ -126,21 +141,41 @@ exchange:function(e){
 					})					
 					q=q.concat(whereQ)
 				}
-			}
-			//completing the missing types
-			var mQ="";
-			miShex.forEach(function(tcs, type, miMapa) {
-					tcs.forEach(function(tc){
-						mQ=mQ.concat("INSERT INTO ").concat(TriName).concat(" (s,p,o)").concat(" SELECT term,'").concat(tc.label).concat("','").concat(tc.type).concat("' FROM TypesFact WHERE type='").concat(type).concat("';");
-						mQ=mQ.concat("INSERT INTO ").concat(TyName).concat(" (term,type) VALUES ('").concat(tc.type).concat("','").concat(tc.type).concat("');")
-					})
-			})
-			console.log(mQ)
-			console.log(q)
+			}						
+			chase=chase.concat(q);
 		})
 	})
-	//[[{"function":"f1","args":[{"rel":"Contact","attr":"id"}]}],"name",[{"rel":"Contact","attr":"firstname"}]]}]
-	//var tdata='{"functions":{},"rules":[{"bind":{"Company":"Company","Contact":"Contact","table3":"table3","table2":"table2","table1":"table1"},"constraints":[],"yield":[{"atom":"ProductShape","args":[{"function":"f1","args":[{"rel":"Contact","attr":"id"}]}]},{"atom":"Triple","args":[[{"function":"f1","args":[{"rel":"Contact","attr":"id"}]}],"name",[{"rel":"Contact","attr":"firstname"}]]}]}]}'
+	
+	if (missing){
+		let msgDanger='<div class="alert alert-danger alert-dismissible fade show" role="alert"> The chase SQL script generates additional rows to satisfy approximatelly ShEx schema<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+		$("#ls_todo").append(msgDanger);
+		//completing the missing types
+		var mQ="";
+		//create the shex table with ShEx schema
+		var schQ=c3;
+		schShex.forEach(function(tcs, type, miMapa){
+			tcs.forEach(function(tc){
+				schQ=schQ.concat("INSERT INTO ").concat(ShName).concat(" (typeS,label,typeO,mult) VALUES ('").concat(type).concat("','").concat(tc.label).concat("','").concat(tc.type).concat("','").concat(tc.mult).concat("');");
+			})
+		})
+		
+		miShex.forEach(function(tcs, type, miMapa) {
+				tcs.forEach(function(tc){
+					mQ=mQ.concat("INSERT INTO ").concat(TriName).concat(" (s,p,o)").concat(" SELECT term,'").concat(tc.label).concat("','").concat(tc.type).concat("' FROM TypesFact WHERE type='").concat(type).concat("';");
+					mQ=mQ.concat("INSERT INTO ").concat(TyName).concat(" (term,type) VALUES ('").concat(tc.type).concat("','").concat(tc.type).concat("');")
+				})
+		})
+		mQ=mQ.concat("INSERT INTO ").concat(TriName).concat(" (s,p,o)").concat(" SELECT Tri.o,Sh.label,Sh.typeO FROM ").concat(TriName).concat(" AS Tri,").concat(ShName).concat(" AS Sh WHERE Tri.o=Sh.typeS AND Sh.mult IN ('1','+'); ");
+		console.log(mQ)
+		console.log(schQ)
+		chase=chase.concat(schQ);
+		chase=chase.concat(mQ);
+	}
+	
+	var link = document.createElement("a");
+    link.download = 'chase.sql';
+    link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(chase);
+    link.click();
 	/*$.ajax({
 	 * 
         url: "chase",
