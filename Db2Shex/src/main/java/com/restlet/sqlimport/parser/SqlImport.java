@@ -145,6 +145,7 @@ public class SqlImport {
 		else if(query.toUpperCase().indexOf("ALTER TABLE") == 0) {
 			p.addParseListener(new AlterTableParseListener(p, database));
 		}
+		//https://stackoverflow.com/questions/27648180/parse-insert-select-statement-using-antlr-based-plsql-parser
 		else {
 			throw new RuntimeException("No parse listener for the query : "+query);
 		}

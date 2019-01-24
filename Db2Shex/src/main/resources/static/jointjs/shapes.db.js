@@ -50,12 +50,12 @@ var paperTGDs = new joint.dia.Paper({
     background: {
         color: 'rgba(0, 255, 0, 0.3)'
     },
-    /*snapLinks: true,*/
+    snapLinks: {radius:75},
     interactive: { labelMove: true },
     linkPinning: false,
     embeddingMode: true,	    
     defaultConnectionPoint: { name: 'boundary' },
-    highlighting: {
+    /*highlighting: {
         'default': {
             name: 'stroke',
             options: {
@@ -68,14 +68,9 @@ var paperTGDs = new joint.dia.Paper({
                 className: 'highlighted-parent'
             }
         }
-    },
+    },*/
     defaultLink:new joint.shapes.standard.Link()
 });
-/*var paperScroller = new joint.ui.PaperScroller({
-    paper: paperTGDs ,
-	autoResizePaper: true
-});*/
-//$('#paper-container').append(paperScroller.render().el);
 paperTGDs.on('link:mouseenter', function(linkView) {
     linkView.showTools();
 });
@@ -111,17 +106,6 @@ paperTGDs.on('link:pointerdblclick', function(linkView){
             loadModalFunctions(currentLink);
         }    
     }
-});
-var removeButton = new joint.linkTools.Remove();
-var toolsView = new joint.dia.ToolsView({
-    tools: [removeButton]
-});
-paperTGDs.on('link:pointerclick',function(linkView){  
-    /*var removeButton = new joint.linkTools.Remove();
-    var toolsView = new joint.dia.ToolsView({
-    tools: [removeButton]
-    });
-    linkView.addTools(toolsView);*/
 });
 
 graphTGDs.on('remove', function(cell, collection, opt) {

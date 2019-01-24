@@ -14,22 +14,39 @@ events: {
 },
 exchange:function(e){
 	e.preventDefault();
+	miShex=new Map();
     // verify that every triple constraint that has multiplicity 1 is linked	
 	graphTGDs.getElements().forEach(function(element){		
-		if (element.attributes.type=="shex.Type"){			
-			element.attributes.options.forEach(function(tc) {	
-				  console.log(tc.mult==1)
-				  if (tc.mult==="1" || tc.mult==="+"){
-					  var elementView=element.findView(paperTGDs);
-					  var intargetLinks=graphTGDs.getConnectedLinks(elementView.model, {inbound:true});
-					  if (intargetLinks.length==0){						  
-						  let msg='<div class="alert alert-info fade in"> <a href="#" class="close" data-dismiss="alert">&times;</a>  <strong>Note!</strong> Triple constraint with label '+tc.label +' needs to be linked.</div>'
-						  $("#ls_todo").append(msg);
-					  }						  					  
-					  //add to a list to show what needs to be achieved in order to obtain a correct chase
-					  
+		if (element.attributes.type=="shex.Type"){
+			miShex.set(element.attributes.question,[])
+			var elementView=element.findView(paperTGDs);
+			var intargetLinks=graphTGDs.getConnectedLinks(elementView.model, {inbound:true});
+			if (intargetLinks.length==0){
+				element.attributes.options.forEach(function(tc) {					  				
+				  if (tc.mult=="1" || tc.mult=="+"){
+					  let msg='<div class="alert alert-warning alert-dismissible fade show" role="alert"> <strong>'+element.attributes.question+'</strong> Triple constraint ('+tc.label+":"+tc.type +') needs to be linked.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>'
+					  $("#ls_todo").append(msg);					  					 					  					 
+					  var tcs=miShex.get(element.attributes.question);
+					  tcs.push(tc)
 				  }
-			});
+				});
+			}else{				
+				element.attributes.ports.items.forEach(function(pt) {
+					if (pt.group!="inType"){	
+						if(!intargetLinks.some(function(itLink){
+							return itLink.attributes.target.port==pt.id;
+						})){
+							var tc=pt.id.split(",");
+							if (tc[2]=="1" || tc[2]=="+"){
+								let msg='<div class="alert alert-warning alert-dismissible fade show" role="alert"> <strong>'+element.attributes.question+'</strong> Triple constraint ('+tc[0]+":"+tc[1]+') needs to be linked.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>'
+								$("#ls_todo").append(msg);
+								var tcs=miShex.get(element.attributes.question);
+								tcs.push({label:tc[0],type:tc[1],mult:tc[2]})
+							}
+						}
+					}					  
+				});
+			}
 		}        	
     });	
 	//construct sql query
@@ -110,6 +127,15 @@ exchange:function(e){
 					q=q.concat(whereQ)
 				}
 			}
+			//completing the missing types
+			var mQ="";
+			miShex.forEach(function(tcs, type, miMapa) {
+					tcs.forEach(function(tc){
+						mQ=mQ.concat("INSERT INTO ").concat(TriName).concat(" (s,p,o)").concat(" SELECT term,'").concat(tc.label).concat("','").concat(tc.type).concat("' FROM TypesFact WHERE type='").concat(type).concat("';");
+						mQ=mQ.concat("INSERT INTO ").concat(TyName).concat(" (term,type) VALUES ('").concat(tc.type).concat("','").concat(tc.type).concat("');")
+					})
+			})
+			console.log(mQ)
 			console.log(q)
 		})
 	})

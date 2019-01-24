@@ -57,16 +57,7 @@ joint.dia.Element.define('shex.Type',{
         '.body': {
             width: 150, height: 250,
             rx: '1%', ry: '2%',
-            stroke: 'none',
-            /*fill: {
-                type: 'linearGradient',
-                stops: [
-                    { offset: '0%', color: '#FEB663' },
-                    { offset: '100%', color: '#31D0C6' }
-                ],
-                // Top-to-bottom gradient.
-                attrs: { x1: '0%', y1: '0%', x2: '0%', y2: '100%' }
-            }*/
+            stroke: 'none',            
             fill:'#b2b2ba'
         },
         '.options': { ref: '.body', 'ref-x': 0 },
