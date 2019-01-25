@@ -98,7 +98,10 @@ paperTGDs.on('link:pointerdblclick', function(linkView){
 
 graphTGDs.on('remove', function(cell, collection, opt) {
    if (cell.isLink()) {	         
-        if (cell.attr('line/stroke')=="green"){                        
+        if (cell.attr('line/stroke')=="green"){     
+        	//TODO NOTIFY THAT WE ARE REMOVING ALL LINKS THAT ARE CONNECTED TO THE TABLE WITH ITS TYPE
+        	
+        	
 			var links=graphTGDs.getLinks();			
 			for (var link of links){
 				
@@ -110,13 +113,13 @@ graphTGDs.on('remove', function(cell, collection, opt) {
 			links=graphTGDs.getLinks();
 			for (var link of links){
 				var edgeView=link.findView(paperTGDs);
-				if (edgeView.sourceView.model.attributes.type=="db.Table" && edgeView.targetView.model.attributes.type=="db.Table" && link.attr('line/stroke')=='blue'){
-					let path=(((tLink.labels()[0]|| {}).attrs||{}).text||{}).text;
-					console.log(path)
-					let names=getTokens(path)
-					console.log(names)
-				}
-				
+				if (edgeView.sourceView.model.attributes.type=="db.Table" && edgeView.targetView.model.attributes.type=="shex.Type" && link.attr('line/stroke')=='blue'){
+					let path=(((link.labels()[0]|| {}).attrs||{}).text||{}).text;					
+					let names=getTokens(path)					
+					if (mapTableIdCanvas.get(names[names.length-1])==cell.attributes.source.id){						
+						link.remove()
+					}
+				}		
 			}
 			
         }        
@@ -283,8 +286,7 @@ paperTGDs.on('link:connect',function(linkView){
                             }
                         }                        
 					});
-                    if (!linked){
-                        
+                    if (!linked){                        
                         var tablesConnected=[{id:linkView.sourceView.model.id,text:linkView.sourceView.model.attributes.question}];                        
                         var intargetLinks=graphTGDs.getConnectedLinks(linkView.targetView.model, {inbound:true});
                         var tLinks=getLinkTarget(intargetLinks,portType);                                        
@@ -294,8 +296,7 @@ paperTGDs.on('link:connect',function(linkView){
                             var tView=tlink.findView(paperTGDs);
                             var visited=[];
                             getJoinsTableFromTo(linkView.sourceView.model,tablesConnected,tView.sourceView.model.id,visited,tablesConnected[0]);	
-						}     
-						console.log(tablesConnected)
+						}     						
 						if (tablesConnected.length==1){
                             currentLink.appendLabel({
                                 attrs: {
@@ -671,7 +672,9 @@ function loadModalPathAttribute(currentLink,parameters){
             }
             
             if (!isPathEqSourceLink){
-                //create the green link
+                //VERIFY IF ALREADY EXISTS green link IF NOT CREATE
+            	
+            	
                 //get the element of the path
                 var element;
                 for (let table of graphTGDs.getElements()){
@@ -679,15 +682,20 @@ function loadModalPathAttribute(currentLink,parameters){
                         element=table;
                     }
                 }
-                var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
-                var pks=getKeys(element.attributes.options);
-                let valueIRI=mapSymbols.keys().next().value+"("+pks[0]+")";
-                linkParent.appendLabel({attrs: {
-                                text: {
-                                    text: valueIRI
-                                }}
-                            });
-                drawNewGreenLinkInTable(linkParent,lastTableName,valueIRI,linkView.targetView.model.attributes.question)
+                let isConnectedGL=false
+            	for (var greenL of graphTGDs.getLinks()){            		
+            		if(greenL.attributes.source.port==element.attributes.ports.items[0].id && greenL.attributes.target.port==linkView.targetView.model.attributes.ports.items[0].id){
+            			isConnectedGL=true;
+            			break;
+            		}
+            	}
+                if (!isConnectedGL){
+	                var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
+	                var pks=getKeys(element.attributes.options);
+	                let valueIRI=mapSymbols.keys().next().value+"("+pks[0]+")";
+	                linkParent.appendLabel({attrs: {text: {text: valueIRI}}});
+	                drawNewGreenLinkInTable(linkParent,lastTableName,valueIRI,linkView.targetView.model.attributes.question)
+                }
             }
         },
         onCancel: function(){
@@ -891,8 +899,162 @@ function loadModalPathAttributeDetail(currentLink,parameters){
     modal.render();
 }
 
+function loadModalRedFromTable(currentLink,iris, parameters,functionsMap,valueReference,inTargetLinks){
+	var CustomView = Backbone.View.extend({
+        initialize: function(opts) {
+            this.iris = opts.displayIris;
+            this.parameters=opts.displayParameters;
+        },
+        render: function() {
+            var divContainer=document.createElement('div');
+            divContainer.className="container";
+            var divDropdown=document.createElement('div');
+            divDropdown.id='ddIriConstructor';
+            divDropdown.className='dropdown';
+            
+            var iriUrl=createText("iriUrl");
+            
+            var items = createList(this.iris);            
+            var buttonDropIri=createButton(this.iris[0].text);
+            divDropdown.appendChild(buttonDropIri);
+            divDropdown.appendChild(iriUrl);
+            divDropdown.appendChild(items);
+            
+            
+            var divDropdownParameters=document.createElement('div');
+            divDropdownParameters.id='ddParameter';
+            divDropdownParameters.className='dropdown';
+            var buttonDropParameter=createButton(this.parameters[0].text);
+            divDropdownParameters.appendChild(buttonDropParameter);
+            var itemsParameters=createList(this.parameters);        
+            divDropdownParameters.appendChild(itemsParameters);
+                        
+            divContainer.appendChild(divDropdown);        
+            divContainer.appendChild(divDropdownParameters);
+            this.$el.html(divContainer);        
+            $("#iriUrl").val(functionsMap.get(this.iris[0].text.trim()));
+            return this;
+        },
+        events :{
+            "click .dropdown-menu a":"changeName",
+            "click #ddIriConstructor a":"changeInputText",
+            "mouseover #ddParameter a":"selectPath",
+            "mouseout #ddParameter a":"unselectPath",
+        },
+        changeName: function(e) {                                           
+            $(e.target).parents(".dropdown").find('.btn').html($(e.target).text().replace(/,/g,'&#10781;') + ' <span class="caret"></span>');            
+            $(e.target).parents(".dropdown").find('.btn').val($(e.target).data('value'));
+        },
+        changeInputText:function (e) {
+            $("#iriUrl").val(functionsMap.get($(e.target).text().trim()));            
+        },
+        selectPath:function(e){
+            var tablesCombo=$(e.target).data('value').split(',');
+            for (var id of tablesCombo){
+                graphTGDs.getElements().forEach(function(element){
+                    if (id==element.id){
+                        var elementView=element.findView(paperTGDs);
+                        elementView.highlight();
+                    }
+                });
+            }
+
+        },
+        unselectPath:function(e){                        
+            var tablesCombo=$(e.target).data('value').split(',');
+            for (var id of tablesCombo){
+                graphTGDs.getElements().forEach(function(element){
+                    if (id==element.id){
+                        var elementView=element.findView(paperTGDs);
+                        elementView.unhighlight();
+                    }
+                });
+            }
+        }
+    });
+    var modal = new BackboneBootstrapModals.ConfirmationModal({        
+        headerViewOptions:{showClose:false, label: 'Define IRI Constructor'},
+        bodyView: CustomView,
+        bodyViewOptions: { displayIris: iris, displayParameters:parameters },
+        onConfirm: function() {               
+            var valueIRI=$("#ddIriConstructor .btn").text().trim();
+            valueIRI=valueIRI.concat("(");            
+            valueIRI=valueIRI.concat(valueReference);
+            valueIRI=valueIRI.concat(")");
+            var joinPath=$("#ddParameter .btn").text().trim();
+            if (currentLink.labels().length==0){            
+            	currentLink.appendLabel({attrs: {text: {text: valueIRI}},position: {offset: 10}});            
+            	currentLink.appendLabel({attrs: {text: {text: joinPath}},position: {offset: -10}}); 
+            }else{                
+                currentLink.label(0,{attrs: {text: {text: valueIRI}}}); 
+                currentLink.label(1,{attrs: {text: {text: joinPath}},position: {offset: -10}}) ;               
+            }            
+            let linkView=currentLink.findView(paperTGDs);      
+            let sAtt=getSourceOptionNameLinkView(linkView);
+//            drawNewRedLinkInTable(currentLink,linkView.sourceView.model.attributes.question,sAtt,joinPath,valueIRI,linkView.targetView.model.attributes.question)
+            
+            
+            //get the id and set by default the table						
+            var paramValue=$('#ddParameter .btn').val();            
+            if (paramValue===""){
+                paramValue=parameters[0].id;
+            }
+            var lastTable=paramValue.split(",");
+            let lastTableName;
+            for (const [key,value] of mapTableIdCanvas){
+                if (value==lastTable[lastTable.length-1]){
+                    lastTableName=key;
+                    break;
+                }
+            }            			            
+            var portType=linkView.targetView.model.attributes.ports.items[0];
+            var tLinks=getLinkTargetType(inTargetLinks,portType);             
+            //loop all links that are table id to type id
+            let isPathEqSourceLink=false;
+            
+            for (var tlink of tLinks){							
+                var tView=tlink.findView(paperTGDs);                
+                if (tView.sourceView.model.id==lastTable[lastTable.length-1]){
+                    isPathEqSourceLink=true;                    
+                    break;
+                }
+            }
+			
+			if (!isPathEqSourceLink){
+
+                console.log("creating link green")
+                for (var element of graphTGDs.getElements()){                
+                    if (element.id==lastTable[lastTable.length-1]){					
+                        var pks=getKeys(element.attributes.options);					
+                        var fSymbol=getFunctionSymbol(mapSymbols,linkView.targetView.model.attributes.question);
+                        var valueIRI=fSymbol+"("+pks[0]+")";											
+                        var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
+                        createLinkTool(linkParent);
+                        
+                        linkParent.appendLabel({
+                            attrs: {
+                                text: {
+                                    text: valueIRI
+                                }
+                            }
+                        });
+                        
+                        let graphicTGDparent=$('<div>').append($('<span>').attr('class','li_tgd').append(element.attributes.question)).append($('<div>').attr({'class':'link_tgd'}).append($('<p>').attr({id:"text_"+linkParent.id}).append((((linkParent.labels()[0]|| {}).attrs||{}).text||{}).text)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:linkParent.id,class:'edit_green_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowGreen',x1:0,x2:widthSVGLine,y1:10,y2:10})))).append($('<span>').attr('class', 'li_tgd').append(linkView.targetView.model.attributes.question)).remove().html();
+                        $table.bootstrapTable('append',[{id:linkParent.id,ex:graphicTGDparent}])
+                    }
+                }
+			}
+        },
+        onCancel: function(){
+            currentLink.remove();
+        }        
+    });
+    modal.render();
+}
+
 //linkView.sourceView.model.attributes.question.concat('.').concat(getSourceOptionNameLinkView(currentLink.findView(paperTGDs)))
 function loadModalTypeReferenced(currentLink,iris, parameters,functionsMap,valueReference,inTargetLinks){
+	console.log("Red Link")
     var CustomView = Backbone.View.extend({
         initialize: function(opts) {
             this.iris = opts.displayIris;
@@ -982,6 +1144,7 @@ function loadModalTypeReferenced(currentLink,iris, parameters,functionsMap,value
                 currentLink.label(0,{attrs: {text: {text: valueIRI}}}); 
                 currentLink.label(1,{attrs: {text: {text: joinPath}},position: {offset: -10}}) ;               
             }
+            createLinkTool(currentLink);
             let linkView=currentLink.findView(paperTGDs);      
             let sAtt=getSourceOptionNameLinkView(linkView);
             drawNewRedLinkInTable(currentLink,linkView.sourceView.model.attributes.question,sAtt,joinPath,valueIRI,linkView.targetView.model.attributes.question)
@@ -1170,155 +1333,13 @@ function loadPathIRIModal(currentLink,iris, parameters,functionsMap,lsPaths){
     modal.render();
 }
 
-function loadWizadModel(curLink,iris, parameters,functionsMap,parameters2){
-    let parentLink;
-    var CustomView = Backbone.View.extend({
-        initialize: function(opts) {
-            this.iris = opts.displayIris;
-            this.parameters=opts.displayParameters;
-        },
-        render: function() {
-            var divContainer=document.createElement('div');
-            divContainer.className="container";
-            var divDropdown=document.createElement('div');
-            divDropdown.id='ddIriConstructor';
-            divDropdown.className='dropdown';
-            
-            var iriUrl=createText("iriUrl");
-            
-            var items = createList(this.iris);            
-            var buttonDropIri=createButton("IRI Constructors");
-            divDropdown.appendChild(buttonDropIri);
-            divDropdown.appendChild(iriUrl);
-            divDropdown.appendChild(items);
-            
-            var divDropdownParameters=document.createElement('div');
-            divDropdownParameters.id='ddParameter';
-            divDropdownParameters.className='dropdown';
-            var buttonDropParameter=createButton(this.parameters[0].text);
-            divDropdownParameters.appendChild(buttonDropParameter);
-            var itemsParameters=createList(this.parameters);        
-            divDropdownParameters.appendChild(itemsParameters);
-                        
-            divContainer.appendChild(divDropdown);        
-            divContainer.appendChild(divDropdownParameters);
-            this.$el.html(divContainer);        
-            return this;
-        },
-        events :{
-            "click .dropdown-menu a":"changeName",
-            "click #ddIriConstructor a":"changeInputText"
-        },changeName: function(e) {                                           
-            $(e.target).parents(".dropdown").find('.btn').html($(e.target).text().replace(/,/g,'&#10781;') + ' <span class="caret"></span>');            
-            $(e.target).parents(".dropdown").find('.btn').val($(e.target).data('value'));
-        },
-        changeInputText:function (e) {
-            $("#iriUrl").val(functionsMap.get($(e.target).text().trim()));            
-        }
-    });
-    var CustomViewPath = Backbone.View.extend({
-        initialize: function(opts) {
-            this.parameters=opts.displayParameters;
-        },
-        render: function() {
-            var divContainer=document.createElement('div');
-            divContainer.className="container";            
-            
-            var divDropdownParameters=document.createElement('div');
-            divDropdownParameters.id='ddParameter2';
-            divDropdownParameters.className='dropdown';
-            var buttonDropParameter=createButton(this.parameters[0].text);
-            divDropdownParameters.appendChild(buttonDropParameter);
-            var itemsParameters=createList(this.parameters);        
-            divDropdownParameters.appendChild(itemsParameters);                              
-            divContainer.appendChild(divDropdownParameters);
-            this.$el.html(divContainer);        
-            return this;
-        },
-        events :{         
-            "click .dropdown-menu a":"changeName",
-            "mouseover #ddParameter2 a":"selectPath",
-            "mouseout #ddParameter2 a":"unselectPath",
-        },
-        changeName: function(e) {                                           
-            $(e.target).parents(".dropdown").find('.btn').html($(e.target).text().replace(/,/g,'&#10781;') + ' <span class="caret"></span>');            
-            $(e.target).parents(".dropdown").find('.btn').val($(e.target).data('value'));
-        },
-        selectPath:function(e){
-            var tablesCombo=$(e.target).data('value').split(',');
-            for (var id of tablesCombo){
-                graphTGDs.getElements().forEach(function(element){
-                    if (id==element.id){
-                        var elementView=element.findView(paperTGDs);
-                        elementView.highlight();
-                    }
-                });
-            }
 
-        },
-        unselectPath:function(e){
-            var tablesCombo=$(e.target).data('value').split(',');
-            for (var id of tablesCombo){
-                graphTGDs.getElements().forEach(function(element){
-                    if (id==element.id){
-                        var elementView=element.findView(paperTGDs);
-                        elementView.unhighlight();
-                    }
-                });
-            }
-        }
-    });
-    
-    
-    var modal = new BackboneBootstrapModals.WizardModal ({ 
-        stepGraph: [{
-    label: 'Path Selection',
-    view: CustomViewPath,
-    viewOptions: { displayParameters:parameters2 },
-    nextIndex: 1,    
-    onNext: function() {
-      var joinPath=$("#ddParameter2 .btn").text().trim();
-        curLink.appendLabel({
-                    attrs: {
-                        text: {
-                            text: joinPath
-                        }
-                    },
-                    position: {
-                        offset: -10
-                    }
-                });
-        curLink.attr('line/stroke', 'blue');
-    }
-  },{
-    label: 'IRI Constructor',
-    view: CustomView,
-    viewOptions: { displayIris: iris, displayParameters:parameters },
-    nextText: 'Finish',    
-    previousIndex: 0,
-    onNext: function() {
-      var valueIRI=$("#ddIriConstructor .btn").text().trim();
-            valueIRI=valueIRI.concat("(");
-            valueIRI=valueIRI.concat($("#ddParameter .btn").text().trim());
-            valueIRI=valueIRI.concat(")");
-            /*parentLink.appendLabel({
-                        attrs: {
-                            text: {
-                                text: valueIRI
-                            }
-                        }
-                    });*/
-    }
-  }
-  ]    
-});
-    modal.render();
-}
 
-function loadModal(curLink,iris, parameters,functionsMap){
-    var orderParameters=orderTablesByShortestName(parameters);
+function loadModal(currentLink,iris, parameters,functionsMap){
+    /*var orderParameters=orderTablesByShortestName(parameters);
     console.log("ordernar de menor longitud a mayor")
-    console.log(orderParameters)
+    console.log(orderParameters)*/
+	let keyParameters=filterKeyParam(parameters)
     var CustomView = Backbone.View.extend({
         initialize: function(opts) {
             this.iris = opts.displayIris;
@@ -1368,7 +1389,7 @@ function loadModal(curLink,iris, parameters,functionsMap){
     var modal = new BackboneBootstrapModals.ConfirmationModal({        
         headerViewOptions:{showClose:false, label: 'Define IRI Constructor'},
         bodyView: CustomView,
-        bodyViewOptions: { displayIris: iris, displayParameters:parameters },
+        bodyViewOptions: { displayIris: iris, displayParameters:keyParameters },
         onConfirm: function(a) {                                 
             if ($("#ddParameter .btn").text().trim()=="Constructor Parameters" || $("#ddIriConstructor .btn").text().trim()=="IRI Constructors"){
                 alert("Need to specify IRI and Parameter")
@@ -1378,21 +1399,16 @@ function loadModal(curLink,iris, parameters,functionsMap){
                 valueIRI=valueIRI.concat("(");
                 valueIRI=valueIRI.concat($("#ddParameter .btn").text().trim());
                 valueIRI=valueIRI.concat(")");            
-                curLink.appendLabel({
-                            attrs: {
-                                text: {
-                                    text: valueIRI
-                                }
-                            }
-                        });            
+                currentLink.appendLabel({attrs: {text: {text: valueIRI}}});            
                 
                 createLinkTool(currentLink);
+                var linkView=currentLink.findView(paperTGDs)
                 let graphicTGD=$('<div>').append($('<span>').attr('class','li_tgd').append(linkView.sourceView.model.attributes.question)).append($('<div>').attr('class','link_tgd').append((((currentLink.labels()[0]|| {}).attrs||{}).text||{}).text).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_green_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowGreen',x1:0,x2:widthSVGLine,y1:10,y2:10})))).append($('<span>').attr('class', 'li_tgd').append(linkView.targetView.model.attributes.question)).remove().html();
                 $table.bootstrapTable('append',[{id:currentLink.id,ex:graphicTGD}])            
             }
         },        
         onCancel: function(){
-            curLink.remove();
+        	currentLink.remove();
         }        
     });
     modal.render();
@@ -1400,7 +1416,7 @@ function loadModal(curLink,iris, parameters,functionsMap){
 
 function loadModalGreenFromTable(currentLink,iris, parameters,functionsMap){
     //show only those parameters that are keys
-    keyParameters=filterKeyParam(parameters)
+    let keyParameters=filterKeyParam(parameters)
     var CustomView = Backbone.View.extend({
         initialize: function(opts) {
             this.iris = opts.displayIris;

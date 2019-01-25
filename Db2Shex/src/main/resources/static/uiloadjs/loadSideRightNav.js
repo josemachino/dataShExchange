@@ -138,7 +138,7 @@ modifyLinkRed:function(e){
     }
     console.log(tablesConnected)
     if (tablesConnected.length>1 || auxKeySymbols.length>2){
-		loadModalTypeReferenced(auxLink,auxKeySymbols,tablesConnected,mapSymbols,sourceAtt,intargetLinks);
+    	loadModalRedFromTable(auxLink,auxKeySymbols,tablesConnected,mapSymbols,sourceAtt,intargetLinks);
 	}
     //if there is more than two functions symbols load to select which one
     //if there are many paths to show

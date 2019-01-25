@@ -75,12 +75,12 @@ exchange:function(e){
 		rule.yield.forEach(function(atom){
 			var q="";				
 			if (atom.args.length==1){					
-				q=q.concat("insert into").concat(" ").concat(TyName).concat(" ").concat("(").concat("term,type").concat(") ");			
+				q=q.concat("INSERT INTO").concat(" ").concat(TyName).concat(" ").concat("(").concat("term,type").concat(") ");			
 				//consider that the length of args in case of type atom will allays be one 			
 				q=q.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("',").concat(atom.args[0].args[0].attr).concat(")").concat(",").concat("'").concat(atom.atom).concat("'").concat(" ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel);
 				q=q.concat(";\n")			
 			}else if (atom.args.length==3){//it is the triple atom
-				q=q.concat("insert into").concat(" ").concat(TriName).concat(" ").concat("(").concat("s,p,o").concat(") ");
+				q=q.concat("INSERT INTO").concat(" ").concat(TriName).concat(" ").concat("(").concat("s,p,o").concat(") ");
 				q=q.concat("SELECT").concat(" ");
 				let lastRel="";
 				atom.args.forEach(function(term){
@@ -139,7 +139,7 @@ exchange:function(e){
 							q=q.concat(rule.bind[tableN]).concat(" AS ").concat(tableN).concat(",")
 						}
 					})					
-					q=q.concat(whereQ)
+					q=q.concat(whereQ).concat(";\n")
 				}
 			}						
 			chase=chase.concat(q);
