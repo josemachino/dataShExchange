@@ -66,9 +66,9 @@ exchange:function(e){
 	let TyName="TypesFact";
 	let TriName="Triples";
 	let ShName="Expression";
-	let c1="CREATE TABLE "+ TriName +" (s varchar,p varchar, o varchar);";
-	let c2="CREATE TABLE "+TyName +" (term varchar,type varchar);";
-	let c3="CREATE TABLE "+ShName+ "(typeS varchar,label varchar,typeO varchar, mult varchar;)";	
+	let c1="CREATE TABLE "+ TriName +" (s varchar,p varchar, o varchar);\n";
+	let c2="CREATE TABLE "+TyName +" (term varchar,type varchar);\n";
+	let c3="CREATE TABLE "+ShName+ "(typeS varchar,label varchar,typeO varchar, mult varchar);\n";	
 	let chase=c1.concat(c2).concat(c3);
 	tgds.rules.forEach(function(rule){
 		
@@ -78,7 +78,7 @@ exchange:function(e){
 				q=q.concat("insert into").concat(" ").concat(TyName).concat(" ").concat("(").concat("term,type").concat(") ");			
 				//consider that the length of args in case of type atom will allays be one 			
 				q=q.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("',").concat(atom.args[0].args[0].attr).concat(")").concat(",").concat("'").concat(atom.atom).concat("'").concat(" ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel);
-				q=q.concat(";")			
+				q=q.concat(";\n")			
 			}else if (atom.args.length==3){//it is the triple atom
 				q=q.concat("insert into").concat(" ").concat(TriName).concat(" ").concat("(").concat("s,p,o").concat(") ");
 				q=q.concat("SELECT").concat(" ");
@@ -97,7 +97,7 @@ exchange:function(e){
 					}						
 				});
 				if (rule.constraints.length==0){					
-					q=q.concat(" FROM ").concat(lastRel).concat(";");						
+					q=q.concat(" FROM ").concat(lastRel).concat(";\n");						
 				}else{
 					let lsTables=[]
 					let whereQ=""
@@ -144,7 +144,7 @@ exchange:function(e){
 			}						
 			chase=chase.concat(q);
 		})
-	})
+	});
 	
 	if (missing){
 		let msgDanger='<div class="alert alert-danger alert-dismissible fade show" role="alert"> The chase SQL script generates additional rows to satisfy approximatelly ShEx schema<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
@@ -155,27 +155,34 @@ exchange:function(e){
 		var schQ=c3;
 		schShex.forEach(function(tcs, type, miMapa){
 			tcs.forEach(function(tc){
-				schQ=schQ.concat("INSERT INTO ").concat(ShName).concat(" (typeS,label,typeO,mult) VALUES ('").concat(type).concat("','").concat(tc.label).concat("','").concat(tc.type).concat("','").concat(tc.mult).concat("');");
+				schQ=schQ.concat("INSERT INTO ").concat(ShName).concat(" (typeS,label,typeO,mult) VALUES ('").concat(type).concat("','").concat(tc.label).concat("','").concat(tc.type).concat("','").concat(tc.mult).concat("');\n");
 			})
 		})
 		
 		miShex.forEach(function(tcs, type, miMapa) {
 				tcs.forEach(function(tc){
-					mQ=mQ.concat("INSERT INTO ").concat(TriName).concat(" (s,p,o)").concat(" SELECT term,'").concat(tc.label).concat("','").concat(tc.type).concat("' FROM TypesFact WHERE type='").concat(type).concat("';");
-					mQ=mQ.concat("INSERT INTO ").concat(TyName).concat(" (term,type) VALUES ('").concat(tc.type).concat("','").concat(tc.type).concat("');")
+					mQ=mQ.concat("INSERT INTO ").concat(TriName).concat(" (s,p,o)").concat(" SELECT term,'").concat(tc.label).concat("','").concat(tc.type).concat("' FROM TypesFact WHERE type='").concat(type).concat("';\n");
+					mQ=mQ.concat("INSERT INTO ").concat(TyName).concat(" (term,type) VALUES ('").concat(tc.type).concat("','").concat(tc.type).concat("');\n")
 				})
 		})
-		mQ=mQ.concat("INSERT INTO ").concat(TriName).concat(" (s,p,o)").concat(" SELECT Tri.o,Sh.label,Sh.typeO FROM ").concat(TriName).concat(" AS Tri,").concat(ShName).concat(" AS Sh WHERE Tri.o=Sh.typeS AND Sh.mult IN ('1','+'); ");
-		console.log(mQ)
-		console.log(schQ)
+		mQ=mQ.concat("INSERT INTO ").concat(TriName).concat(" (s,p,o)").concat(" SELECT Tri.o,Sh.label,Sh.typeO FROM ").concat(TriName).concat(" AS Tri,").concat(ShName).concat(" AS Sh WHERE Tri.o=Sh.typeS AND Sh.mult IN ('1','+'); \n");		
 		chase=chase.concat(schQ);
 		chase=chase.concat(mQ);
-	}
+	}	
 	
-	var link = document.createElement("a");
-    link.download = 'chase.sql';
-    link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(chase);
-    link.click();
+	/*const fileStream = streamSaver.createWriteStream('filename.txt')
+	const writer = fileStream.getWriter()
+	const encoder = new TextEncoder
+	let data = 'a'.repeat(1024)
+	let uint8array = encoder.encode(data + "\n\n")
+
+	writer.write(uint8array)
+	writer.close()*/
+	
+	var linkC = document.createElement("a");
+    linkC.download = 'chase.sql';
+    linkC.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(chase);
+    linkC.click();
 	/*$.ajax({
 	 * 
         url: "chase",
