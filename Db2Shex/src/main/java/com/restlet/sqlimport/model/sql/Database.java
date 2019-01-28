@@ -12,7 +12,8 @@ public class Database {
 	 * Tables
 	 */
 	private List<Table> tables = new ArrayList<Table>();
-
+	private List<String> inserts=new ArrayList<String>();
+	
 	public Table getTableForName(final String tableName) {
 		for(final Table table : tables) {
 			if(table.getName().equalsIgnoreCase(tableName)) {
@@ -26,6 +27,10 @@ public class Database {
 		return tables;
 	}
 
+	public List<String> getInserts(){
+		return inserts;
+	}
+	
 	public void setTables(final List<Table> tables) {
 		this.tables = tables;
 	}

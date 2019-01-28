@@ -91,10 +91,7 @@ doSearch: function( event ){
         }
         drawReferences(graphTGDs,obj.data,mapTableIdCanvas);        
         joint.layout.DirectedGraph.layout(graphTGDs.getCells(),getLayoutOptions());
-		paperTGDs.fitToContent({
-                padding: 50,
-                allowNewOrigin: 'any'
-            });
+		paperTGDs.fitToContent({padding: 50,allowNewOrigin: 'any'});
     };
     reader.readAsText(event.currentTarget.files[0]);       
 }

@@ -991,7 +991,7 @@ function loadModalRedFromTable(currentLink,iris, parameters,functionsMap,valueRe
             }            
             let linkView=currentLink.findView(paperTGDs);      
             let sAtt=getSourceOptionNameLinkView(linkView);
-            
+            drawUpdateRedLinkInTable(currentLink,linkView.sourceView.model.attributes.question,sAtt,joinPath,valueIRI,linkView.targetView.model.attributes.question)
             //get the id and set by default the table						
             var paramValue=$('#ddParameter .btn').val();            
             if (paramValue===""){

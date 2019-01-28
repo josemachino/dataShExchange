@@ -16,6 +16,7 @@ exchange:function(e){
 	e.preventDefault();
 	miShex=new Map();
 	schShex=new Map();
+	$("#ls_todo").html()
     // verify that every triple constraint that has multiplicity 1 is linked	
 	let missing=false;
 	graphTGDs.getElements().forEach(function(element){		
@@ -183,6 +184,11 @@ exchange:function(e){
     linkC.download = 'chase.sql';
     linkC.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(chase);
     linkC.click();
+    
+    /*$("#ls_todo").fadeTo(2000, 500).slideUp(500, function(){
+        $("#ls_todo").slideUp(500);
+    });*/  
+    
 	/*$.ajax({
 	 * 
         url: "chase",

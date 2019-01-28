@@ -1,6 +1,7 @@
 package com.restlet.sqlimport.parser;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -95,6 +96,7 @@ public class SqlImport {
 		return database;
 	}
 
+		
 	/**
 	 * 
 	 * @param querys
@@ -145,7 +147,9 @@ public class SqlImport {
 		else if(query.toUpperCase().indexOf("ALTER TABLE") == 0) {
 			p.addParseListener(new AlterTableParseListener(p, database));
 		}
-		//https://stackoverflow.com/questions/27648180/parse-insert-select-statement-using-antlr-based-plsql-parser
+		else if (query.toUpperCase().indexOf("INSERT INTO") == 0) {
+			p.addParseListener(new InsertParseListener(p, database));
+		}
 		else {
 			throw new RuntimeException("No parse listener for the query : "+query);
 		}
@@ -163,6 +167,7 @@ public class SqlImport {
 		}
 
 	}
+		
 
 	/**
 	 * Get report.

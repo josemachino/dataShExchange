@@ -2,6 +2,7 @@ package des.services;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.jena.rdf.model.Resource;
@@ -21,12 +22,24 @@ import des.models.SchemaTableJSON;
 
 @Service
 public class DBService {	
-	public byte[] getResultFile(String format) {
+	public byte[] getResultFile(String format,String[] queries) {
+		DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName("org.h2.Driver");
+        dataSource.setUrl("jdbc:h2:mem:~/dbshex");
+        dataSource.setUsername("admin");
+        dataSource.setPassword("123");
+		
+        JdbcTemplate jdbcTemplate=new JdbcTemplate(dataSource);
+		
+      //proceed to the chase with sql inserting the values in the triple store
+        executeQueries(jdbcTemplate,Arrays.asList(queries));
+        
+        
 		//create the triple store
 		RdfInstance rdfInstance=new RdfInstance();
 		//Read the Shex schema file
 		
-		//proceed to the chase with sql inserting the values in the triple store
+		
 		Resource rSubject = ResourceFactory.createResource("http://inria.fr");
 		rdfInstance.putTypes(rSubject, "T1");
 		rdfInstance.getTripleSet().add(rSubject, ResourceFactory.createProperty("hello"), ResourceFactory.createResource("http://person/f1"));
@@ -63,12 +76,10 @@ public class DBService {
 				if (ta.getForeignKeyForColumnNameOrigin(col)==null) {
 					atts[i]=new AttRel(ta.getName().substring(0, 2)+i,col.getName(),pks.contains(col.getName()));	
 				}else {
-					Table refTa=db.getTableForName(ta.getForeignKeyForColumnNameOrigin(col).getTableNameTarget());
-					System.out.println(refTa.getName());
+					Table refTa=db.getTableForName(ta.getForeignKeyForColumnNameOrigin(col).getTableNameTarget());					
 					int j=0;
 					String refColName=ta.getForeignKeyForColumnNameOrigin(col).getColumnNameTargets().get(0);
-					for (Column refCol: refTa.getColumnByNames().values()) {
-						System.out.print(refCol.getName() + " "+ refColName);
+					for (Column refCol: refTa.getColumnByNames().values()) {						
 						if (refCol.getName().equals(refColName)) {
 							break;
 						}
@@ -84,6 +95,16 @@ public class DBService {
 			schemaTables.add(new SchemaTableJSON(ta.getName(),atts));		
 			jdbcTemplate.execute("CREATE TABLE "+ta.getName()+"("+rString.toString()+")");			
 		}
+		
+		executeQueries(jdbcTemplate,db.getInserts());
+		
 		return schemaTables;
 	}
+	private void executeQueries(JdbcTemplate jdbcTemplate,List<String> queries) {		               
+        for (String q:queries) {
+        	System.out.println(q);
+        	jdbcTemplate.execute(q);
+        }
+	}
+		
 }

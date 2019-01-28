@@ -22,12 +22,8 @@ public class DbController {
 		this.dbService = dbService;
 	}	
 	@PostMapping(path="/chase",consumes = "application/json")    
-    public @ResponseBody byte[] chaseRule(@RequestBody TGDS tgds) {
-		StringBuilder sb=new StringBuilder() ;
-		sb.append("select");
-		sb.append("from");
-		sb.append("where");
-		System.out.print("processing "+tgds.getRules());
-        return dbService.getResultFile("RDF/JSON");         
+    public @ResponseBody byte[] chaseRule(@RequestBody String queries) {
+		String[] ls_Query=queries.split("\n");				
+        return dbService.getResultFile("RDF/JSON",ls_Query);         
     }
 }
