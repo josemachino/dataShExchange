@@ -136,7 +136,7 @@ modifyLinkRed:function(e){
         var visited=[];
         getJoinsTableFromTo(linkView.sourceView.model,tablesConnected,tView.sourceView.model.id,visited,tablesConnected[0]);	
     }
-    console.log(tablesConnected)
+    
     if (tablesConnected.length>1 || auxKeySymbols.length>2){
     	loadModalRedFromTable(auxLink,auxKeySymbols,tablesConnected,mapSymbols,sourceAtt,intargetLinks);
 	}

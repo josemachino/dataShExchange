@@ -991,8 +991,6 @@ function loadModalRedFromTable(currentLink,iris, parameters,functionsMap,valueRe
             }            
             let linkView=currentLink.findView(paperTGDs);      
             let sAtt=getSourceOptionNameLinkView(linkView);
-//            drawNewRedLinkInTable(currentLink,linkView.sourceView.model.attributes.question,sAtt,joinPath,valueIRI,linkView.targetView.model.attributes.question)
-            
             
             //get the id and set by default the table						
             var paramValue=$('#ddParameter .btn').val();            
@@ -1206,6 +1204,14 @@ function loadModalTypeReferenced(currentLink,iris, parameters,functionsMap,value
         }        
     });
     modal.render();
+}
+
+function drawUpdateRedLinkInTable(currentLink,sHead,sAtt,path,fObject,tHead){
+    let tAtt=currentLink.attributes.target.port.split(",")[0]
+    var graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(sHead)).append($('<div>').attr('class','li_body_tgd').append(sAtt))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append(path)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_red_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowRed',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({class:"iri_tgd"}).append(fObject))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(tHead)).append($('<div>').attr('class','li_body_tgd').append(tAtt))).remove().html();;
+    //update list of tgds            
+    $table.bootstrapTable('updateByUniqueId',{id:currentLink.id,row:{ex:graphicTGD}})
+
 }
 
 function drawNewRedLinkInTable(currentLink,sHead,sAtt,path,fObject,tHead){
@@ -1478,14 +1484,7 @@ function loadModalGreenFromTable(currentLink,iris, parameters,functionsMap){
                 if (currentLink.labels().length>0){
                     currentLink.removeLabel(-1);
                 }            
-                currentLink.appendLabel({
-                            attrs: {
-                                text: {
-                                    text: valueIRI
-                                }
-                            }
-                        });            
-                //$("#text_"+currentLink.id).html(valueIRI);    
+                currentLink.appendLabel({attrs: {text: {text: valueIRI}}});            
                 let objGraphic=$table.bootstrapTable('getRowByUniqueId',currentLink.id)                                                
                 var relName=$(objGraphic.ex)[0].textContent;
                 var typeName=$(objGraphic.ex)[2].textContent;

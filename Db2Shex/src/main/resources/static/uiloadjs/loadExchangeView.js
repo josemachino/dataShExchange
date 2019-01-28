@@ -69,18 +69,18 @@ exchange:function(e){
 	let c1="CREATE TABLE "+ TriName +" (s varchar,p varchar, o varchar);\n";
 	let c2="CREATE TABLE "+TyName +" (term varchar,type varchar);\n";
 	let c3="CREATE TABLE "+ShName+ "(typeS varchar,label varchar,typeO varchar, mult varchar);\n";	
-	let chase=c1.concat(c2).concat(c3);
+	let chase="";
 	tgds.rules.forEach(function(rule){
 		
 		rule.yield.forEach(function(atom){
 			var q="";				
 			if (atom.args.length==1){					
-				q=q.concat("INSERT INTO").concat(" ").concat(TyName).concat(" ").concat("(").concat("term,type").concat(") ");			
+				q=q.concat("CREATE OR REPLACE VIEW").concat(" [").concat(TyName).concat("] AS ");			
 				//consider that the length of args in case of type atom will allays be one 			
 				q=q.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("',").concat(atom.args[0].args[0].attr).concat(")").concat(",").concat("'").concat(atom.atom).concat("'").concat(" ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel);
 				q=q.concat(";\n")			
 			}else if (atom.args.length==3){//it is the triple atom
-				q=q.concat("INSERT INTO").concat(" ").concat(TriName).concat(" ").concat("(").concat("s,p,o").concat(") ");
+				q=q.concat("CREATE OR REPLACE VIEW").concat(" [").concat(TriName).concat("] AS ");
 				q=q.concat("SELECT").concat(" ");
 				let lastRel="";
 				atom.args.forEach(function(term){
