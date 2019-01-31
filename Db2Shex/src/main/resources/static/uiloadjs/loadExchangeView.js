@@ -60,11 +60,7 @@ exchange:function(e){
 			
 		}        	
     });	
-	let namespace="ex: <http://example.com/ns#>";		
-	let prefix="@prefix rr: <http://www.w3.org/ns/r2rml#>.\n @prefix"+namespace+".\n";
-	
-		 
-	
+		
 	//construct sql query
 	let tgds=editorJSON.get();
 	let TyName="TypesFact";
@@ -75,7 +71,7 @@ exchange:function(e){
 	let c3="CREATE TABLE "+ShName+ "(typeS varchar,label varchar,typeO varchar, mult varchar);\n";	
 	let chase="";
 	let indexTM=1;
-	let file2RML="";
+	let file2RML="@prefix rr: <http://www.w3.org/ns/r2rml#>.\n";
 	tgds.rules.forEach(function(rule){
 		let tmQ="";
 		tmQ=tmQ.concat("<#TriplesMap").concat(indexTM).concat(">");
@@ -112,6 +108,12 @@ exchange:function(e){
 					let whereQ=""
 					whereQ=whereQ.concat(" WHERE ");
 					rule.constraints.forEach(function(joinQ){
+						if (joinQ.type=="apply"){
+							
+						}
+						if (joinQ.type=="like"){
+							
+						}
 						if (joinQ.type=='le'){
 							
 						}
@@ -158,9 +160,9 @@ exchange:function(e){
 				tmQ=tmQ.concat('rr:logicalTable [ rr:sqlQuery """ ').concat(simpleQRML).concat('""" ];');								
 				tmQ=tmQ.concat("rr:subjectMap [");
 				let termS=atom.args[0];
-				let subTerm=termS[0];
-				console.log(subTerm)
-				tmQ=tmQ.concat('rr:template "').concat(tgds.functions[subTerm.function]).concat('{').concat().concat('}"];');
+				let subTerm=termS[0];				
+				let fpTerm=subTerm.args[0]
+				tmQ=tmQ.concat('rr:template "').concat(tgds.functions[subTerm.function]).concat('/{').concat(fpTerm.attr).concat('}"];');
 				tmQ=tmQ.concat("rr:predicateObjectMap [");
 				let termP=atom.args[1];
 				tmQ=tmQ.concat("rr:predicate ").concat(termP).concat(";");
@@ -172,11 +174,12 @@ exchange:function(e){
 				}else{
 					tmQ=tmQ.concat('rr:column  "').concat(objTerm.attr).concat('"];');
 				}
-				tmQ=tmQ.concat("].")
+				tmQ=tmQ.concat("].\n")
 				file2RML=file2RML.concat(tmQ)
 			}						
 			chase=chase.concat(q);
 		})
+		indexTM++;
 		
 	});
 	

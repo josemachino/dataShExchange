@@ -39,8 +39,8 @@
 //https://www.baeldung.com/spring-boot-sql-import-files
 //http://buildingonmud.blogspot.com/2009/06/convert-string-to-unicode-in-javascript.html
 let comparisonOp=["le","leq","gt","geq"]
-let widthSVGForLine='300px';
-let widthSVGLine='282';
+let widthSVGForLine='250px';
+let widthSVGLine='232';
 var graphTGDs = new joint.dia.Graph;
 var paperTGDs = new joint.dia.Paper({
     el: document.getElementById('mydb'),
@@ -168,8 +168,7 @@ paperTGDs.on('link:connect',function(linkView){
         console.log("no element selected");
     }else{
         var currentLink=linkView.model;  
-        //verify that are of the same type the connectors
-        console.log(linkView.targetView.model.attributes.ports)
+        //verify that are of the same type the connectors        
         if (linkView.sourceMagnet.nodeName==linkView.targetMagnet.nodeName && linkView.targetView.model.attributes.ports.items[1].id==currentLink.attributes.target.port){
         	currentLink.remove()
         }
@@ -494,8 +493,7 @@ function loadModalFunctions(currentLink){
             	currentLink.label(index,{attrs: {text: {text: constraintAtt}}});             
             }
             
-            let objGraphic=$table.bootstrapTable('getRowByUniqueId',currentLink.id);
-            console.log($(objGraphic.ex))
+            let objGraphic=$table.bootstrapTable('getRowByUniqueId',currentLink.id);            
             var sourceHead=$(objGraphic.ex)[0].firstChild.textContent;
             var sourceAtt=$(objGraphic.ex)[0].lastChild.textContent;
             var path=$(objGraphic.ex)[1].firstChild.textContent;
@@ -505,7 +503,6 @@ function loadModalFunctions(currentLink){
             let graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(sourceHead)).append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append(path)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({id:"param_"+currentLink.id,class:"param_tgd"}).append(constraintAtt)).append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:currentLink.id,class:'rem_param_blue_tgd'}).append($('<i>').attr('class','fas fa-trash-alt')))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(tHead)).append($('<div>').attr('class','li_body_tgd').append(tAtt))).remove().html();
             
             $table.bootstrapTable('updateByUniqueId',{id:currentLink.id,row:{ex:graphicTGD}})
-            //$('#param_'+currentLink.id).html(constraintAtt)
         },
         onCancel: function(){
             
@@ -523,10 +520,10 @@ function addPrimitiveFunctions(divForm1){
     select.setAttribute("class","form-control");
     var option1 = document.createElement("option");
     option1.text = "Uppercase";
-    option1.value="toUppercase";
+    option1.value="UPPER";
     var option2 = document.createElement("option");
     option2.text = "Lowercase";
-    option2.value="toLowercase";
+    option2.value="LOWER";
     var option3 = document.createElement("option");
     option3.text = "Trim";
     option3.value="Trim";

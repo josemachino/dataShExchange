@@ -84,8 +84,7 @@ modifyTGD: function(e){
         var tView=tlink.findView(paperTGDs);  							
         var visited=[];
         getJoinsTableFromTo(linkView.sourceView.model,tablesConnected,tView.sourceView.model.id,visited,tablesConnected[0]);	
-    }
-    console.log(tablesConnected)
+    }    
     if (tablesConnected.length>1){
         loadModalPathAttributeDetail(auxLink,tablesConnected);
     }else{            
