@@ -109,25 +109,26 @@ exchange:function(e){
 					whereQ=whereQ.concat(" WHERE ");
 					rule.constraints.forEach(function(joinQ){
 						if (joinQ.type=="apply"){
-							
+							//TODO REPLACE THE FUNCTION
+							q=q.replace()
 						}
 						if (joinQ.type=="like"){
-							
+							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" LIKE ").concat(joinQ.right.value).concat(" AND ");
 						}
 						if (joinQ.type=='le'){
-							
+							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" < ").concat(joinQ.right.value).concat(" AND ");
 						}
 						
 						if (joinQ.type=='leq'){
-							
+							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" <= ").concat(joinQ.right.value).concat(" AND ");
 						}
 						
 						if (joinQ.type=='gt'){
-							
+							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" > ").concat(joinQ.right.value).concat(" AND ");
 						}
 						
 						if (joinQ.type=='geq'){
-							
+							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" >= ").concat(joinQ.right.value).concat(" AND ");
 						}
 						if (joinQ.type=='eq' && typeof(joinQ.right.rel)!=='undefined'){							
 							if (!lsTables.includes(joinQ.left.rel))
