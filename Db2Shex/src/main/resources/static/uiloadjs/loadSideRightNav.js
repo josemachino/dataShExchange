@@ -32,18 +32,21 @@ render: function(){
 },
 events: {
      "click #exportst":"export",     
-     "change #importst input[type=file]":"import",
+     "change input[type=file]":"import",
      "click .edit_tgd":"modifyTGD",
      "click .edit_green_tgd":"modifyLinkGreen",
      "click .edit_red_tgd":"modifyLinkRed",
      "click .rem_param_blue_tgd":"removeParam",
 },
-import:function(e){
+import:function(e){	
 	var reader = new FileReader();
     reader.onload = function onReaderLoad(event){        
     	var obj = JSON.parse(event.target.result);
-    	console.log(obj)
-    	graphTGDs.fromJSON(obj);    	
+    	mapSymbols=new Map();
+    	mapTableIdCanvas=new Map();
+    	//TODO create the table of mappings and load the global variables
+    	graphTGDs.fromJSON(obj);   
+    	//loop graphTGDs to obtain mapTableIdCanvas and for mapSymbols the types try to use a default url
     };
     reader.readAsText(e.currentTarget.files[0]);
 	

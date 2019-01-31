@@ -74,16 +74,16 @@ exchange:function(e){
 	let file2RML="@prefix rr: <http://www.w3.org/ns/r2rml#>.\n";
 	tgds.rules.forEach(function(rule){
 		let tmQ="";
-		tmQ=tmQ.concat("<#TriplesMap").concat(indexTM).concat(">");
+		tmQ=tmQ.concat("<#TriplesMap").concat(indexTM).concat(">\n");
 		rule.yield.forEach(function(atom){
 			var q="";				
 			if (atom.args.length==1){					
-				q=q.concat("CREATE OR REPLACE VIEW").concat(" [").concat(TyName).concat("] AS ");			
+				q=q.concat("CREATE OR REPLACE VIEW").concat(" [").concat(TyName).concat(indexTM).concat("] AS ");			
 				//consider that the length of args in case of type atom will allays be one 			
-				q=q.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("',").concat(atom.args[0].args[0].attr).concat(")").concat(",").concat("'").concat(atom.atom).concat("'").concat(" ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel);
+				q=q.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("/',").concat(atom.args[0].args[0].attr).concat(")").concat(",").concat("'").concat(atom.atom).concat("'").concat(" ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel);
 				q=q.concat(";\n")			
 			}else if (atom.args.length==3){//it is the triple atom
-				q=q.concat("CREATE OR REPLACE VIEW").concat(" [").concat(TriName).concat("] AS ");
+				q=q.concat("CREATE OR REPLACE VIEW").concat(" [").concat(TriName).concat(indexTM).concat("] AS ");
 				q=q.concat("SELECT").concat(" ");
 				let lastRel="";
 				let simpleQRML="";
@@ -93,27 +93,32 @@ exchange:function(e){
 							q=q.concat(term[0].attr);
 							lastRel=term[0].rel;
 						}else{								
-							q=q.concat("CONCAT('").concat(tgds.functions[term[0].function]).concat("',").concat(term[0].args[0].attr).concat(")");
+							q=q.concat("CONCAT('").concat(tgds.functions[term[0].function]).concat("/',").concat(term[0].args[0].attr).concat(")");
 							lastRel=term[0].args[0].rel;
 						}														
 					}else{
 						q=q.concat(",'").concat(term).concat("',");							
 					}						
 				});
+				let sT=atom.args[0];					
+				let oT=atom.args[2];
 				if (rule.constraints.length==0){					
-					q=q.concat(" FROM ").concat(lastRel).concat(";\n");						
-					simpleQRML="SELECT * FROM "+lastRel;
+					q=q.concat(" FROM ").concat(lastRel).concat(";\n");									
+										
+					simpleQRML="SELECT "+ sT[0].args[0].attr+","+oT[0].attr +" FROM "+lastRel;
 				}else{
 					let lsTables=[]
 					let whereQ=""
 					whereQ=whereQ.concat(" WHERE ");
+					simpleQRML="SELECT "+ sT[0].args[0].attr+","+oT[0].attr;
 					rule.constraints.forEach(function(joinQ){
 						if (joinQ.type=="apply"){
 							//TODO REPLACE THE FUNCTION
-							q=q.replace()
+							q=q.replace(joinQ.left.attrs[0].attr,joinQ.right.function+"("+joinQ.left.attrs[0].attr+")");
+							simpleQRML=simpleQRML.replace(joinQ.left.attrs[0].attr,joinQ.right.function+"("+joinQ.left.attrs[0].attr+")");
 						}
 						if (joinQ.type=="like"){
-							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" LIKE ").concat(joinQ.right.value).concat(" AND ");
+							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" LIKE '").concat(joinQ.right.value).concat("' AND ");
 						}
 						if (joinQ.type=='le'){
 							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" < ").concat(joinQ.right.value).concat(" AND ");
@@ -144,16 +149,21 @@ exchange:function(e){
 					});
 					whereQ=whereQ.slice(0,-5)
 					q=q.concat(" FROM ");
-					simpleQRML="SELECT * FROM ";
-					lsTables.forEach(function(tableN,idx,array){
-						if (idx==array.length-1){
-							q=q.concat(rule.bind[tableN]).concat(" AS ").concat(tableN)
-							simpleQRML=simpleQRML.concat(rule.bind[tableN]).concat(" AS ").concat(tableN)
-						}else{
-							q=q.concat(rule.bind[tableN]).concat(" AS ").concat(tableN).concat(",")
-							simpleQRML=simpleQRML.concat(rule.bind[tableN]).concat(" AS ").concat(tableN).concat(",")
-						}
-					})					
+					simpleQRML=simpleQRML.concat(" FROM ");
+					if (lsTables.length==0){
+						q=q.concat(lastRel).concat(" ");
+						simpleQRML=simpleQRML.concat(lastRel).concat(" ");
+					}else{					
+						lsTables.forEach(function(tableN,idx,array){
+							if (idx==array.length-1){
+								q=q.concat(rule.bind[tableN]).concat(" AS ").concat(tableN)
+								simpleQRML=simpleQRML.concat(rule.bind[tableN]).concat(" AS ").concat(tableN)
+							}else{
+								q=q.concat(rule.bind[tableN]).concat(" AS ").concat(tableN).concat(",")
+								simpleQRML=simpleQRML.concat(rule.bind[tableN]).concat(" AS ").concat(tableN).concat(",")
+							}
+						})
+					}
 					q=q.concat(whereQ).concat(";\n")
 					simpleQRML=simpleQRML.concat(whereQ);
 				}
@@ -208,6 +218,23 @@ exchange:function(e){
 		chase=chase.concat(mQ);
 	}	
 	
+	console.log(indexTM)
+	//return a set of triples
+	let comment="/*";
+	comment=comment.concat("To materialize, execute the following sentence\n")
+	comment=comment.concat(c1);
+	comment=comment.concat(c2);
+	let triSql="INSERT INTO "+TriName+" ";
+	let tySql="INSERT INTO "+TyName+" ";
+	for (let i=0;i< indexTM;i++){		
+		tySql=tySql.concat("SELECT * FROM ").concat(TyName).concat(i).concat("\n").concat("UNION");
+		triSql=triSql.concat("SELECT * FROM ").concat(TriName).concat(i).concat("\n").concat("UNION");
+	}
+	tySql=tySql.slice(0,-5).concat(";");
+	triSql=triSql.slice(0,-5).concat(";");
+	comment=comment.concat("*/");
+	chase=chase.concat(comment);
+	
 	/*const fileStream = streamSaver.createWriteStream('filename.txt')
 	const writer = fileStream.getWriter()
 	const encoder = new TextEncoder
@@ -228,9 +255,9 @@ exchange:function(e){
 	}
     linkC.click();
     
-    /*$("#ls_todo").fadeTo(2000, 500).slideUp(500, function(){
+    $("#ls_todo").fadeTo(30000, 500).slideUp(500, function(){
         $("#ls_todo").slideUp(500);
-    });*/  
+    });  
     
 	/*$.ajax({
 	 * 

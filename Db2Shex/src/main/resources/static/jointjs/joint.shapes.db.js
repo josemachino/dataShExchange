@@ -179,7 +179,9 @@ joint.dia.Element.define('db.Table',{
 
             var portY = offsetY - optionHeight / 2 + questionHeight;
             if (option.iskey && option.ref==null ){
-              this.addPort({group:'pk',id:'pk-'.concat(option.id),args:{y: portY }});    
+            	if (!this.getPort('pk-'+option.id)) {
+            		this.addPort({group:'pk',id:'pk-'.concat(option.id),args:{y: portY }});
+            	}                  
             }
             if (!this.getPort(option.id)) {
                 if (option.ref!=null){
@@ -197,7 +199,9 @@ joint.dia.Element.define('db.Table',{
             }
             
             if (option.ref!=null){
-              this. addPort({group:'fk',id:'fk-'.concat(option.id),args:{y: portY }});  
+            	if (!this.getPort('fk-'.concat(option.id))){
+            		this. addPort({group:'fk',id:'fk-'.concat(option.id),args:{y: portY }});
+            	}                
             }
             
         }, this);

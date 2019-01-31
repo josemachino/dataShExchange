@@ -113,12 +113,7 @@
 	<div id="result_exchange"></div>
 </script>
 <script type="text/template" id="sql_template">
-        <form id="data" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-            <select class="form-control">
-                <option>Postgres</option>
-            </select>
-        </div>
+        <form id="data" method="post" enctype="multipart/form-data">        
         <div class="form-group">
             <label for="sqlFile">SQL File</label>
             <input type="file" accept=".sql" class="form-control-file form-control" id="sqlFile" aria-describedby="filelHelp" placeholder="Enter SQL file">
@@ -160,7 +155,7 @@
 		</div>
 		<div class="form-group">
 			<label for="importst">Import Graphic File</label>
-		   <input id="importst" type="file" placeholder="Import Graphics" class="form-control-file form-control> 
+		   <input id="importst" type="file" placeholder="Import Graphics" class="form-control-file form-control" /> 
 		</div>
         <div id="toolbar">
             <div class="form-inline" role="form">
@@ -200,12 +195,7 @@
 	  window.operateEvents = {    
 	    'click .removeTGD': function (e, value, row, index) {	    	
 	    	let currentLink=graphTGDs.getCell(row.id);
-	    	currentLink.remove()
-	      /*$table.bootstrapTable('remove', {
-	        field: 'id',
-	        values: [row.id]
-	      })*/
-	      
+	    	currentLink.remove()	      	      
 	    }
 	  }
 	var $table = $('#table');

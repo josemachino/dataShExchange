@@ -526,7 +526,7 @@ function addPrimitiveFunctions(divForm1){
     option2.value="LOWER";
     var option3 = document.createElement("option");
     option3.text = "Trim";
-    option3.value="Trim";
+    option3.value="TRIM";
 	var option4 = document.createElement("option");
     option4.text = "<";
     option4.value="le";

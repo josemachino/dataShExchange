@@ -121,8 +121,8 @@ joint.dia.Element.define('shex.Type',{
                     this.addPort({ group: 'outype', id: aux_id, args: { y: portY } });
                     this.addPort({ group:'outRefType',id: "ref"+aux_id, args: { y: portY } });
                 }
-            } else {                
-                this.portProp(option.id, 'args/y', portY);
+            } else {                	
+            	this.portProp(aux_id, 'args/y', portY);            	
             }
         }, this);
         this.attr(attrsUpdate);
