@@ -14,18 +14,23 @@ function getPositionFromDB(graphObj){
     return {x:maxValue,y:0}
 }
 
-function drawRefTypes(g,expressions,map){    
-    for (var i=0;i< expressions.length ;i++){        
-        /*for (var j=0;j< tables[i].items.length ;j++){           	
-            if (tables[i].items[j].ref){                   
-            	linkDataBase(g,map.get(), portSource, target,portTarget)                               
-            }
-        }*/
-    }    
+function drawRefTypes(g,expressions){
+	expressions.forEach(function(valor,clave, miMapa){		
+		valor.forEach(function(constraints,idtype,miMapa2){			
+			constraints.forEach(function (tc){
+				if (tc.type!='Literal'){					
+					let ids=idtype.split(',');									
+					let refIds=Array.from(miMapa.get(tc.type).keys())[0].split(",")					
+					linkShex(g,ids[0], "ref"+tc.label+","+tc.type+","+tc.mult, refIds[0],refIds[1])
+				}
+			})
+		})
+	})   
 }
 
 var mapSymbols=new Map();
 var expressions=new Map();
+var graphShex = new joint.dia.Graph;
 var SearchView = Backbone.View.extend({
 initialize: function(){
     this.render();
@@ -81,15 +86,32 @@ doSearch: function( event ){
 	                var num=mapSymbols.size+1;
 	                mapSymbols.set("f"+num,shape.id);
 	                var sExpression=createShexType(shape.id.split('/').pop(),tcs,positionShexType);
-	                console.log(sExpression)
-	                graphTGDs.addCell(sExpression);                
+	                let mapExpr=new Map();	                
+	                mapExpr.set(sExpression.attributes.id+","+sExpression.attributes.ports.items[1].id,tcs)
+	                expressions.set(sExpression.attributes.question,mapExpr)	                
+	                graphShex.addCell(sExpression);                
 	            }
 	            
 	        }
 	    });
     
 	    //draw 	references from
-	    //drawRefTypes()
+	    drawRefTypes(graphShex,expressions)	    
+	    joint.layout.DirectedGraph.layout(graphShex.getCells(),getLayoutOptionsNotVertices());
+	    let pos=getPositionFromDB(graphTGDs)
+	    graphShex.getCells().forEach(function(cell){	    	
+	    	if (!cell.isLink()){		    	
+		    	cell.set('position',{x:cell.get('position').x+pos.x,y:cell.get('position').y})
+		    	graphTGDs.addCell(cell)
+	    	}else{
+	    		let arrayVert=cell.get('vertices')
+	    		arrayVert.forEach(function(it){
+	    			it.x=it.x+pos.x
+	    		})
+	    		cell.set('vertices',arrayVert)
+	    		graphTGDs.addCell(cell)
+	    	}
+	    })
 	    
 		paperTGDs.fitToContent({padding: 50,allowNewOrigin: 'any' });
     };

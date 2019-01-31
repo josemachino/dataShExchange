@@ -137,7 +137,7 @@ modifyLinkRed:function(e){
         getJoinsTableFromTo(linkView.sourceView.model,tablesConnected,tView.sourceView.model.id,visited,tablesConnected[0]);	
     }
     
-    if (tablesConnected.length>1 || auxKeySymbols.length>2){
+    if (tablesConnected.length>1 || auxKeySymbols.length>1){
     	loadModalRedFromTable(auxLink,auxKeySymbols,tablesConnected,mapSymbols,sourceAtt,intargetLinks);
 	}
     //if there is more than two functions symbols load to select which one

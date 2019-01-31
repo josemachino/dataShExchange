@@ -2,18 +2,7 @@
 //https://stackoverflow.com/questions/37919393/layout-directedgraph-dagre-only-on-a-subset-of-nodes
 //https://github.com/dagrejs/dagre/releases?after=v0.5.1
 //Returns in the first positions the tables that do not contain references, then the rest
-function getLayoutOptions(){
-    return {
-                setVertices: true,
-                setLabels: true,
-                ranker: "network-simplex",
-                rankDir: "LR",
-                align: "UL",
-                rankSep: parseInt(150, 10),
-                edgeSep: parseInt(150, 10),
-                nodeSep: parseInt(150, 10)
-            };
-}
+
 function drawReferences(g,tables,map){    
     for (var i=0;i< tables.length ;i++){        
         for (var j=0;j< tables[i].items.length ;j++){           	

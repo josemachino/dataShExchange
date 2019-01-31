@@ -20,8 +20,7 @@ exchange:function(e){
     // verify that every triple constraint that has multiplicity 1 is linked	
 	let missing=false;
 	graphTGDs.getElements().forEach(function(element){		
-		if (element.attributes.type=="shex.Type"){
-			
+		if (element.attributes.type=="shex.Type"){			
 			miShex.set(element.attributes.question,[])
 			var elementView=element.findView(paperTGDs);
 			var intargetLinks=graphTGDs.getConnectedLinks(elementView.model, {inbound:true});
@@ -61,7 +60,11 @@ exchange:function(e){
 			
 		}        	
     });	
-			
+	let namespace="ex: <http://example.com/ns#>";		
+	let prefix="@prefix rr: <http://www.w3.org/ns/r2rml#>.\n @prefix"+namespace+".\n";
+	
+		 
+	
 	//construct sql query
 	let tgds=editorJSON.get();
 	let TyName="TypesFact";
@@ -71,8 +74,11 @@ exchange:function(e){
 	let c2="CREATE TABLE "+TyName +" (term varchar,type varchar);\n";
 	let c3="CREATE TABLE "+ShName+ "(typeS varchar,label varchar,typeO varchar, mult varchar);\n";	
 	let chase="";
+	let indexTM=1;
+	let file2RML="";
 	tgds.rules.forEach(function(rule){
-		
+		let tmQ="";
+		tmQ=tmQ.concat("<#TriplesMap").concat(indexTM).concat(">");
 		rule.yield.forEach(function(atom){
 			var q="";				
 			if (atom.args.length==1){					
@@ -84,6 +90,7 @@ exchange:function(e){
 				q=q.concat("CREATE OR REPLACE VIEW").concat(" [").concat(TriName).concat("] AS ");
 				q=q.concat("SELECT").concat(" ");
 				let lastRel="";
+				let simpleQRML="";
 				atom.args.forEach(function(term){
 					if (Array.isArray(term)){							
 						if (typeof(term[0].function)==='undefined'){								
@@ -99,6 +106,7 @@ exchange:function(e){
 				});
 				if (rule.constraints.length==0){					
 					q=q.concat(" FROM ").concat(lastRel).concat(";\n");						
+					simpleQRML="SELECT * FROM "+lastRel;
 				}else{
 					let lsTables=[]
 					let whereQ=""
@@ -133,18 +141,43 @@ exchange:function(e){
 					});
 					whereQ=whereQ.slice(0,-5)
 					q=q.concat(" FROM ");
+					simpleQRML="SELECT * FROM ";
 					lsTables.forEach(function(tableN,idx,array){
 						if (idx==array.length-1){
 							q=q.concat(rule.bind[tableN]).concat(" AS ").concat(tableN)
+							simpleQRML=simpleQRML.concat(rule.bind[tableN]).concat(" AS ").concat(tableN)
 						}else{
 							q=q.concat(rule.bind[tableN]).concat(" AS ").concat(tableN).concat(",")
+							simpleQRML=simpleQRML.concat(rule.bind[tableN]).concat(" AS ").concat(tableN).concat(",")
 						}
 					})					
 					q=q.concat(whereQ).concat(";\n")
+					simpleQRML=simpleQRML.concat(whereQ);
 				}
+				//add to RML query
+				tmQ=tmQ.concat('rr:logicalTable [ rr:sqlQuery """ ').concat(simpleQRML).concat('""" ];');								
+				tmQ=tmQ.concat("rr:subjectMap [");
+				let termS=atom.args[0];
+				let subTerm=termS[0];
+				console.log(subTerm)
+				tmQ=tmQ.concat('rr:template "').concat(tgds.functions[subTerm.function]).concat('{').concat().concat('}"];');
+				tmQ=tmQ.concat("rr:predicateObjectMap [");
+				let termP=atom.args[1];
+				tmQ=tmQ.concat("rr:predicate ").concat(termP).concat(";");
+				tmQ=tmQ.concat("rr:objectMap [");
+				let termO=atom.args[2];
+				let objTerm=termO[0];
+				if (typeof(objTerm.function)!=='undefined'){
+					tmQ=tmQ.concat('rr:template "').concat(tgds.functions[objTerm.function]).concat('{').concat(objTerm.attr).concat('}"];');
+				}else{
+					tmQ=tmQ.concat('rr:column  "').concat(objTerm.attr).concat('"];');
+				}
+				tmQ=tmQ.concat("].")
+				file2RML=file2RML.concat(tmQ)
 			}						
 			chase=chase.concat(q);
 		})
+		
 	});
 	
 	if (missing){
@@ -181,8 +214,14 @@ exchange:function(e){
 	writer.close()*/
 	
 	var linkC = document.createElement("a");
-    linkC.download = 'chase.sql';
-    linkC.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(chase);
+	var valR=$('input[name=optradio]:checked').val();	 
+	if(valR=="sql"){
+		linkC.download = 'chase.sql';
+	    linkC.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(chase);
+	}else if(valR=="rml"){
+		linkC.download = 'R2RML.ttl';
+		linkC.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(file2RML);
+	}
     linkC.click();
     
     /*$("#ls_todo").fadeTo(2000, 500).slideUp(500, function(){

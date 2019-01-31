@@ -7,50 +7,18 @@ joint.dia.Element.define('shex.Type',{
     portMarkup: [{ tagName: 'rect', selector: 'portBody' },{ tagName: 'circle', selector: 'portBody2' }],
     ports: {
         groups: {
-            'inType': {
-                position:'top' /*{
-                    name: 'ellipse',
-                    args: {
-                        dx: -5,
-                        dy: -5,
-                        dr: 0,
-                        step: 10,
-                        startAngle: 270
-                    }
-                }*/,
-                attrs: {
-                    portBody: {
-                        width: 10,
-                        height: 10,
-                        stroke: 'white',
-                        fill: '#feb663',
-                        magnet: 'passive'
-                    }                    
-                },
+            'inType': { position:'top',
+                attrs: {  portBody: {width: 10, height: 10,stroke: 'white', fill: '#feb663', magnet: 'passive' }},
                 isConnected:false
             },
-            out: {
-                position: 'left',
-                attrs:{
-                 portBody2: {
-                        magnet: 'passive',
-                        stroke: 'none', fill: '#31d0c6', r: 9
-                 }
-                }
+            'refType':{position:'bottom',attrs: {  portBody: {width: 10, height: 10,stroke: 'white', fill: '#feb663', magnet: 'passive' }}},
+            'outRefType':{position:'right',attrs:{portBody: {width: 5, height: 10,stroke: 'white', fill: '#feb663', magnet: 'passive' }}},
+            out: {position: 'left',
+                attrs:{portBody2: {magnet: 'passive',stroke: 'none', fill: '#31d0c6', r: 9}}
             },
-            outype: {
-                position: 'left',
-                attrs:{
-                 portBody2: {
-                        magnet: 'passive',
-                        stroke: 'none', fill: '#31d0c6', r: 9
-                 }
-                }
-            }
+            outype: {position: 'left', attrs:{portBody2: {magnet: 'passive', stroke: 'none', fill: '#31d0c6', r: 9 }}}
         },
-        items: [
-            { group: 'inType'}
-        ]
+        items: [{group:'inType'},{group:'refType'}]
     },
     attrs: {
         '.': { magnet: false },
@@ -82,12 +50,9 @@ joint.dia.Element.define('shex.Type',{
             fill: 'white',
             ref: '.body',
             'ref-width': 1
-        }/*,        
-        '.option-mult': {
-            ref: '.body', 'ref-x': 110, 'ref-y': 2,'font-size': 8, fill:'white'
-        },*/
+        }
     }       
-},{   markup: '<g class="rotatable"><g class="scalable"><rect class="body"/></g><text class="question-text"/><g class="options"></g></g>',optionMarkup: '<g class="option"><rect class="option-rect"/><text class="option-text"/><text class="option-mult"/></g>',
+},{   markup: '<g class="rotatable"><g class="scalable"><rect class="body"/></g><text class="question-text"/><g class="options"></g></g>',optionMarkup: '<g class="option"><rect class="option-rect"/><text class="option-text"/></g>',
     initialize: function() {        
         joint.dia.Element.prototype.initialize.apply(this, arguments);        
         this.on('change:options', this.onChangeOptions, this);
@@ -143,7 +108,6 @@ joint.dia.Element.define('shex.Type',{
                 tripleConstraint=option.label+"::@"+option.type+ " ("+option.mult+")";
             }
             attrsUpdate[selector + ' .option-text'] = { text: tripleConstraint, dynamic: true };
-            //attrsUpdate[selector + ' .option-mult'] = { text:option.mult,dynamic: true };
 
             offsetY += optionHeight;
 
@@ -155,6 +119,7 @@ joint.dia.Element.define('shex.Type',{
                     this.addPort({ group: 'out', id:aux_id , args: { y: portY } });
                 }else{                                    
                     this.addPort({ group: 'outype', id: aux_id, args: { y: portY } });
+                    this.addPort({ group:'outRefType',id: "ref"+aux_id, args: { y: portY } });
                 }
             } else {                
                 this.portProp(option.id, 'args/y', portY);

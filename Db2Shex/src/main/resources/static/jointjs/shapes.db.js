@@ -6,6 +6,7 @@
  * Deleting red links cause problems
  * Recommend what to do when user is going to exchange
  */
+//https://groups.google.com/forum/#!topic/jointjs/r9xuR09_76g
 //https://www.cs.ox.ac.uk/boris.motik/pubs/bkmmpst17becnhmarking-chase.pdf
 //http://www.dia.uniroma3.it/~papotti/Projects/DataExchange/pdf/vldb10.pdf
 //https://perso.liris.cnrs.fr/angela.bonifati/teaching/dbdm/DBDM-dataIntegration3.pdf
@@ -165,12 +166,14 @@ var invertPaths=function(tablesConnected){
 paperTGDs.on('link:connect',function(linkView){  
     if (typeof(linkView.targetView)==='null'){
         console.log("no element selected");
-        //graphTGDs.clear();
     }else{
         var currentLink=linkView.model;  
-        //verify that are of the same type
-        if (linkView.sourceMagnet.nodeName==linkView.targetMagnet.nodeName){
-            
+        //verify that are of the same type the connectors
+        console.log(linkView.targetView.model.attributes.ports)
+        if (linkView.sourceMagnet.nodeName==linkView.targetMagnet.nodeName && linkView.targetView.model.attributes.ports.items[1].id==currentLink.attributes.target.port){
+        	currentLink.remove()
+        }
+        else if (linkView.sourceMagnet.nodeName==linkView.targetMagnet.nodeName){                        
             var auxKeySymbols=[];
             for (const key of mapSymbols.keys()) {
                 var obj={text:key};                        
@@ -451,11 +454,7 @@ function loadModalFunctions(currentLink){
             constraintAtt=constraintAtt.concat("]")
             
             var offsetNew=currentLink.labels().length+1*10
-            if (index==-1){
-                var wraptext = joint.util.breakText(constraintAtt, {
-                    width:50,
-                    height: 20
-                });
+            if (index==-1){                
                 currentLink.appendLabel({
                         markup: [{
                             tagName: 'rect',
@@ -466,7 +465,7 @@ function loadModalFunctions(currentLink){
                         }],
                         attrs: {
                             text: {
-                                text: wraptext,
+                                text: constraintAtt,
                                 fill: '#7c68fc',
                                 fontFamily: 'sans-serif',
                                 textAnchor: 'middle',
@@ -492,14 +491,7 @@ function loadModalFunctions(currentLink){
                         }
                     });
             }else{
-            currentLink.label(index,{
-                        attrs: {
-                            text: {
-                                text: constraintAtt
-                            }
-                        }
-                    }); 
-            
+            	currentLink.label(index,{attrs: {text: {text: constraintAtt}}});             
             }
             
             let objGraphic=$table.bootstrapTable('getRowByUniqueId',currentLink.id);
@@ -830,11 +822,7 @@ function loadModalPathAttributeDetail(currentLink,parameters){
             constraintAtt=constraintAtt.concat("]")
             
             var offsetNew=currentLink.labels().length+1*10
-            if (index==-1){
-                var wraptext = joint.util.breakText(constraintAtt, {
-                    width:50,
-                    height: 20
-                });
+            if (index==-1){                
                 currentLink.appendLabel({
                         markup: [{
                             tagName: 'rect',
@@ -845,7 +833,7 @@ function loadModalPathAttributeDetail(currentLink,parameters){
                         }],
                         attrs: {
                             text: {
-                                text: wraptext,
+                                text: constraintAtt,
                                 fill: '#7c68fc',
                                 fontFamily: 'sans-serif',
                                 textAnchor: 'middle',
@@ -871,14 +859,7 @@ function loadModalPathAttributeDetail(currentLink,parameters){
                         }
                     });
             }else{
-				currentLink.label(index,{
-                        attrs: {
-                            text: {
-                                text: constraintAtt
-                            }
-                        }
-                    }); 
-            
+				currentLink.label(index,{attrs: {text: {text: constraintAtt}}});            
             }
             
             let objGraphic=$table.bootstrapTable('getRowByUniqueId',currentLink.id);
@@ -1634,6 +1615,20 @@ function linkDataBase(g,source, portSource, target,portTarget,vertices) {
     return link;
 }
 
+function linkShex(g,source, portSource, target,portTarget,vertices) {      	
+    var link = new joint.shapes.standard.Link({
+        source: { id: source, port:portSource},
+        target: { id: target , port:portTarget},
+        attrs:{line:{stroke:'#D7BCBC'}},
+        router: { name: 'manhattan' },
+        connector: { name: 'jumpover' },
+        vertices: vertices || []
+
+    });    
+    g.addCell(link);
+    return link;
+}
+
 function getTokens(value){
     var tokens=[];
     var j=0;
@@ -1724,8 +1719,7 @@ function stTGD2(graph,paper,mapTables){
             //construct body terms
             var objterm=[];
             var s_fterm=[];
-			var relNames;
-			console.log(link.labels())
+			var relNames;			
             for (var lab of link.labels()){
                 var annotation=lab.attrs.text.text;                
                 if (annotation.includes('(')){
@@ -1896,3 +1890,29 @@ const convert_map_to_obj = ( aMap => {
     return obj;
 });
 
+
+function getLayoutOptions(){
+    return {
+                setVertices: true,
+                setLabels: true,
+                ranker: "network-simplex",
+                rankDir: "LR",
+                align: "UL",
+                rankSep: parseInt(150, 10),
+                edgeSep: parseInt(150, 10),
+                nodeSep: parseInt(150, 10)
+            };
+}
+
+function getLayoutOptionsNotVertices(){
+    return {
+                setVertices: false,
+                setLabels: true,
+                ranker: "network-simplex",
+                rankDir: "LR",
+                align: "UL",
+                rankSep: parseInt(150, 10),
+                edgeSep: parseInt(150, 10),
+                nodeSep: parseInt(150, 10)
+            };
+}

@@ -4,7 +4,9 @@
 	<title>DB2ShEx</title>
 	<meta charset="utf-8" />
 	<meta content="width=device-width, initial-scale=1.0" name="viewport" />
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/jointjs/2.2.0/joint.css" rel="stylesheet" type="text/css" /><!--<link rel="stylesheet" type="text/css" href="joint.ui.paperScroller.min.css">--><!--BOOTSTRAP --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/jointjs/2.2.0/joint.css" rel="stylesheet" type="text/css" /><!--<link rel="stylesheet" type="text/css" href="joint.ui.paperScroller.min.css">-->
+	<!--BOOTSTRAP -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
 	<link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" rel="stylesheet" /><script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script><!-- Our Custom CSS -->
 	<link href="css/style4.css" rel="stylesheet" /><!--BOOTSTRAP --><!-- Font Awesome JS 
     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
@@ -102,7 +104,9 @@
 <script type="text/template" id="exchange_template">
 	<form>
 	<div class="form-group">    
-    <button type="submit" class="btn btn-primary form-control">Exchange</button>        		
+		<label class="radio-inline"><input id="rb_sql "type="radio" name="optradio" checked value="sql">Script SQL</label>
+		<label class="radio-inline"><input id="rb_rml" type="radio" name="optradio" value="rml">R2RML</label>
+	    <button type="submit" class="btn btn-primary form-control">Exchange</button>        		
 	</div>
 	</form>
 	<div id="ls_todo"></div>
@@ -187,9 +191,25 @@
     <script type="text/javascript">
 	var $table = $('#table');
 	$table.bootstrapTable({    
-    columns:[{field:'id',title:'IdLink',class:"w-25",visible:false},{field:'ex',title:'Expression',sortable:"true",searchable:true}]
-});
+    columns:[{field:'id',title:'IdLink',class:"w-25",visible:false},{field:'ex',title:'Expression',sortable:"true",searchable:true},{field:'operate',title:'Delete',align:'center', events: window.operateEvents,formatter: operateFormatter}]});
 	$('#ls_todo').hide();
+	function operateFormatter(value, row, index) {
+	    return [      
+	      '<a class="removeTGD" href="javascript:void(0)" title="Remove">',
+	      '<i class="fa fa-trash"></i>',
+	      '</a>'
+	    ].join('')
+	  }
+
+	  window.operateEvents = {    
+	    'click .removeTGD': function (e, value, row, index) {
+	    	console.log(row.id)
+	      $table.bootstrapTable('remove', {
+	        field: 'id',
+	        values: [row.id]
+	      })
+	    }
+	  }
 	</script>
 </body>
 </html>
