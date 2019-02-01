@@ -1187,7 +1187,6 @@ function loadModalTypeReferenced(currentLink,iris, parameters,functionsMap,value
 function drawUpdateRedLinkInTable(currentLink,sHead,sAtt,path,fObject,tHead){
     let tAtt=currentLink.attributes.target.port.split(",")[0]
     var graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(sHead)).append($('<div>').attr('class','li_body_tgd').append(sAtt))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append(path)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_red_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowRed',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({class:"iri_tgd"}).append(fObject))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(tHead)).append($('<div>').attr('class','li_body_tgd').append(tAtt))).remove().html();;
-    //update list of tgds            
     $table.bootstrapTable('updateByUniqueId',{id:currentLink.id,row:{ex:graphicTGD}})
 
 }
@@ -1201,6 +1200,14 @@ function drawNewRedLinkInTable(currentLink,sHead,sAtt,path,fObject,tHead){
 function drawNewGreenLinkInTable(greenLink,sHead,fSubject,tHead){    
     let graphicTGDparent=$('<div>').append($('<span>').attr('class','li_tgd').append(sHead)).append($('<div>').attr({'class':'link_tgd'}).append($('<p>').attr({id:"text_"+greenLink.id}).append(fSubject)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:greenLink.id,class:'edit_green_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowGreen',x1:0,x2:widthSVGLine,y1:10,y2:10})))).append($('<span>').attr('class', 'li_tgd').append(tHead)).remove().html();
     $table.bootstrapTable('append',[{id:greenLink.id,ex:graphicTGDparent}])
+}
+
+function drawNewBlueLinkInTable(blueLink){
+	let linkView=blueLink.findView(graphTGDs);
+	let sourceTName=linkView.sourceView.model.attributes.question;
+	let sourceAtt=getSourceOptionNameLinkView(linkView)
+	let graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(sourceTName)).append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr({'class':'link_tgd'}).append($('<div>').attr({class:"path_tgd"}).append(joinPath)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<p>').attr({id:"param_"+currentLink.id,class:"param_tgd"}))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(linkView.targetView.model.attributes.question)).append($('<div>').attr('class','li_body_tgd').append(currentLink.attributes.target.port.split(",")[0]))).remove().html();
+    $table.bootstrapTable('append',[{id:blueLink.id,ex:graphicTGD}])
 }
 
 function loadPathIRIModal(currentLink,iris, parameters,functionsMap,lsPaths){

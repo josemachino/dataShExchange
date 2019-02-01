@@ -46,6 +46,29 @@ import:function(e){
     	mapTableIdCanvas=new Map();
     	//TODO create the table of mappings and load the global variables
     	graphTGDs.fromJSON(obj);   
+    	paperTGDs.fitToContent({
+            padding: 50,
+            allowNewOrigin: 'any'
+        });    	
+    	var links=graphTGDs.getLinks();			
+		for (var link of links){
+			var edgeView=link.findView(paperTGDs);
+			if (edgeView.sourceView.model.attributes.type=="db.Table" && edgeView.targetView.model.attributes.type=="shex.Type"){
+				if (link.attr('line/stroke')=='green'){
+					let valueIRI=(((link.labels()[0]|| {}).attrs||{}).text||{}).text;
+					let taName=edgeView.sourceView.model.attributes.question;
+					drawNewGreenLinkInTable(link,taName,valueIRI,edgeView.targetView.model.attributes.question);
+				}
+				if (link.attr('line/stroke')=='blue'){
+					//TODO drawNewBlueLinkInTable()
+					console.log("Implement blue")
+				}
+				if (link.attr('line/stroke')=='red'){
+					//TODO drawNewRedLinkInTable(currentLink,linkView.sourceView.model.attributes.question,sAtt,joinPath,valueIRI,linkView.targetView.model.attributes.question)
+					console.log("Implement red")
+				}				
+			}
+		}
     	//loop graphTGDs to obtain mapTableIdCanvas and for mapSymbols the types try to use a default url
     };
     reader.readAsText(e.currentTarget.files[0]);
