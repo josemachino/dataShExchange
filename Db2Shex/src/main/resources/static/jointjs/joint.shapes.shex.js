@@ -11,7 +11,14 @@ joint.dia.Element.define('shex.Type',{
                 attrs: {  portBody: {width: 10, height: 10,stroke: 'white', fill: '#feb663', magnet: 'passive' }},
                 isConnected:false
             },
-            'refType':{position:'bottom',attrs: {  portBody: {width: 10, height: 10,stroke: 'white', fill: '#feb663', magnet: 'passive' }}},
+            /*position: function(ports, elBBox) {
+            return ports.map(function(_, index) {
+                var step = -Math.PI / 8;
+                var y = Math.sin(index * step) * 50;
+                return new g.Point({ x: index * 12, y: y + elBBox.height });
+            });
+        },*/
+            'refType':{position:'absolute',attrs: {  portBody: {width: 1, height: 1,stroke: '#4b4a67', fill: '#4b4a67', magnet: 'passive' }}},
             'outRefType':{position:'right',attrs:{portBody: {width: 5, height: 10,stroke: 'white', fill: '#feb663', magnet: 'passive' }}},
             out: {position: 'left',
                 attrs:{portBody2: {magnet: 'passive',stroke: 'none', fill: '#31d0c6', r: 9}}

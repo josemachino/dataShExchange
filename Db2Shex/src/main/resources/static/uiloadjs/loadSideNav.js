@@ -7,7 +7,8 @@ render: function(){
     this.$el.html( template );
 },
 events: {
-    "click .list-unstyled li a":"hideOthers"    
+    "click .list-unstyled li a":"hideOthers",
+    "click #sideLeftcollapse":"activate"
 },
 hideOthers:function(e){
     if ($(e.target).parents('li')[0].id=="tgd"){
@@ -24,6 +25,10 @@ hideOthers:function(e){
     $(e.target).parents('li').siblings()[i].firstElementChild.classList.remove('active'); 
     $(e.target).parents('li').siblings()[i].firstElementChild.removeAttribute('aria-expanded');	
 	}
+},
+activate:function(e){    
+    //$(e.target).toggleClass('active');
+    $('#sidebar').toggleClass('active');
 }
 });
 

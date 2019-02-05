@@ -50,7 +50,7 @@
 <nav id="sidebar">&nbsp;</nav>
 
 <div id="content">
-	<div id="menu">&nbsp;</div>
+	<!-- <div id="menu">&nbsp;</div> -->
 
 	<div class="tab-content">
 		<div class="tab-pane fade" id="database">
@@ -71,15 +71,15 @@
 <!--<div id="paper-container"></div>-->
 </div>
 
-<div id="sidebar-right">&nbsp;</div>
+<div id="sidebar-right"></div>
 </div>
 
 <script src="jointjs/joint.shapes.db.js"></script><script src="jointjs/joint.shapes.shex.js"></script>
 <script src="jointjs/shapes.db.js"></script>
 <script type="text/template" id="side_template">
         <div class="sidebar-header">
-            <h3>Data Exchange</h3>
-            <strong>DE</strong>
+            <a id="sideLeftcollapse"><h3>Data Exchange</h3></a>
+            <a id="sideLeftcollapse"><strong>DE</strong></a>
         </div>
         <ul class="list-unstyled components nav-tabs" role="tablist">
             <li>
@@ -163,8 +163,10 @@
     </script>
 <script type="text/template" id="sideright_template">
         <div class="sidebar-header">
-            <h3>Set of Mappings</h3>            
+            <a id="rightCollapsed"><h3>Set of Mappings</h3></a>
+			<a id="rightCollapsed"><strong>ST-TGDs</strong></a>            
         </div>
+		<div class="rightside">
 		<div class="form-group">
 		   <button id="exportst" type="button"> Export</button>
 		</div>
@@ -185,12 +187,12 @@
         <table id="table" class="table table-striped" data-toggle="table" data-toolbar="#toolbar" data-search="true" data-unique-id="id">            
         </table>                   
         <div id="syntax_tgds"> </div>
-        
+        </div>
     </script>
 <script type="text/template" id="tgd_template">
 <div id="tgds_list" style="400px"></div>
 </script>
-<script type="text/javascript" src="uiloadjs/loadMenuNav.js"></script>
+<!--  <script type="text/javascript" src="uiloadjs/loadMenuNav.js"></script>-->
 <script type="text/javascript" src="uiloadjs/loadSideNav.js"></script>
 <script type="text/javascript" src="uiloadjs/loadSideRightNav.js"></script>
 <script type="text/javascript" src="uiloadjs/loadShExFile.js"></script>

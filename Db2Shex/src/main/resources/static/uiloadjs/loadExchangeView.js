@@ -72,6 +72,7 @@ exchange:function(e){
 	let chase="";
 	let indexTM=1;
 	let file2RML="@prefix rr: <http://www.w3.org/ns/r2rml#>.\n";
+	try{
 	tgds.rules.forEach(function(rule){
 		let tmQ="";
 		tmQ=tmQ.concat("<#TriplesMap").concat(indexTM).concat(">\n");
@@ -193,6 +194,10 @@ exchange:function(e){
 		indexTM++;
 		
 	});
+	}
+	catch(err){
+		alert("Error in mappings "+err.message)
+	}
 	let headerTri="INSERT INTO "+TriName+" ";
 	let headerTy="INSERT INTO "+TyName+" ";
 	let triSql=""
@@ -277,13 +282,12 @@ exchange:function(e){
         $("#ls_todo").slideUp(500);
     });  
     
-	/*$.ajax({
-	 * 
+	$.ajax({	  
         url: "chase",
         type: "POST",
-        data:  JSON.stringify(editorJSON.get()),
+        data:  chase,
         processData: false,
-        contentType: "application/json"
+        contentType: "text/plain"
       })
       .done(function(data) {
         console.log(data)
@@ -295,7 +299,7 @@ exchange:function(e){
       })
       .always(function() {
         
-      });*/
+      });
 	
 	}
 });

@@ -37,7 +37,12 @@ events: {
      "click .edit_green_tgd":"modifyLinkGreen",
      "click .edit_red_tgd":"modifyLinkRed",
      "click .rem_param_blue_tgd":"removeParam",
+     "click #rightCollapsed":"activate"
 },
+activate:function(e){    
+    $('#sidebar-right').toggleClass('active');
+}
+,
 import:function(e){	
 	var reader = new FileReader();
     reader.onload = function onReaderLoad(event){        

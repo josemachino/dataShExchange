@@ -30,6 +30,34 @@ p{
     min-width: 650px;
     max-width: 650px;
 }
+
+#sidebar-right.active {
+    min-width: 80px;
+    max-width: 80px;
+    text-align: center;
+}
+
+#sidebar-right .sidebar-header strong {
+    display: none;
+    font-size: 1.8em;
+}
+
+#sidebar-right.active .rightside{
+	display:none;
+}
+
+#sidebar-right .rightside{
+	display:block;
+}
+
+#sidebar-right.active .sidebar-header h3{
+	display:none;
+}
+
+#sidebar-right.active .sidebar-header strong {
+    display: block;
+}
+
 .arrowBlue{
   stroke:blue;
   stroke-width:2; 
