@@ -50,6 +50,17 @@ import:function(e){
             padding: 50,
             allowNewOrigin: 'any'
         });    	
+    	let num=1;
+    	let namespace="http://example.com/"
+    	graphTGDs.getElements().forEach(function(element){
+    		if (element.attributes.type=="db.Table"){
+    			mapTableIdCanvas.set(element.attributes.question,element.id)
+    		}
+    		if (element.attributes.type=="shex.Type"){
+    			mapSymbols.set("f"+num,namespace+element.attributes.question);
+    			num++;
+    		}
+    	})
     	var links=graphTGDs.getLinks();			
 		for (var link of links){
 			var edgeView=link.findView(paperTGDs);
@@ -59,16 +70,19 @@ import:function(e){
 					let taName=edgeView.sourceView.model.attributes.question;
 					drawNewGreenLinkInTable(link,taName,valueIRI,edgeView.targetView.model.attributes.question);
 				}
-				if (link.attr('line/stroke')=='blue'){
-					//TODO drawNewBlueLinkInTable()
-					console.log("Implement blue")
+				if (link.attr('line/stroke')=='blue'){					
+					drawNewBlueLinkInTable(link)
 				}
-				if (link.attr('line/stroke')=='red'){
-					//TODO drawNewRedLinkInTable(currentLink,linkView.sourceView.model.attributes.question,sAtt,joinPath,valueIRI,linkView.targetView.model.attributes.question)
-					console.log("Implement red")
+				if (link.attr('line/stroke')=='red'){					
+					let sHead=edgeView.sourceView.model.attributes.question;
+					let sAtt=getSourceOptionNameLinkView(edgeView);
+					let path=(((link.labels()[0]|| {}).attrs||{}).text||{}).text;;
+					let fObject=(((link.labels()[1]|| {}).attrs||{}).text||{}).text;
+					let tHead=edgeView.targetView.model.attributes.question;
+					drawNewRedLinkInTable(link,sHead,sAtt,path,fObject,tHead)
 				}				
 			}
-		}
+		}		
     	//loop graphTGDs to obtain mapTableIdCanvas and for mapSymbols the types try to use a default url
     };
     reader.readAsText(e.currentTarget.files[0]);

@@ -213,9 +213,13 @@
 	    	currentLink.remove()	      	      
 	    }
 	  }
-	var $table = $('#table');
-	$table.bootstrapTable({treeShowField:'ex',parentIdField:'pid',    
-    columns:[{field:'pid',title:'pIdLink',class:"w-25",visible:false},{field:'id',title:'IdLink',class:"w-25",visible:false},{field:'ex',title:'Expression',sortable:"true",searchable:true},{field:'operate',title:'Delete',align:'center', events: window.operateEvents,formatter: operateFormatter,width:'10px'}]});
+	var $table = $('#table');//,idField:'id',
+	$table.bootstrapTable({ columns:[{field:'pid',title:'pIdLink',class:"w-25",visible:false},{field:'id',title:'IdLink',class:"w-25",visible:false},{field:'ex',title:'Expression',sortable:"true",searchable:true},{field:'operate',title:'Delete',align:'center', events: window.operateEvents,formatter: operateFormatter,width:'10px'}],
+	treeShowField:'ex',parentIdField:'pid'
+	});
+	//onChange:function(){$table.bootstrapTable('resetWidth')}
+	$table.treegrid({treeColumn: 1,expanderExpandedClass: 'glyphicon glyphicon-minus',
+        expanderCollapsedClass: 'glyphicon glyphicon-plus'});
 	$('#ls_todo').hide();	
 	</script>
 </body>

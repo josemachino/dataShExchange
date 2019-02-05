@@ -312,25 +312,10 @@ paperTGDs.on('link:connect',function(linkView){
                             });
 							currentLink.attr('line/stroke', 'blue');
 							createLinkTool(currentLink);
-							drawNewBlueLinkInTable(currentLink);
-							//let graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(linkView.sourceView.model.attributes.question)).append($('<div>').attr('class','li_body_tgd').append(getSourceOptionNameLinkView(currentLink.findView(paperTGDs))))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append((((currentLink.labels()[0]|| {}).attrs||{}).text||{}).text)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({id:"param_"+currentLink.id,class:"param_tgd"})).append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:currentLink.id,class:'rem_param_blue_tgd'}).append($('<i>').attr('class','fas fa-trash-alt')))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(linkView.targetView.model.attributes.question)).append($('<div>').attr('class','li_body_tgd').append(currentLink.attributes.target.port.split(",")[0]))).remove().html();
-							//$table.bootstrapTable('append',[{id:currentLink.id,ex:graphicTGD}])
+							drawNewBlueLinkInTable(currentLink);							
                         }else{                    							
                             loadModalPathAttribute(currentLink,tablesConnected);
-                        }                        
-                        /*$('<div>').append($('<tr>').append($('<td>').append($('<h5>').append("Rule"))).append($('<td>').append($('<span>').attr('class', '').append(linkView.sourceView.model.attributes.question.concat('.').concat(getSourceOptionNameLinkView(currentLink.findView(paperTGDs))))).append($('<button>').attr({'class':'','type':'button',id:currentLink.id}).append(currentLink.labels()[0].attrs.text.text)).append($('<span>').attr('class', '').append(linkView.targetView.model.attributes.question.concat('.').concat(currentLink.attributes.target.port.split(",")[0]))))).remove().html();
-                        
-                        d3.select(`#${CSS.escape(currentLink.id)}`).append('svg').attr('height',17).attr('width','80').append('line').attr('class','arrow').attr('x1',0).attr('x2',60).attr('y1',10).attr('y2',10);                        
-                        if (currentLink.labels().length>1){
-                            for (let i=1;i<currentLink.labels.length;i++){
-                                $(`#${CSS.escape(currentLink.id)}`).append(currentLink.labels()[i].attrs.text.text);
-                            }
-                        } */                     
-                        //var rowId = $("#table >tbody >tr").length;
-                        //var part1=$('<span>').attr('class', '').append(linkView.sourceView.model.attributes.question.concat('.').concat(getSourceOptionNameLinkView(currentLink.findView(paperTGDs)))).html()						
-                        /*console.log($('<div>').append($('<span>').attr('class','').append(linkView.sourceView.model.attributes.question.concat('.').concat(getSourceOptionNameLinkView(currentLink.findView(paperTGDs))))).append($('<div>').attr('class','').append(currentLink.labels()[0].attrs.text.text).append($('<svg>').attr({height:'17px',width:'80px'}).append($('<line>').attr({class:'arrow',x1:0,x2:60,y1:10,y2:10})))).append($('<span>').attr('class', '').append(linkView.targetView.model.attributes.question.concat('.').concat(currentLink.attributes.target.port.split(",")[0]))))).remove().html())*/						
-                        //part1=part1.concat($('<div>').append($('<svg>').attr({height:'17px',width:'90px'}).append($('<line>').attr({class:'arrow',x1:0,x2:80,y1:10,y2:10}))).remove().html());
-                        //part1=part1.concat($('<span>').attr('class', '').append(linkView.targetView.model.attributes.question.concat('.').concat(currentLink.attributes.target.port.split(",")[0])).html());                           
+                        }                                                                           
                     }                                        
                 }                            
         }               
@@ -1200,19 +1185,45 @@ function drawNewRedLinkInTable(currentLink,sHead,sAtt,path,fObject,tHead){
 
 function drawNewGreenLinkInTable(greenLink,sHead,fSubject,tHead){    
     let graphicTGDparent=$('<div>').append($('<span>').attr('class','li_tgd').append(sHead)).append($('<div>').attr({'class':'link_tgd'}).append($('<p>').attr({id:"text_"+greenLink.id}).append(fSubject)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:greenLink.id,class:'edit_green_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowGreen',x1:0,x2:widthSVGLine,y1:10,y2:10})))).append($('<span>').attr('class', 'li_tgd').append(tHead)).remove().html();
-    let ident="1"//greenLink.id
+    let ident=greenLink.id;
     $table.bootstrapTable('append',[{pid:0,id:ident,ex:graphicTGDparent}])
 }
 
 function drawNewBlueLinkInTable(blueLink){
-	console.log("blue link")
-	let parentId="1";
-	let joinPath=blueLink.attributes.target.port.split(",")[0];
+	//TODO GET THE PARENT ID	
+	let joinPath=(((blueLink.labels()[0]|| {}).attrs||{}).text||{}).text;;
+	console.log(joinPath)
+	let relNames=getTokens(joinPath)
 	let linkView=blueLink.findView(paperTGDs);
+	var inTargetLinks=graphTGDs.getConnectedLinks(linkView.targetView.model, {inbound:true});
+	
+	var portType=linkView.targetView.model.attributes.ports.items[0];
+    var tLinks=getLinkTargetType(inTargetLinks,portType);             
+    //loop all links that are table id to type id    
+    let parentId;
+    let idTable;
+    let greenTableName=relNames[relNames.length-1];
+    console.log(greenTableName)
+    for (const [key,value] of mapTableIdCanvas){
+        if (key==joinPath){
+            idTable=value;
+            break;
+        }
+    }
+    for (var tlink of tLinks){							
+        var tView=tlink.findView(paperTGDs);                
+        if (tView.sourceView.model.id==idTable){            
+            parentId=tlink.id;
+            break;
+        }
+    }
+    console.log(parentId)
 	let sourceTName=linkView.sourceView.model.attributes.question;
 	let sourceAtt=getSourceOptionNameLinkView(linkView)
-	let graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(sourceTName)).append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr({'class':'link_tgd'}).append($('<div>').attr({class:"path_tgd"}).append(joinPath)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:blueLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<p>').attr({id:"param_"+blueLink.id,class:"param_tgd"}))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(linkView.targetView.model.attributes.question)).append($('<div>').attr('class','li_body_tgd').append(blueLink.attributes.target.port.split(",")[0]))).remove().html();
+	let graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(sourceTName)).append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr({'class':'link_tgd'}).append($('<div>').attr({class:"path_tgd"}).append(joinPath)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:blueLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<p>').attr({id:"param_"+blueLink.id,class:"param_tgd"}))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(linkView.targetView.model.attributes.question)).append($('<div>').attr('class','li_body_tgd').append(blueLink.attributes.target.port.split(",")[0]))).remove().html();	
     $table.bootstrapTable('append',[{pid:parentId,id:blueLink.id,ex:graphicTGD}])
+    $table.treegrid({treeColumn: 1,expanderExpandedClass: 'glyphicon glyphicon-minus',
+        expanderCollapsedClass: 'glyphicon glyphicon-plus'});
 }
 
 function loadPathIRIModal(currentLink,iris, parameters,functionsMap,lsPaths){
