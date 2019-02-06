@@ -35,6 +35,9 @@ public class GetSqlQuery {
 		if(queryUpperCase.indexOf("CREATE TABLE") == 0) {
 			return false;
 		}
+		if(queryUpperCase.indexOf("INSERT INTO") == 0) {
+			return false;
+		}
 		// support ALTER TABLE with ADD CONSTRAINT
 		if(queryUpperCase.indexOf("ALTER TABLE") == 0) {
 			if(queryUpperCase.indexOf("ADD CONSTRAINT") != -1) {
@@ -62,11 +65,10 @@ public class GetSqlQuery {
 		final List<String> querys = new ArrayList<String>();
 
 		int posStart = getPosStartQuery(content, 0);
-		int posEnd = getPosEndQuery(content, posStart);
+		int posEnd = getPosEndQuery(content, posStart);		
 		while((posStart != -1) && (posStart < content.length()) && (posEnd < content.length())) {
 
-			final String query = content.substring(posStart, posEnd);
-
+			final String query = content.substring(posStart, posEnd);			
 			final boolean isFiltered = isQueryFiltered(query);
 			if(!isFiltered) {
 				querys.add(query);

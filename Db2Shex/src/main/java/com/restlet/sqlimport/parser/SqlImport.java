@@ -137,7 +137,7 @@ public class SqlImport {
 		p.addErrorListener(listener);
 
 		if(LOG_ACTIVATED) {
-			//System.out.println("Parse the query : \n"+query);
+			System.out.println("Parse the query : \n"+query);
 		}
 
 		// Fill database schema from SQL input stream read by ANTLR

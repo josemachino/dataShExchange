@@ -56,7 +56,14 @@ public class InsertParseListener extends SqlBaseListener {
 	*exit  insert 
 	**/
 	public void exitInsert_stmt(final Insert_stmtContext ctx) {
-		if (inInsert)
-			database.getInserts().add(ctx.getText());
+		if (inInsert) {
+			int children=ctx.getChildCount();
+			StringBuilder sb=new StringBuilder();
+			for (int j=0;j<children;j++) {				
+				sb.append(ctx.getChild(j).getText()).append(" ");
+			}
+			database.getInserts().add(sb.toString());
+			inInsert=false;
+		}
 	}
 }

@@ -2,12 +2,10 @@ package des.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import des.models.TGDS;
 import des.services.DBService;
 //https://stackoverflow.com/questions/43503977/spring-mvc-jackson-mapping-query-parameters-to-modelattribute-lowercase-wi
 //https://github.com/spring-guides?page=2
@@ -22,7 +20,7 @@ public class DbController {
 	public DbController(DBService dbService) {
 		this.dbService = dbService;
 	}	
-	@PostMapping(path="/chase",consumes = "application/json")    
+	@PostMapping(path="/chase")    
     public @ResponseBody byte[] chaseRule(@RequestParam("queries") String queries) {
 		String[] ls_Query=queries.split("\n");				
         return dbService.getResultFile("RDF/JSON",ls_Query);         

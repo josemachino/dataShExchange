@@ -70,6 +70,7 @@ exchange:function(e){
 	let c2="CREATE TABLE "+TyName +" (term varchar,type varchar);\n";
 	let c3="CREATE TABLE "+ShName+ "(typeS varchar,label varchar,typeO varchar, mult varchar);\n";	
 	let chase="";
+	let chaseQ="";
 	let indexTM=1;
 	let file2RML="@prefix rr: <http://www.w3.org/ns/r2rml#>.\n";
 	try{
@@ -79,12 +80,12 @@ exchange:function(e){
 		rule.yield.forEach(function(atom){
 			var q="";				
 			if (atom.args.length==1){					
-				q=q.concat("CREATE OR REPLACE VIEW").concat(" [").concat(TyName).concat(indexTM).concat("] AS ");			
+				q=q.concat("CREATE OR REPLACE VIEW").concat(" ").concat(TyName).concat(indexTM).concat(" AS ");			
 				//consider that the length of args in case of type atom will allays be one 			
 				q=q.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("/',").concat(atom.args[0].args[0].attr).concat(")").concat(",").concat("'").concat(atom.atom).concat("'").concat(" ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel);
 				q=q.concat(";\n")			
 			}else if (atom.args.length==3){//it is the triple atom
-				q=q.concat("CREATE OR REPLACE VIEW").concat(" [").concat(TriName).concat(indexTM).concat("] AS ");
+				q=q.concat("CREATE OR REPLACE VIEW").concat(" ").concat(TriName).concat(indexTM).concat(" AS ");
 				q=q.concat("SELECT").concat(" ");
 				let lastRel="";
 				let simpleQRML="";
@@ -190,6 +191,7 @@ exchange:function(e){
 				file2RML=file2RML.concat(tmQ)
 			}						
 			chase=chase.concat(q);
+			chaseQ=chaseQ.concat(q);
 		})
 		indexTM++;
 		
@@ -285,7 +287,7 @@ exchange:function(e){
 	$.ajax({	  
         url: "chase",
         type: "POST",
-        data:  {queries:chase}
+        data:  {queries:chaseQ}
       })
       .done(function(data) {
         console.log(data)

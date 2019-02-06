@@ -166,6 +166,8 @@ paperTGDs.on('link:connect',function(linkView){
     if (typeof(linkView.targetView)==='null'){
         console.log("no element selected");
     }else{
+    	try{ 
+    	
         var currentLink=linkView.model;  
         //verify that are of the same type the connectors        
         if (linkView.sourceMagnet.nodeName==linkView.targetMagnet.nodeName && linkView.targetView.model.attributes.ports.items[1].id==currentLink.attributes.target.port){
@@ -294,6 +296,14 @@ paperTGDs.on('link:connect',function(linkView){
 						console.log(tablesConnected)
 						//supposed that it is already connected with others but there is only one path then we have to create the green link first
 						if (tablesConnected.length==1){
+							
+							var element;
+			                for (let table of graphTGDs.getElements()){			                	
+			                    if (table.attributes.question==tablesConnected[0].text){
+			                        element=table;
+			                    }
+			                }
+							
 							let isConnectedGL=false;
 				        	for (var greenL of graphTGDs.getLinks()){            		
 				        		if(greenL.attributes.source.port==element.attributes.ports.items[0].id && greenL.attributes.target.port==linkView.targetView.model.attributes.ports.items[0].id){
@@ -313,10 +323,9 @@ paperTGDs.on('link:connect',function(linkView){
 
 				                
 				                let tHead=linkView.sourceView.model.attributes.question;
-				                drawNewGreenLinkInTable(linkParent,sHead[sHead.length-1],valueIRI,tHead)
+				                drawNewGreenLinkInTable(linkParent,tablesConnected[0].text,valueIRI,tHead)
 				            }
-						}
-						else if (tablesConnected.length==1 &&){
+						
                             currentLink.appendLabel({attrs: {text: {text: tablesConnected[0].text}},position: {offset: -10}});							
                             currentLink.attr('line/stroke', 'blue');
 							createLinkTool(currentLink);
@@ -331,7 +340,11 @@ paperTGDs.on('link:connect',function(linkView){
     }else{//remove the link from the canvas            
         currentLink.remove();
     }
-}});
+    }catch(err){
+    	console.log(err.message)
+    }
+    }
+});
 
 function createULList(list){
     var items = document.createElement('ul');

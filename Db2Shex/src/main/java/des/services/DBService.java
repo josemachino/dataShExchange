@@ -59,7 +59,7 @@ public class DBService {
 		
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
-        dataSource.setUrl("jdbc:h2:mem:~/dbshex");
+        dataSource.setUrl("jdbc:h2:mem:dbshex");
         dataSource.setUsername("admin");
         dataSource.setPassword("123");
 
@@ -92,16 +92,19 @@ public class DBService {
 				i++;
 			}	
 			rString.setLength(rString.length()-1);			
-			schemaTables.add(new SchemaTableJSON(ta.getName(),atts));		
-			jdbcTemplate.execute("CREATE TABLE "+ta.getName()+"("+rString.toString()+")");			
+			schemaTables.add(new SchemaTableJSON(ta.getName(),atts));
+			String taQ="CREATE TABLE "+ta.getName()+" ( "+rString.toString()+" )";
+			System.out.println(taQ);
+			jdbcTemplate.execute(taQ);			
 		}
-		
+		System.out.println(db.getInserts().size());
 		executeQueries(jdbcTemplate,db.getInserts());
 		
 		return schemaTables;
 	}
 	private void executeQueries(JdbcTemplate jdbcTemplate,List<String> queries) {		               
-        for (String q:queries) {
+        for (String q:queries) {        	
+        	q=q.replaceAll(";", "");
         	System.out.println(q);
         	jdbcTemplate.execute(q);
         }
