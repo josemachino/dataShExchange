@@ -285,9 +285,7 @@ exchange:function(e){
 	$.ajax({	  
         url: "chase",
         type: "POST",
-        data:  chase,
-        processData: false,
-        contentType: "text/plain"
+        data:  {queries:chase}
       })
       .done(function(data) {
         console.log(data)

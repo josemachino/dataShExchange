@@ -3,6 +3,7 @@ package des.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +23,7 @@ public class DbController {
 		this.dbService = dbService;
 	}	
 	@PostMapping(path="/chase",consumes = "application/json")    
-    public @ResponseBody byte[] chaseRule(@RequestBody String queries) {
+    public @ResponseBody byte[] chaseRule(@RequestParam("queries") String queries) {
 		String[] ls_Query=queries.split("\n");				
         return dbService.getResultFile("RDF/JSON",ls_Query);         
     }

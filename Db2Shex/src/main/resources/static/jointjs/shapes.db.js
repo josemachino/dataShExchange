@@ -260,8 +260,7 @@ paperTGDs.on('link:connect',function(linkView){
                                 portType=V(childElement.firstChild).attr('port');
                                 var portLinks=_.filter(graphTGDs.getLinks(), function(o) {                                    
                                     return o.get('target').port == V(childElement.firstChild).attr('port');
-                                });    
-                                
+                                });                                    
                                 if (portLinks.length<1){
                                     if (V(linkView.sourceMagnet.parentNode).attr('port-group')==='out'){                                                                                                                                                                 
                                         var idsourceModel;
@@ -293,7 +292,31 @@ paperTGDs.on('link:connect',function(linkView){
                             getJoinsTableFromTo(linkView.sourceView.model,tablesConnected,tView.sourceView.model.id,visited,tablesConnected[0]);	
 						}     		
 						console.log(tablesConnected)
+						//supposed that it is already connected with others but there is only one path then we have to create the green link first
 						if (tablesConnected.length==1){
+							let isConnectedGL=false;
+				        	for (var greenL of graphTGDs.getLinks()){            		
+				        		if(greenL.attributes.source.port==element.attributes.ports.items[0].id && greenL.attributes.target.port==linkView.targetView.model.attributes.ports.items[0].id){
+				        			isConnectedGL=true;
+				        			break;
+				        		}
+				        	}
+				            if (!isConnectedGL){
+							
+								var pks=getKeys(element.attributes.options);					
+				                var fSymbol=getFunctionSymbol(mapSymbols,linkView.targetView.model.attributes.question);
+								var valueIRI=fSymbol+"("+pks[0]+")";											
+								var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
+								createLinkTool(linkParent);
+				                
+				                linkParent.appendLabel({attrs: {text: {text: valueIRI}}});
+
+				                
+				                let tHead=linkView.sourceView.model.attributes.question;
+				                drawNewGreenLinkInTable(linkParent,sHead[sHead.length-1],valueIRI,tHead)
+				            }
+						}
+						else if (tablesConnected.length==1 &&){
                             currentLink.appendLabel({attrs: {text: {text: tablesConnected[0].text}},position: {offset: -10}});							
                             currentLink.attr('line/stroke', 'blue');
 							createLinkTool(currentLink);
@@ -427,13 +450,7 @@ function loadModalFunctions(currentLink){
             var offsetNew=currentLink.labels().length+1*10
             if (index==-1){                
                 currentLink.appendLabel({
-                        markup: [{
-                            tagName: 'rect',
-                            selector: 'labelBody'
-                        }, {
-                            tagName: 'text',
-                            selector: 'text'
-                        }],
+                        markup: [{tagName: 'rect',selector: 'labelBody'}, {tagName: 'text',selector: 'text'}],
                         attrs: {
                             text: {
                                 text: constraintAtt,
