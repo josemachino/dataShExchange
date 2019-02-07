@@ -80,7 +80,7 @@ exchange:function(e){
 		rule.yield.forEach(function(atom){
 			var q="";				
 			if (atom.args.length==1){					
-				q=q.concat("CREATE OR REPLACE VIEW").concat(" ").concat(TyName).concat(indexTM).concat(" AS ");			
+				q=q.concat("CREATE OR REPLACE VIEW").concat(" ").concat(TyName).concat(indexTM).concat(" (term,type) AS ");			
 				//consider that the length of args in case of type atom will allays be one 			
 				q=q.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("/',").concat(atom.args[0].args[0].attr).concat(")").concat(",").concat("'").concat(atom.atom).concat("'").concat(" ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel);
 				q=q.concat(";\n")			
@@ -205,11 +205,11 @@ exchange:function(e){
 	let triSql=""
 	let tySql=""
 	for (let i=1;i< indexTM;i++){		
-		tySql=tySql.concat("SELECT * FROM ").concat(TyName).concat(i).concat("\n").concat(" UNION \n");
-		triSql=triSql.concat("SELECT * FROM ").concat(TriName).concat(i).concat("\n").concat(" UNION \n");
+		tySql=tySql.concat("SELECT * FROM ").concat(TyName).concat(i).concat(" UNION ");
+		triSql=triSql.concat("SELECT * FROM ").concat(TriName).concat(i).concat(" UNION ");
 	}
-	tySql=tySql.slice(0,-9).concat(";\n");
-	triSql=triSql.slice(0,-9).concat(";\n");
+	tySql=tySql.slice(0,-7).concat(";\n");
+	triSql=triSql.slice(0,-7).concat(";\n");
 	
 	if (missing){
 		let msgDanger='<div class="alert alert-danger alert-dismissible fade show" role="alert"> The chase SQL script generates additional rows to satisfy approximatelly ShEx schema<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
@@ -217,36 +217,42 @@ exchange:function(e){
 		//completing the missing types
 		var mQ="";
 		//create the shex table with ShEx schema
-		var schQ="/*FOR MISSING PROPERTIES \n 1.CREATING THE SCHEMA*/\n".concat(c3);
+		var schQTitle="/*FOR MISSING PROPERTIES \n 1.CREATING THE SCHEMA*/\n".concat(c3);
+		let schQ="";
 		schShex.forEach(function(tcs, type, miMapa){
 			tcs.forEach(function(tc){
 				schQ=schQ.concat("INSERT INTO ").concat(ShName).concat(" (typeS,label,typeO,mult) VALUES ('").concat(type).concat("','").concat(tc.label).concat("','").concat(tc.type).concat("','").concat(tc.mult).concat("');\n");
 			})
-		})
-		
-		/*miShex.forEach(function(tcs, type, miMapa) {
-				tcs.forEach(function(tc){
-					mQ=mQ.concat("INSERT INTO ").concat(TriName).concat(" (s,p,o)").concat(" SELECT term,'").concat(tc.label).concat("','").concat(tc.type).concat("' FROM TypesFact WHERE type='").concat(type).concat("';\n");
-					mQ=mQ.concat("INSERT INTO ").concat(TyName).concat(" (term,type) VALUES ('").concat(tc.type).concat("','").concat(tc.type).concat("');\n")
-				})
-		})*/
-		
-		
+		})			
+		chaseQ=chaseQ.concat(c3).concat(schQ)
 		let allTri="CREATE OR REPLACE VIEW Triples (s,p,o) AS ";
 		allTri=allTri.concat(triSql)
+		
+		/*TODO
+		 * SELECT where Sh.mult=1 and Sh.label not in select p from triples  
+		*/
+		
+		//CREATE OR REPLACE VIEW Types (term,type) AS SELECT DISTINCT term,type from (SELECT * FROM TypesFact1 UNION SELECT * FROM TypesFact2) ;
 		let allTy="CREATE OR REPLACE VIEW Types (term,type) AS "
 		allTy=allTy.concat(tySql)
 		mQ=mQ.concat("/*2. CREATING A TOTAL VIEW OF TRIPLES AND TYPES */\n");
 		mQ=mQ.concat(allTri);
+		chaseQ=chaseQ.concat(allTri)
 		mQ=mQ.concat(allTy);
+		chaseQ=chaseQ.concat(allTy)
 		mQ=mQ.concat("/*3. ADDING MISSING VALUES */\n");
-		
+		let objectTypes="SELECT Tri.o AS term,typeO AS type FROM Triples AS Tri,Types AS Ty,SHEX AS Sh WHERE Tri.s=Ty.term AND Ty.type=Sh.typeS AND Sh.mult IN ('1','+') AND Sh.label=Tri.p";
 		let mTypeValue="CREATE OR REPLACE VIEW MissTypeValue (o,type) AS SELECT Tri.o,typeO FROM Triples AS Tri,Types AS Ty,SHEX AS Sh WHERE Tri.o=Ty.term AND Ty.type=Sh.typeO AND Sh.mult IN ('1','+');\n";
+		
+		
+		mTypeValue=mTypeValue.concat("CREATE OR REPLACE VIEW TriplesMiss AS ").concat(" SELECT MV.o,Sh.label,Sh.typeO FROM MissTypeValue").concat(" AS MV,").concat(ShName).concat(" AS Sh WHERE MV.type=Sh.typeS AND Sh.mult IN ('1','+'); \n");
 		mQ=mQ.concat(mTypeValue);
-		mQ=mQ.concat("CREATE OR REPLACE VIEW [TriplesMiss] AS ").concat(" SELECT Tri.o,Sh.label,Sh.typeO FROM MissTypeValue").concat(" AS MV,").concat(ShName).concat(" AS Sh WHERE MV.type=Sh.typeS AND Sh.mult IN ('1','+'); \n");
+		chaseQ=chaseQ.concat(mTypeValue);
 		mQ=mQ.concat("/*UNIFYING THE SET WITH THE MISSING TRIPLES*/\n");
-		mQ=mQ.concat("CREATE OR REPLACE VIEW Solution AS SELECT * FROM Triples UNION SELECT * FROM TriplesMiss;\n");
-		chase=chase.concat(schQ);
+		let solution="CREATE OR REPLACE VIEW Solution AS SELECT * FROM Triples UNION SELECT * FROM TriplesMiss;\n";
+		chaseQ=chaseQ.concat(solution);
+		mQ=mQ.concat(solution);
+		chase=chase.concat(schQTitle).concat(schQ);
 		chase=chase.concat(mQ);
 	}	
 			
@@ -291,8 +297,18 @@ exchange:function(e){
       })
       .done(function(data) {
         console.log(data)
-        
-        $('#result_exchange').html(data)
+        const fileStream = streamSaver.createWriteStream('triples.ttl')
+		const writer = fileStream.getWriter()
+		const encoder = new TextEncoder		
+		let uint8array = encoder.encode(data)	
+		writer.write(uint8array)
+		writer.close()
+        //$('#result_exchange').html(data)
+        var triples=[];//{subject:,predicate:,object:}
+        var svgTriples = d3.select("#result_exchange").append("svg").attr("width", 800).attr("height", 600);		
+		var force = d3.layout.force().size([800, 600]);		
+		var graph = triplesToGraph(svgTriples,triples);		
+		update(svgTriples,force);
       })
       .fail(function(jqXHR, textStatus, errorThrown) {        
         console.log(textStatus);

@@ -1,14 +1,19 @@
 package des.services;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
 
 import com.restlet.sqlimport.model.sql.Column;
@@ -22,28 +27,39 @@ import des.models.SchemaTableJSON;
 
 @Service
 public class DBService {	
+	
+	@Autowired
+    private JdbcTemplate jdbcTemplate;
+	
 	public byte[] getResultFile(String format,String[] queries) {
-		DriverManagerDataSource dataSource = new DriverManagerDataSource();
+		/*DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
         dataSource.setUrl("jdbc:h2:mem:~/dbshex");
         dataSource.setUsername("admin");
         dataSource.setPassword("123");
 		
-        JdbcTemplate jdbcTemplate=new JdbcTemplate(dataSource);
+        JdbcTemplate jdbcTemplate=new JdbcTemplate(dataSource);*/
 		
       //proceed to the chase with sql inserting the values in the triple store
         executeQueries(jdbcTemplate,Arrays.asList(queries));
         
-        
+		//Read the Shex schema file        
 		//create the triple store
-		RdfInstance rdfInstance=new RdfInstance();
-		//Read the Shex schema file
-		
-		
-		Resource rSubject = ResourceFactory.createResource("http://inria.fr");
-		rdfInstance.putTypes(rSubject, "T1");
-		rdfInstance.getTripleSet().add(rSubject, ResourceFactory.createProperty("hello"), ResourceFactory.createResource("http://person/f1"));
-		
+		RdfInstance rdfInstance=jdbcTemplate.query("SELECT * FROM Solution",new ResultSetExtractor<RdfInstance>() {
+			@Override
+			public RdfInstance extractData(ResultSet rs) throws SQLException, DataAccessException {
+				RdfInstance triples=new RdfInstance();
+				while(rs.next()) {
+					Resource rSubject = ResourceFactory.createResource(rs.getString(1));
+					Property predicate=ResourceFactory.createProperty(rs.getString(2));
+					Literal rObject = ResourceFactory.createStringLiteral(rs.getString(3));
+					//rdfInstance.putTypes(rSubject, "T1");
+					//ResourceFactory.createResource("http://person/f1");
+					triples.getTripleSet().add(rSubject,predicate ,rObject );
+				}
+				return triples;
+			}			
+		} );		
 		
 		//Write to file of the format specified
 		org.apache.jena.riot.RIOT.init();
@@ -55,15 +71,7 @@ public class DBService {
 	}
 
 	public List<SchemaTableJSON> createH2DB(Database db) throws SQLException {
-		List<SchemaTableJSON> schemaTables=new ArrayList<SchemaTableJSON>();
-		
-		DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.h2.Driver");
-        dataSource.setUrl("jdbc:h2:mem:dbshex");
-        dataSource.setUsername("admin");
-        dataSource.setPassword("123");
-
-		JdbcTemplate jdbcTemplate=new JdbcTemplate(dataSource);		
+		List<SchemaTableJSON> schemaTables=new ArrayList<SchemaTableJSON>();		
 		
 		for (Table ta: db.getTables()) {
 			
@@ -93,11 +101,9 @@ public class DBService {
 			}	
 			rString.setLength(rString.length()-1);			
 			schemaTables.add(new SchemaTableJSON(ta.getName(),atts));
-			String taQ="CREATE TABLE "+ta.getName()+" ( "+rString.toString()+" )";
-			System.out.println(taQ);
+			String taQ="CREATE TABLE "+ta.getName()+" ( "+rString.toString()+" )";			
 			jdbcTemplate.execute(taQ);			
-		}
-		System.out.println(db.getInserts().size());
+		}		
 		executeQueries(jdbcTemplate,db.getInserts());
 		
 		return schemaTables;

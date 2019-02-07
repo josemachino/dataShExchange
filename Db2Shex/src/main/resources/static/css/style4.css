@@ -358,3 +358,30 @@ ul.CTAs a {
         display: none;
     }
 }
+
+
+/* ---------------------------------------------------
+    Visualizing Nodes of Result
+----------------------------------------------------- */
+.node {
+  stroke: #fff;
+  fill:#ddd;
+  stroke-width: 1.5px;
+}
+.link {
+  stroke: #999;
+  stroke-opacity: .6;
+  stroke-width: 1px;
+}
+marker {
+	stroke: #999;
+	fill:rgba(124,240,10,0);
+}
+.node-text {
+  font: 11px sans-serif;
+  fill:black;
+}
+.link-text {
+  font: 9px sans-serif;
+  fill:grey;
+}

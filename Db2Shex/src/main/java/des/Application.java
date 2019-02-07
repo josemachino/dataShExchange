@@ -15,6 +15,8 @@ import des.storage.StorageService;
 @EnableConfigurationProperties(StorageProperties.class)
 public class Application extends SpringBootServletInitializer {
 	
+	
+	
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
@@ -32,4 +34,5 @@ public class Application extends SpringBootServletInitializer {
             storageService.init();
         };
     }
+	
 }

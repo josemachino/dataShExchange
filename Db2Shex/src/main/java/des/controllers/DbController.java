@@ -23,6 +23,7 @@ public class DbController {
 	@PostMapping(path="/chase")    
     public @ResponseBody byte[] chaseRule(@RequestParam("queries") String queries) {
 		String[] ls_Query=queries.split("\n");				
-        return dbService.getResultFile("RDF/JSON",ls_Query);         
+        //return dbService.getResultFile("RDF/JSON",ls_Query);
+        return dbService.getResultFile("Turtle",ls_Query);
     }
 }
