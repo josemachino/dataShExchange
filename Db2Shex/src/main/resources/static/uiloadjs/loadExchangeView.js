@@ -16,7 +16,7 @@ exchange:function(e){
 	e.preventDefault();
 	miShex=new Map();
 	schShex=new Map();
-	$("#ls_todo").html()
+	$("#ls_todo").html("");
     // verify that every triple constraint that has multiplicity 1 is linked	
 	let missing=false;
 	graphTGDs.getElements().forEach(function(element){		
@@ -231,7 +231,7 @@ exchange:function(e){
 		/*TODO
 		 * SELECT where Sh.mult=1 and Sh.label not in select p from triples  
 		*/
-		
+		let F="SELECT Ts.term,Sh.label,Sh.typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n"; 
 		//CREATE OR REPLACE VIEW Types (term,type) AS SELECT DISTINCT term,type from (SELECT * FROM TypesFact1 UNION SELECT * FROM TypesFact2) ;
 		let allTy="CREATE OR REPLACE VIEW Types (term,type) AS "
 		allTy=allTy.concat(tySql)
@@ -241,15 +241,22 @@ exchange:function(e){
 		mQ=mQ.concat(allTy);
 		chaseQ=chaseQ.concat(allTy)
 		mQ=mQ.concat("/*3. ADDING MISSING VALUES */\n");
-		let objectTypes="SELECT Tri.o AS term,typeO AS type FROM Triples AS Tri,Types AS Ty,SHEX AS Sh WHERE Tri.s=Ty.term AND Ty.type=Sh.typeS AND Sh.mult IN ('1','+') AND Sh.label=Tri.p";
-		let mTypeValue="CREATE OR REPLACE VIEW MissTypeValue (o,type) AS SELECT Tri.o,typeO FROM Triples AS Tri,Types AS Ty,SHEX AS Sh WHERE Tri.o=Ty.term AND Ty.type=Sh.typeO AND Sh.mult IN ('1','+');\n";
 		
 		
-		mTypeValue=mTypeValue.concat("CREATE OR REPLACE VIEW TriplesMiss AS ").concat(" SELECT MV.o,Sh.label,Sh.typeO FROM MissTypeValue").concat(" AS MV,").concat(ShName).concat(" AS Sh WHERE MV.type=Sh.typeS AND Sh.mult IN ('1','+'); \n");
+		
+		let tripleSimulation="CREATE OR REPLACE VIEW TripleSim (s,p,o) AS SELECT * FROM Triples UNION ".concat(F);
+		mQ=mQ.concat(tripleSimulation);
+		chaseQ=chaseQ.concat(tripleSimulation);
+		let objectTypes="SELECT DISTINCT Tri.o AS term,typeO AS type FROM TripleSim AS Tri,Types AS Ty,SHEX AS Sh WHERE Tri.s=Ty.term AND Ty.type=Sh.typeS AND Sh.mult IN ('1','+') AND Sh.label=Tri.p ;\n";
+		let typesM="CREATE OR REPLACE VIEW AllTyped (term,type) AS SELECT * FROM Types UNION ".concat(objectTypes);
+		mQ=mQ.concat(typesM);
+		chaseQ=chaseQ.concat(typesM);
+		let mTypeValue="CREATE OR REPLACE VIEW MissTypeValue (o,type) AS SELECT DISTINCT Tri.o,typeO FROM TripleSim AS Tri,AllTyped AS Ty,SHEX AS Sh WHERE Tri.o=Ty.term AND Ty.type=Sh.typeO AND Sh.mult IN ('1','+');\n";
+		mTypeValue=mTypeValue.concat("CREATE OR REPLACE VIEW TripleSim2 AS ").concat(" SELECT MV.o,Sh.label,Sh.typeO FROM MissTypeValue").concat(" AS MV,").concat(ShName).concat(" AS Sh WHERE MV.type=Sh.typeS AND Sh.mult IN ('1','+'); \n");
 		mQ=mQ.concat(mTypeValue);
 		chaseQ=chaseQ.concat(mTypeValue);
 		mQ=mQ.concat("/*UNIFYING THE SET WITH THE MISSING TRIPLES*/\n");
-		let solution="CREATE OR REPLACE VIEW Solution AS SELECT * FROM Triples UNION SELECT * FROM TriplesMiss;\n";
+		let solution="CREATE OR REPLACE VIEW Solution AS SELECT * FROM Triples UNION SELECT * FROM TripleSim UNION SELECT * FROM TripleSim2;\n";
 		chaseQ=chaseQ.concat(solution);
 		mQ=mQ.concat(solution);
 		chase=chase.concat(schQTitle).concat(schQ);
@@ -297,18 +304,31 @@ exchange:function(e){
       })
       .done(function(data) {
         console.log(data)
-        const fileStream = streamSaver.createWriteStream('triples.ttl')
+        let tripleSim=[]
+		const s_bytes=JSON.stringify(data);        
+        const jsonObj=JSON.parse(s_bytes)
+        
+        
+        const fileStream = streamSaver.createWriteStream('triples.rj')
 		const writer = fileStream.getWriter()
 		const encoder = new TextEncoder		
 		let uint8array = encoder.encode(data)	
 		writer.write(uint8array)
-		writer.close()
+		writer.close();
+        
+        
+        /*for (const [sub,Prop] of jsonObj){
+        	console.log(sub)
+        	console.log(Prop)
+        	tripleSim.push({subject:sub,predicate:"",object:""});
+        }*/
+        
         //$('#result_exchange').html(data)
-        var triples=[];//{subject:,predicate:,object:}
+        var triples=[{subject:"a",predicate:"b",object:"c"}];
         var svgTriples = d3.select("#result_exchange").append("svg").attr("width", 800).attr("height", 600);		
 		var force = d3.layout.force().size([800, 600]);		
 		var graph = triplesToGraph(svgTriples,triples);		
-		update(svgTriples,force);
+		update(svgTriples,force,graph);
       })
       .fail(function(jqXHR, textStatus, errorThrown) {        
         console.log(textStatus);

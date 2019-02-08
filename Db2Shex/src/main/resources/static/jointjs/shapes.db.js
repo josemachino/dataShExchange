@@ -6,6 +6,11 @@
  * Deleting red links cause problems
  * Recommend what to do when user is going to exchange
  */
+//https://dzone.com/articles/writing-web-based-client-side-unit-tests-with-jasm
+//https://jasmine.github.io/tutorials/your_first_suite
+//http://shexjava.lille.inria.fr/demonstrator
+//http://ftp.informatik.rwth-aachen.de/Publications/CEUR-WS/Vol-368/paper16.pdf
+//https://www.testingexcellence.com/encode-decode-json-byte-array/
 //https://groups.google.com/forum/#!topic/jointjs/r9xuR09_76g
 //https://www.cs.ox.ac.uk/boris.motik/pubs/bkmmpst17becnhmarking-chase.pdf
 //http://www.dia.uniroma3.it/~papotti/Projects/DataExchange/pdf/vldb10.pdf
@@ -1978,7 +1983,7 @@ function triplesToGraph(svg,triples){
 	return graph;
 }
 
-function update(svg,force){
+function update(svg,force,graph){
 	// ==================== Add Marker ====================
 	svg.append("svg:defs").selectAll("marker")
 	    .data(["end"])
