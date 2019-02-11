@@ -8,18 +8,14 @@ render: function(){
 },
 events: {
     "click .list-unstyled li a":"hideOthers",
-    "click #sideLeftcollapse":"activate"
+    "click #sideLeftcollapse":"activate"  
 },
 hideOthers:function(e){
-    if ($(e.target).parents('li')[0].id=="tgd"){
-        
-        //$('#tgds_container').html(JSON.stringify());
-    	editorJSON.set(stTGD2(graphTGDs,paperTGDs,mapTableIdCanvas))
-        /*$('#tgds_list').rainbowJSON({
-            maxElements: 1000,
-            maxDepth: 10,
-            json: stTGD2(graphTGDs,paperTGDs,mapTableIdCanvas)
-        });*/
+    if ($(e.target).parents('li')[0].id=="tgd"){        
+    	editorJSON.set(stTGD2(graphTGDs,paperTGDs,mapTableIdCanvas));        
+    }
+    if($(e.target).parents('li')[0].id=="testing"){    	
+    	window.open("SpecRunner.html");
     }
 	for (var i=0;i<$(e.target).parents('li').siblings().length;i++){
     $(e.target).parents('li').siblings()[i].firstElementChild.classList.remove('active'); 
@@ -27,7 +23,6 @@ hideOthers:function(e){
 	}
 },
 activate:function(e){    
-    //$(e.target).toggleClass('active');
     $('#sidebar').toggleClass('active');
 }
 });
