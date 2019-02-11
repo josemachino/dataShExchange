@@ -271,16 +271,7 @@ exchange:function(e){
 	comment=comment.concat(headerTri).concat(triSql)
 	comment=comment.concat(headerTy).concat(tySql)		
 	comment=comment.concat("*/");
-	chase=chase.concat(comment);
-	
-	/*const fileStream = streamSaver.createWriteStream('filename.txt')
-	const writer = fileStream.getWriter()
-	const encoder = new TextEncoder
-	let data = 'a'.repeat(1024)
-	let uint8array = encoder.encode(data + "\n\n")
-
-	writer.write(uint8array)
-	writer.close()*/
+	chase=chase.concat(comment);	
 	
 	var linkC = document.createElement("a");
 	var valR=$('input[name=optradio]:checked').val();	 

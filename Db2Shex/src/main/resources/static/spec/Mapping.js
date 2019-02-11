@@ -1,9 +1,9 @@
 describe("Mappings", function() {
-  var graphST;
-  var song;
-
+  var graphST;  
+  var exchange;
   beforeEach(function() {
 	graphST=new joint.dia.Graph;
+	exchange=new Exchange();
   });
 
   it("Mapping two relational attributes to the same Triple constraint", function() {
@@ -34,7 +34,9 @@ describe("Mappings", function() {
 	        async: false
 	      })
 	      .done(function(data) {
-	        console.log(data)
+	    	 graphST.fromJSON(data);
+	    	 exchange.setGraph(graphST);
+	    	 
 	      })
 	      .fail(function(jqXHR, textStatus, errorThrown) {        
 	        console.log(textStatus);
@@ -42,11 +44,11 @@ describe("Mappings", function() {
 	      .always(function() {
 	        
 	      });
-	  
+	  exchange.generateQuery();
 	  $.ajax({	  
 	        url: "test",
 	        type: "POST",
-	        data:{nameTest:"twoAttSameTC",queries:},
+	        data:{nameTest:"twoAttSameTC",queries:exchange.chaseQueryDB},
 	        async: false
 	      })
 	      .done(function(data) {
