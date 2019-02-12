@@ -1,17 +1,54 @@
 function Exchange(){}
-Exchange.prototype.setGraph=function(graphST) {
-	this.graphST=graphST;	 
+
+Exchange.prototype.getKeyByValue=function(object, value){
+	  return Object.keys(object).find(key => object[key] === value);
 };
 
-Exchange.prototype.stTGD=function(graph,paper,mapTables){
+Exchange.prototype.getSubjectFunctionTerm=function(graph, model,s_fterm, portType,bind){
+	    var aux_links=graph.getConnectedLinks(model, {outbound:true});
+	    for (var s_link of aux_links){                                
+	        if (model.getPort(s_link.attributes.source.port).group=='in' && s_link.attributes.target.port==portType){
+	            var fterm=s_link.labels()[0].attrs.text.text.split('(');
+	            s_fterm.push({function:fterm[0],args:[{rel:this.getKeyByValue(bind,model.attributes.question),attr:fterm[1].slice(0,-1)}]});
+	            break;
+	        }
+	    }        
+};
+
+Exchange.prototype.convert_map_to_obj=( aMap => {
+    const obj = {};
+    aMap.forEach ((v,k) => { obj[k] = v });
+    return obj;
+});
+
+Exchange.prototype.getTokens=function (value){
+    var tokens=[];
+    var j=0;
+    var aux;
+    
+    for (var i=0; i < value.length; i++) {
+        var theUnicode = value.charCodeAt(i);                
+        if (theUnicode==10781){
+            aux=value.substring(j,i);
+            j=i+1;
+            tokens.push(aux)            
+        }
+    }
+    tokens.push(value.substring(j,i));
+    return tokens;
+}
+
+Exchange.prototype.stTGD=function(mapSymbols,graph,paper,mapTables){
     var bindNames={}
     graph.getElements().forEach(function(element){
         if (element.attributes.type=="db.Table"){
             bindNames[element.attributes.question]=element.attributes.question;
         }
     });    
-    var sigma={functions:convert_map_to_obj(mapSymbols),rules:[]};    
+    var sigma={functions:this.convert_map_to_obj(mapSymbols),rules:[]};    
     for (var link of graph.getLinks()){
+    	
+    	if (link!=='undefined'){    		
         var linkView=link.findView(paper);
         if (linkView.sourceView.model.attributes.type=="db.Table" && linkView.targetView.model.attributes.type=="shex.Type" && linkView.sourceMagnet.nodeName=='circle'){ 
 			var rule={bind:bindNames,constraints:[],yield:[]};
@@ -23,7 +60,7 @@ Exchange.prototype.stTGD=function(graph,paper,mapTables){
                 var annotation=lab.attrs.text.text;                
                 if (annotation.includes('(')){
                     var fterm=annotation.split('(');                                        
-                    objterm.push({function:fterm[0],args:[{rel:getKeyByValue(rule.bind,linkView.sourceView.model.attributes.question),attr:fterm[1].slice(0,-1)}]});                                   
+                    objterm.push({function:fterm[0],args:[{rel:this.getKeyByValue(rule.bind,linkView.sourceView.model.attributes.question),attr:fterm[1].slice(0,-1)}]});                                   
                 } else if (annotation.includes('function')){
 					
 					annotation=annotation.replace(/[\[\]]/g,"")					
@@ -41,10 +78,10 @@ Exchange.prototype.stTGD=function(graph,paper,mapTables){
 					
 					
 				}else{
-                    relNames=getTokens(annotation);                    
+                    relNames=this.getTokens(annotation);                    
                     if (relNames.length==1){
                         //get subject term 
-                        getSubjectFunctionTerm(graph,linkView.sourceView.model,s_fterm, linkView.targetView.model.attributes.ports.items[0].id,rule.bind);
+                        this.getSubjectFunctionTerm(graph,linkView.sourceView.model,s_fterm, linkView.targetView.model.attributes.ports.items[0].id,rule.bind);
                         
                     }else{
                         
@@ -57,7 +94,7 @@ Exchange.prototype.stTGD=function(graph,paper,mapTables){
                                     var elementView=element.findView(paper);  
 									
 									if (i==relNames.length-1)
-										getSubjectFunctionTerm(graph,elementView.model,s_fterm, linkView.targetView.model.attributes.ports.items[0].id,rule.bind);
+										this.getSubjectFunctionTerm(graph,elementView.model,s_fterm, linkView.targetView.model.attributes.ports.items[0].id,rule.bind);
 									
                                     mapFD.set(name,[]);
                                     mapFD.set(relNames[i+1],[]);
@@ -119,7 +156,7 @@ Exchange.prototype.stTGD=function(graph,paper,mapTables){
             if (objterm.length==0){
 				for (var opt of linkView.sourceView.model.attributes.options){                        
                         if (opt.id==V(linkView.sourceMagnet.parentNode).attr('port')){                            
-							objterm.push({rel:getKeyByValue(rule.bind,relNames[0]),attr:opt.text})
+							objterm.push({rel:this.getKeyByValue(rule.bind,relNames[0]),attr:opt.text})
                             break;
                         }
                     }
@@ -136,23 +173,27 @@ Exchange.prototype.stTGD=function(graph,paper,mapTables){
             rule.yield.push({atom:"Triple",args:triTerms});
 			sigma.rules.push(rule)
         }
+    	}
     }    
     return sigma;
     
 };
 
-Exchange.prototype.generateQuery = function() {
-	this.chaseQueryDB="";
-	this.graphST.getElements().forEach(function(element){		
-		if (element.attributes.type=="shex.Type"){			
-			miShex.set(element.attributes.question,[])
+Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTables) {		
+	let chaseQ="";
+	let msgs=[];
+	let miShex=new Map();
+	let schShex=new Map();
+	graphST.getElements().forEach(function(element){		
+		if (element.attributes.type=="shex.Type"){				
+			miShex.set(element.attributes.question,[]);
 			var elementView=element.findView(paperTGDs);
-			var intargetLinks=this.graphST.getConnectedLinks(elementView.model, {inbound:true});
+			var intargetLinks=graphST.getConnectedLinks(elementView.model, {inbound:true});
 			if (intargetLinks.length==0){
 				element.attributes.options.forEach(function(tc) {					  				
 				  if (tc.mult=="1" || tc.mult=="+"){
-					  let msg='<div class="alert alert-warning alert-dismissible fade show" role="alert"> <strong>'+element.attributes.question+'</strong> Triple constraint ('+tc.label+":"+tc.type +') needs to be linked.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>'
-					  $("#ls_todo").append(msg);					  					 					  					 
+					  let msg='<div class="alert alert-warning alert-dismissible fade show" role="alert"> <strong>'+element.attributes.question+'</strong> Triple constraint ('+tc.label+":"+tc.type +') needs to be linked.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>'					  
+					  msgs.push(msg)
 					  var tcs=miShex.get(element.attributes.question);
 					  tcs.push(tc)
 					  missing=true;
@@ -167,7 +208,7 @@ Exchange.prototype.generateQuery = function() {
 							var tc=pt.id.split(",");
 							if (tc[2]=="1" || tc[2]=="+"){
 								let msg='<div class="alert alert-warning alert-dismissible fade show" role="alert"> <strong>'+element.attributes.question+'</strong> Triple constraint ('+tc[0]+":"+tc[1]+') needs to be linked.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>'
-								$("#ls_todo").append(msg);
+								msgs.push(msg)
 								var tcs=miShex.get(element.attributes.question);
 								tcs.push({label:tc[0],type:tc[1],mult:tc[2]})
 								missing=true;
@@ -186,7 +227,7 @@ Exchange.prototype.generateQuery = function() {
     });	
 		
 	//construct sql query
-	let tgds=stTGD(this.graphST);
+	let tgds=this.stTGD(mapSymbols,graphST,paperTGDs,mapTables);
 	let TyName="TypesFact";
 	let TriName="Triples";
 	let ShName="SHEX";
@@ -207,7 +248,7 @@ Exchange.prototype.generateQuery = function() {
 				q=q.concat("CREATE OR REPLACE VIEW").concat(" ").concat(TyName).concat(indexTM).concat(" (term,type) AS ");			
 				//consider that the length of args in case of type atom will allays be one 			
 				q=q.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("/',").concat(atom.args[0].args[0].attr).concat(")").concat(",").concat("'").concat(atom.atom).concat("'").concat(" ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel);
-				q=q.concat(";\n")			
+				q=q.concat(";\n");			
 			}else if (atom.args.length==3){//it is the triple atom
 				q=q.concat("CREATE OR REPLACE VIEW").concat(" ").concat(TriName).concat(indexTM).concat(" AS ");
 				q=q.concat("SELECT").concat(" ");
@@ -315,7 +356,7 @@ Exchange.prototype.generateQuery = function() {
 				file2RML=file2RML.concat(tmQ)
 			}						
 			chase=chase.concat(q);
-			this.chaseQueryDB=this.chaseQueryDB.concat(q);
+			chaseQ=chaseQ.concat(q);
 		})
 		indexTM++;
 		
@@ -337,7 +378,7 @@ Exchange.prototype.generateQuery = function() {
 	
 	if (missing){
 		let msgDanger='<div class="alert alert-danger alert-dismissible fade show" role="alert"> The chase SQL script generates additional rows to satisfy approximatelly ShEx schema<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
-		$("#ls_todo").append(msgDanger);
+		msgs.push(msgDanger);
 		//completing the missing types
 		var mQ="";
 		//create the shex table with ShEx schema
@@ -348,7 +389,7 @@ Exchange.prototype.generateQuery = function() {
 				schQ=schQ.concat("INSERT INTO ").concat(ShName).concat(" (typeS,label,typeO,mult) VALUES ('").concat(type).concat("','").concat(tc.label).concat("','").concat(tc.type).concat("','").concat(tc.mult).concat("');\n");
 			})
 		})			
-		this.chaseQueryDB=this.chaseQueryDB.concat(c3).concat(schQ)
+		chaseQ=chaseQ.concat(c3).concat(schQ)
 		let allTri="CREATE OR REPLACE VIEW Triples (s,p,o) AS ";
 		allTri=allTri.concat(triSql)
 		
@@ -361,27 +402,27 @@ Exchange.prototype.generateQuery = function() {
 		allTy=allTy.concat(tySql)
 		mQ=mQ.concat("/*2. CREATING A TOTAL VIEW OF TRIPLES AND TYPES */\n");
 		mQ=mQ.concat(allTri);
-		this.chaseQueryDB=this.chaseQueryDB.concat(allTri)
+		chaseQ=chaseQ.concat(allTri)
 		mQ=mQ.concat(allTy);
-		this.chaseQueryDB=this.chaseQueryDB.concat(allTy)
+		chaseQ=chaseQ.concat(allTy)
 		mQ=mQ.concat("/*3. ADDING MISSING VALUES */\n");
 		
 		
 		
 		let tripleSimulation="CREATE OR REPLACE VIEW TripleSim (s,p,o) AS SELECT * FROM Triples UNION ".concat(F);
 		mQ=mQ.concat(tripleSimulation);
-		this.chaseQueryDB=this.chaseQueryDB.concat(tripleSimulation);
+		chaseQ=chaseQ.concat(tripleSimulation);
 		let objectTypes="SELECT DISTINCT Tri.o AS term,typeO AS type FROM TripleSim AS Tri,Types AS Ty,SHEX AS Sh WHERE Tri.s=Ty.term AND Ty.type=Sh.typeS AND Sh.mult IN ('1','+') AND Sh.label=Tri.p ;\n";
 		let typesM="CREATE OR REPLACE VIEW AllTyped (term,type) AS SELECT * FROM Types UNION ".concat(objectTypes);
 		mQ=mQ.concat(typesM);
-		this.chaseQueryDB=this.chaseQueryDB.concat(typesM);
+		chaseQ=chaseQ.concat(typesM);
 		let mTypeValue="CREATE OR REPLACE VIEW MissTypeValue (o,type) AS SELECT DISTINCT Tri.o,typeO FROM TripleSim AS Tri,AllTyped AS Ty,SHEX AS Sh WHERE Tri.o=Ty.term AND Ty.type=Sh.typeO AND Sh.mult IN ('1','+');\n";
 		mTypeValue=mTypeValue.concat("CREATE OR REPLACE VIEW TripleSim2 AS ").concat(" SELECT MV.o,Sh.label,Sh.typeO FROM MissTypeValue").concat(" AS MV,").concat(ShName).concat(" AS Sh WHERE MV.type=Sh.typeS AND Sh.mult IN ('1','+'); \n");
 		mQ=mQ.concat(mTypeValue);
-		this.chaseQueryDB=this.chaseQueryDB.concat(mTypeValue);
+		chaseQ=chaseQ.concat(mTypeValue);
 		mQ=mQ.concat("/*UNIFYING THE SET WITH THE MISSING TRIPLES*/\n");
 		let solution="CREATE OR REPLACE VIEW Solution AS SELECT * FROM Triples UNION SELECT * FROM TripleSim UNION SELECT * FROM TripleSim2;\n";
-		this.chaseQueryDB=this.chaseQueryDB.concat(solution);
+		chaseQ=chaseQ.concat(solution);
 		mQ=mQ.concat(solution);
 		chase=chase.concat(schQTitle).concat(schQ);
 		chase=chase.concat(mQ);
@@ -397,6 +438,6 @@ Exchange.prototype.generateQuery = function() {
 	comment=comment.concat("*/");
 	chase=chase.concat(comment);
 	
-		
-	this.chaseScript="";
+	this.chaseQueryDB=chaseQ;
+	this.chaseScript=chase;
 };

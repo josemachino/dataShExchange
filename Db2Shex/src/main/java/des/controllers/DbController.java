@@ -1,10 +1,14 @@
 package des.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import des.services.DBService;
 //https://stackoverflow.com/questions/43503977/spring-mvc-jackson-mapping-query-parameters-to-modelattribute-lowercase-wi
@@ -20,10 +24,17 @@ public class DbController {
 	public DbController(DBService dbService) {
 		this.dbService = dbService;
 	}	
-	@PostMapping(path="/chase")    
-    public @ResponseBody byte[] chaseRule(@RequestParam("queries") String queries) {
+	@PostMapping(path="/chase") 		
+    public @ResponseBody ResponseEntity<StreamingResponseBody> chaseRule(@RequestParam("queries") String queries) {
 		String[] ls_Query=queries.split("\n");				
-        //return dbService.getResultFile("RDF/JSON",ls_Query);
-        return dbService.getResultFile("RDF/JSON",ls_Query);
+        final StreamingResponseBody body = out -> out.write(dbService.getResultFile("RDF/JSON",ls_Query));       		
+
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentDispositionFormData("filename", "triples.rj");
+        
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.valueOf("application/rdf+json"))
+                .body(body); 
     }
 }

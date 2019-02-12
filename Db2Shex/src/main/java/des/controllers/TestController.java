@@ -1,7 +1,5 @@
 package des.controllers;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -12,11 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.restlet.sqlimport.model.sql.Database;
@@ -61,15 +62,16 @@ public class TestController {
         };
     }
 	
-	@RequestMapping("/test")
-    String test(@RequestParam("nameTest") String nameTest,@RequestParam("queries")String queries) throws IOException, SQLException {
+	@PostMapping("/test")
+	@ResponseBody
+	ResponseEntity<StreamingResponseBody> test(@RequestParam("nameTest") String nameTest,@RequestParam("queries")String queries) throws IOException, SQLException {
 		//Read file
 		Resource dbResource=null;		
-		if (nameTest.equals("twoAttSameTC")) {
+		if (nameTest.equals("student_twoAttSameTC")) {
 			dbResource = new ClassPathResource(folderDBName+"/"+sqlFiles[0]+".sql");
 		}
 		if (nameTest.equals("")){
-			
+			dbResource = new ClassPathResource(folderDBName+"/"+sqlFiles[1]+".sql");
 		}
 		
 		final InputStream in = dbResource.getInputStream();
@@ -79,6 +81,15 @@ public class TestController {
         //Return the structure that will draw the graphic        
         dbService.createH2DB(database);        
         String[] ls_Query=queries.split("\n");
-        return dbService.getResultFile("RDF/JSON",ls_Query).toString();        
+        
+        final StreamingResponseBody body = out -> out.write(dbService.getResultFile("RDF/JSON",ls_Query));       		
+
+        final HttpHeaders headers = new HttpHeaders();
+        headers.setContentDispositionFormData("filename", "triples.rj");
+        
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.valueOf("application/rdf+json"))
+                .body(body);        
     }
 }

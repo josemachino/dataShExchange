@@ -294,10 +294,18 @@ exchange:function(e){
         data:  {queries:chaseQ}
       })
       .done(function(data) {
-        console.log(data)
-        let tripleSim=[]
-		const s_bytes=JSON.stringify(data);        
-        const jsonObj=JSON.parse(s_bytes)
+        console.log(data)        
+		var triples=[];
+        for(var uri in data){
+        	for(var property in data[uri]){
+        		for(var i=0; i<data[uri][property].length; i++ ){
+      	          var s = uri;
+      	          var p = property;
+      	          var o = data[uri][property][i]['value'];	        	          
+      	          triples.push({subject:s,predicate:p,object:o})
+        		}
+      	  	}  
+        }
         
         
         const fileStream = streamSaver.createWriteStream('triples.rj')
@@ -307,15 +315,8 @@ exchange:function(e){
 		writer.write(uint8array)
 		writer.close();
         
+                
         
-        /*for (const [sub,Prop] of jsonObj){
-        	console.log(sub)
-        	console.log(Prop)
-        	tripleSim.push({subject:sub,predicate:"",object:""});
-        }*/
-        
-        //$('#result_exchange').html(data)
-        var triples=[{subject:"a",predicate:"b",object:"c"}];
         var svgTriples = d3.select("#result_exchange").append("svg").attr("width", 800).attr("height", 600);		
 		var force = d3.layout.force().size([800, 600]);		
 		var graph = triplesToGraph(svgTriples,triples);		
