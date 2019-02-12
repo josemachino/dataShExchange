@@ -36,10 +36,13 @@ exchange:function(e){
 				});
 			}else{				
 				element.attributes.ports.items.forEach(function(pt) {
-					if (pt.group!="inType"){	
-						if(!intargetLinks.some(function(itLink){
+					if (pt.group!="inType"){
+						let isCon=intargetLinks.some(function(itLink){
 							return itLink.attributes.target.port==pt.id;
-						})){
+						});
+						console.log(isCon)
+						console.log(itLink)
+						if(!isCon){
 							var tc=pt.id.split(",");
 							if (tc[2]=="1" || tc[2]=="+"){
 								let msg='<div class="alert alert-warning alert-dismissible fade show" role="alert"> <strong>'+element.attributes.question+'</strong> Triple constraint ('+tc[0]+":"+tc[1]+') needs to be linked.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>'
