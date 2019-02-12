@@ -94,9 +94,9 @@ exchange:function(e){
 						if (typeof(term[0].function)==='undefined'){								
 							q=q.concat(term[0].attr);
 							lastRel=term[0].rel;
-						}else{								
-							q=q.concat("CONCAT('").concat(tgds.functions[term[0].function]).concat("/',").concat(term[0].args[0].attr).concat(")");
+						}else{
 							lastRel=term[0].args[0].rel;
+							q=q.concat("CONCAT('").concat(tgds.functions[term[0].function]).concat("/',").concat(lastRel).concat(".").concat(term[0].args[0].attr).concat(")");							
 						}														
 					}else{
 						q=q.concat(",'").concat(term).concat("',");							

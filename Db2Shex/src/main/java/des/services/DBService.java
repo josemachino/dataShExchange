@@ -72,7 +72,7 @@ public class DBService {
 
 	public List<SchemaTableJSON> createH2DB(Database db) throws SQLException {
 		List<SchemaTableJSON> schemaTables=new ArrayList<SchemaTableJSON>();		
-		
+		jdbcTemplate.execute("DROP ALL OBJECTS");
 		for (Table ta: db.getTables()) {
 			
 			List<String> pks=ta.getPrimaryKey().getColumnNames();			

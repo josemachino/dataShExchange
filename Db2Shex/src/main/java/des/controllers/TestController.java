@@ -31,7 +31,7 @@ import des.services.DBService;
 public class TestController {
 	String folderDBName="tests/db";
 	String folderTGDName="tests/tgds";
-	String [] sqlFiles=new String[] {"student","product"};
+	String [] sqlFiles=new String[] {"student","supplier"};
 	
 	private final DBService dbService;
 	private Util util = new Util();
@@ -70,7 +70,7 @@ public class TestController {
 		if (nameTest.equals("student_twoAttSameTC")) {
 			dbResource = new ClassPathResource(folderDBName+"/"+sqlFiles[0]+".sql");
 		}
-		if (nameTest.equals("")){
+		if (nameTest.equals("supplier_singleGB")||nameTest.equals("supplier_singleGBR")){
 			dbResource = new ClassPathResource(folderDBName+"/"+sqlFiles[1]+".sql");
 		}
 		
