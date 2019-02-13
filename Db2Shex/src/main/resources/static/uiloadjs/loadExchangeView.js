@@ -36,12 +36,10 @@ exchange:function(e){
 				});
 			}else{				
 				element.attributes.ports.items.forEach(function(pt) {
-					if (pt.group!="inType"){
+					if (pt.group!="inType" && pt.group!="refType" && pt.group!="outRefType"){
 						let isCon=intargetLinks.some(function(itLink){
 							return itLink.attributes.target.port==pt.id;
-						});
-						console.log(isCon)
-						console.log(itLink)
+						});						
 						if(!isCon){
 							var tc=pt.id.split(",");
 							if (tc[2]=="1" || tc[2]=="+"){
@@ -89,7 +87,7 @@ exchange:function(e){
 				q=q.concat(";\n")			
 			}else if (atom.args.length==3){//it is the triple atom
 				q=q.concat("CREATE OR REPLACE VIEW").concat(" ").concat(TriName).concat(indexTM).concat(" AS ");
-				q=q.concat("SELECT").concat(" ");
+				q=q.concat("SELECT DISTINCT ").concat(" ");
 				let lastRel="";
 				let simpleQRML="";
 				atom.args.forEach(function(term){
@@ -214,6 +212,9 @@ exchange:function(e){
 	tySql=tySql.slice(0,-7).concat(";\n");
 	triSql=triSql.slice(0,-7).concat(";\n");
 	
+	let allTri="CREATE OR REPLACE VIEW Triples (s,p,o) AS ";
+	allTri=allTri.concat(triSql);
+	
 	if (missing){
 		let msgDanger='<div class="alert alert-danger alert-dismissible fade show" role="alert"> The chase SQL script generates additional rows to satisfy approximatelly ShEx schema<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
 		$("#ls_todo").append(msgDanger);
@@ -228,8 +229,7 @@ exchange:function(e){
 			})
 		})			
 		chaseQ=chaseQ.concat(c3).concat(schQ)
-		let allTri="CREATE OR REPLACE VIEW Triples (s,p,o) AS ";
-		allTri=allTri.concat(triSql)
+		
 		
 		/*TODO
 		 * SELECT where Sh.mult=1 and Sh.label not in select p from triples  
@@ -264,6 +264,12 @@ exchange:function(e){
 		mQ=mQ.concat(solution);
 		chase=chase.concat(schQTitle).concat(schQ);
 		chase=chase.concat(mQ);
+	}else{
+		chaseQ=chaseQ.concat(allTri);
+		chase=chase.concat(allTri);
+		let solution="CREATE OR REPLACE VIEW Solution AS SELECT * FROM Triples;\n";
+		chaseQ=chaseQ.concat(solution);
+		chase=chase.concat(solution);
 	}	
 			
 	//return a set of triples

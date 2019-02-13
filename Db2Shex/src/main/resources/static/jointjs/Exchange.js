@@ -1,5 +1,12 @@
 function Exchange(){}
 
+Exchange.prototype.getNameAttribute=function(attributes,id){
+    for (var att of attributes){
+        if (att.id==id)
+            return att.text;
+    }
+};
+
 Exchange.prototype.getKeyByValue=function(object, value){
 	  return Object.keys(object).find(key => object[key] === value);
 };
@@ -109,7 +116,7 @@ Exchange.prototype.stTGD=function(mapSymbols,graph,paper,mapTables){
                                                 for (var taElem of graph.getElements()){
                                                     if (mapTables.get(opt.ref.name)==taElem.id){
                                                         var taView=taElem.findView(paper);
-                                                        nameAttRef=getNameAttribute(taView.model.attributes.options,opt.ref.id);
+                                                        nameAttRef=this.getNameAttribute(taView.model.attributes.options,opt.ref.id);
                                                         break;
                                                     }
                                                 }                                                
@@ -201,7 +208,7 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 				});
 			}else{				
 				element.attributes.ports.items.forEach(function(pt) {
-					if (pt.group!="inType"){	
+					if (pt.group!="inType" && pt.group!="refType" && pt.group!="outRefType"){	
 						if(!intargetLinks.some(function(itLink){
 							return itLink.attributes.target.port==pt.id;
 						})){
@@ -251,7 +258,7 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 				q=q.concat(";\n");			
 			}else if (atom.args.length==3){//it is the triple atom
 				q=q.concat("CREATE OR REPLACE VIEW").concat(" ").concat(TriName).concat(indexTM).concat(" AS ");
-				q=q.concat("SELECT").concat(" ");
+				q=q.concat("SELECT DISTINCT ").concat(" ");
 				let lastRel="";
 				let simpleQRML="";
 				atom.args.forEach(function(term){
@@ -264,7 +271,7 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 							q=q.concat("CONCAT('").concat(tgds.functions[term[0].function]).concat("/',").concat(lastRel).concat(".").concat(term[0].args[0].attr).concat(")");
 						}														
 					}else{
-						q=q.concat(",'").concat(term).concat("',");							
+						q=q.concat(",'").concat(term).concat("' as p,");							
 					}						
 				});
 				let sT=atom.args[0];					
@@ -376,6 +383,9 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	tySql=tySql.slice(0,-7).concat(";\n");
 	triSql=triSql.slice(0,-7).concat(";\n");
 	
+	let allTri="CREATE OR REPLACE VIEW Triples (s,p,o) AS ";
+	allTri=allTri.concat(triSql)
+	
 	if (missing){
 		let msgDanger='<div class="alert alert-danger alert-dismissible fade show" role="alert"> The chase SQL script generates additional rows to satisfy approximatelly ShEx schema<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
 		msgs.push(msgDanger);
@@ -390,8 +400,7 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 			})
 		})			
 		chaseQ=chaseQ.concat(c3).concat(schQ)
-		let allTri="CREATE OR REPLACE VIEW Triples (s,p,o) AS ";
-		allTri=allTri.concat(triSql)
+		
 		
 		/*TODO
 		 * SELECT where Sh.mult=1 and Sh.label not in select p from triples  
@@ -426,7 +435,13 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 		mQ=mQ.concat(solution);
 		chase=chase.concat(schQTitle).concat(schQ);
 		chase=chase.concat(mQ);
-	}	
+	}else{
+		chaseQ=chaseQ.concat(allTri);
+		chase=chase.concat(allTri);
+		let solution="CREATE OR REPLACE VIEW Solution AS SELECT * FROM Triples;\n";
+		chaseQ=chaseQ.concat(solution);
+		chase=chase.concat(solution);
+	}
 			
 	//return a set of triples
 	let comment="/*";

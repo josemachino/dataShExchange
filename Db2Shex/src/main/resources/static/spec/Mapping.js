@@ -235,6 +235,79 @@ describe("Mappings", function() {
 	      });
 	console.log(triples)
 	var triplesExpected=[
+		{ subject: 'http://example.com/SupplierShape/S1', predicate: 'name', object: 'Supp_North' },
+		{ subject: 'http://example.com/SupplierShape/S2', predicate: 'name', object: 'Supp_South' },
+		{ subject: 'http://example.com/ProductShape/P2', predicate: 'supplier', object: 'http://example.com/SupplierShape/S1' },
+		{ subject: 'http://example.com/ProductShape/P2', predicate: 'supplier', object: 'http://example.com/SupplierShape/S2' },
+		{ subject: 'http://example.com/ProductShape/P2', predicate: 'name', object: 'Potatoe' },
+		{ subject: 'http://example.com/ProductShape/P3', predicate: 'supplier', object: 'http://example.com/SupplierShape/S1' },
+		{ subject: 'http://example.com/ProductShape/P3', predicate: 'supplier', object: 'http://example.com/SupplierShape/S2' },
+		{ subject: 'http://example.com/ProductShape/P3', predicate: 'name', object: 'Onion' },
+		{ subject: 'http://example.com/ProductShape/P1', predicate: 'supplier', object: 'http://example.com/SupplierShape/S1' },
+		{ subject: 'http://example.com/ProductShape/P1', predicate: 'supplier', object: 'http://example.com/SupplierShape/S2' },
+		{ subject: 'http://example.com/ProductShape/P1', predicate: 'name', object: 'Carrot' }		
+		];
+	expect(triplesExpected).toEqual(triples);
+  });
+  
+  it("Bug Example Mapping with two Blank Nodes and four blank literals", function() {
+	  var triples=[];
+	  $.ajax({	  
+	        url: "tgd/bug_mapping",
+	        type: "GET",
+	        async: false
+	      })
+	      .done(function(data) {	    	  
+	    	 graphST.fromJSON(data);	
+	    	 let mapSymbols=new Map();
+	     	 let mapTableIdCanvas=new Map();
+	     	 let num=1;
+	     	 let namespace="http://example.com/"
+	     	 graphST.getElements().forEach(function(element){
+	    		if (element.attributes.type=="db.Table"){
+	    			mapTableIdCanvas.set(element.attributes.question,element.id)
+	    		}
+	    		if (element.attributes.type=="shex.Type"){
+	    			mapSymbols.set("f"+num,namespace+element.attributes.question);
+	    			num++;
+	    		}
+	     	 });	     	 
+	    	 exchange.generateQuery(mapSymbols,graphST,paperTGDs,mapTableIdCanvas);	    	 	    	 
+	      })
+	      .fail(function(jqXHR, textStatus, errorThrown) {        
+	        console.log(textStatus);
+	      })
+	      .always(function() {
+	        
+	      });		  
+	  $.ajax({	  
+	        url: "test",
+	        type: "POST",
+	        data:{nameTest:"bug_mapping",queries:exchange.chaseQueryDB},
+	        async: false
+	      })
+	      .done(function(data) {
+	        console.log(data);
+	        for(var uri in data){
+	        	  for(var property in data[uri]){
+	        	     for(var i=0; i<data[uri][property].length; i++ ){
+	        	          var s = uri;
+	        	          var p = property;
+	        	          var o = data[uri][property][i]['value'];	        	          	        	         
+	        	          triples.push({subject:s,predicate:p,object:o})
+	        	     }
+	        	  }  
+	        }
+	      })
+	      .fail(function(jqXHR, textStatus, errorThrown) {        	        
+	        console.log(errorThrown)
+	      })
+	      .always(function() {
+	        
+	      });
+	console.log(triples)
+	var triplesExpected=[
+				
 		];
 	expect(triplesExpected).toEqual(triples);
   });
