@@ -191,6 +191,7 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	let msgs=[];
 	let miShex=new Map();
 	let schShex=new Map();
+	let missing=false;
 	graphST.getElements().forEach(function(element){		
 		if (element.attributes.type=="shex.Type"){				
 			miShex.set(element.attributes.question,[]);
@@ -384,7 +385,7 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	triSql=triSql.slice(0,-7).concat(";\n");
 	
 	let allTri="CREATE OR REPLACE VIEW Triples (s,p,o) AS ";
-	allTri=allTri.concat(triSql)
+	allTri=allTri.concat(triSql);
 	
 	if (missing){
 		let msgDanger='<div class="alert alert-danger alert-dismissible fade show" role="alert"> The chase SQL script generates additional rows to satisfy approximatelly ShEx schema<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
