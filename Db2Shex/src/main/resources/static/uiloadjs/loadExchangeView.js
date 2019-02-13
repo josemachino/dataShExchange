@@ -320,7 +320,7 @@ exchange:function(e){
         const fileStream = streamSaver.createWriteStream('triples.rj')
 		const writer = fileStream.getWriter()
 		const encoder = new TextEncoder		
-		let uint8array = encoder.encode(data)	
+		let uint8array = encoder.encode(JSON.stringify(data))	
 		writer.write(uint8array)
 		writer.close();
         

@@ -65,7 +65,7 @@ doSearch: function( event ){
 	                            typeLabel='Literal';
 	                        }
 	                        multiplicity='';
-	                        if (typeof(expression.max)==='undefined'){
+	                        if (typeof(expression.max)==='undefined' || expression.max==expression.min){
 	                            multiplicity='1';
 	                        }else{
 	                            if (expression.max==1 && expression.min==0){
@@ -73,7 +73,8 @@ doSearch: function( event ){
 	                            }
 	                            if (expression.max==-1 && expression.min==0){
 	                            	multiplicity='*';
-	                            }else{
+	                            }
+	                            if (expression.max>1 && expression.min==0){
 	                            	multiplicity='+';
 	                            }
 	                        }

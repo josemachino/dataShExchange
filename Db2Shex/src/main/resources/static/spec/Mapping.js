@@ -108,7 +108,7 @@ describe("Mappings", function() {
   });
   
   
-  it("Mapping single green and blue links", function() {
+  it("Mapping on Supplier DB single green and blue links", function() {
 	  var triples=[];
 	  $.ajax({	  
 	        url: "tgd/supplier_singleGB",
@@ -178,7 +178,7 @@ describe("Mappings", function() {
 	expect(triplesExpected).toEqual(triples);
   });
   
-  it("Mapping single green, blue and red links", function() {
+  it("Mapping on Supplier DB single green, blue and red links", function() {
 	  var triples=[];
 	  $.ajax({	  
 	        url: "tgd/supplier_singleGBR",
@@ -239,8 +239,7 @@ describe("Mappings", function() {
 		{ subject: 'http://example.com/SupplierShape/S2', predicate: 'name', object: 'Supp_South' },
 		{ subject: 'http://example.com/ProductShape/P2', predicate: 'supplier', object: 'http://example.com/SupplierShape/S1' },
 		{ subject: 'http://example.com/ProductShape/P2', predicate: 'supplier', object: 'http://example.com/SupplierShape/S2' },
-		{ subject: 'http://example.com/ProductShape/P2', predicate: 'name', object: 'Potatoe' },
-		{ subject: 'http://example.com/ProductShape/P3', predicate: 'supplier', object: 'http://example.com/SupplierShape/S1' },
+		{ subject: 'http://example.com/ProductShape/P2', predicate: 'name', object: 'Potatoe' },	
 		{ subject: 'http://example.com/ProductShape/P3', predicate: 'supplier', object: 'http://example.com/SupplierShape/S2' },
 		{ subject: 'http://example.com/ProductShape/P3', predicate: 'name', object: 'Onion' },
 		{ subject: 'http://example.com/ProductShape/P1', predicate: 'supplier', object: 'http://example.com/SupplierShape/S1' },
@@ -284,6 +283,68 @@ describe("Mappings", function() {
 	        url: "test",
 	        type: "POST",
 	        data:{nameTest:"bug_mapping",queries:exchange.chaseQueryDB},
+	        async: false
+	      })
+	      .done(function(data) {
+	        console.log(data);
+	        for(var uri in data){
+	        	  for(var property in data[uri]){
+	        	     for(var i=0; i<data[uri][property].length; i++ ){
+	        	          var s = uri;
+	        	          var p = property;
+	        	          var o = data[uri][property][i]['value'];	        	          	        	         
+	        	          triples.push({subject:s,predicate:p,object:o})
+	        	     }
+	        	  }  
+	        }
+	      })
+	      .fail(function(jqXHR, textStatus, errorThrown) {        	        
+	        console.log(errorThrown)
+	      })
+	      .always(function() {
+	        
+	      });
+	console.log(triples)
+	var triplesExpected=[
+				
+		];
+	expect(triplesExpected).toEqual(triples);
+  });
+  
+  it("ProdSupp Example Mapping with single paths", function() {
+	  var triples=[];
+	  $.ajax({	  
+	        url: "tgd/prodsupp_mapping",
+	        type: "GET",
+	        async: false
+	      })
+	      .done(function(data) {	    	  
+	    	 graphST.fromJSON(data);	
+	    	 let mapSymbols=new Map();
+	     	 let mapTableIdCanvas=new Map();
+	     	 let num=1;
+	     	 let namespace="http://example.com/"
+	     	 graphST.getElements().forEach(function(element){
+	    		if (element.attributes.type=="db.Table"){
+	    			mapTableIdCanvas.set(element.attributes.question,element.id)
+	    		}
+	    		if (element.attributes.type=="shex.Type"){
+	    			mapSymbols.set("f"+num,namespace+element.attributes.question);
+	    			num++;
+	    		}
+	     	 });	     	 
+	    	 exchange.generateQuery(mapSymbols,graphST,paperTGDs,mapTableIdCanvas);	    	 	    	 
+	      })
+	      .fail(function(jqXHR, textStatus, errorThrown) {        
+	        console.log(textStatus);
+	      })
+	      .always(function() {
+	        
+	      });		  
+	  $.ajax({	  
+	        url: "test",
+	        type: "POST",
+	        data:{nameTest:"prodsupp_mapping",queries:exchange.chaseQueryDB},
 	        async: false
 	      })
 	      .done(function(data) {

@@ -31,7 +31,7 @@ import des.services.DBService;
 public class TestController {
 	String folderDBName="tests/db";
 	String folderTGDName="tests/tgds";
-	String [] sqlFiles=new String[] {"student","supplier"};
+	String [] sqlFiles=new String[] {"student","supplier","bug","ProdSup"};
 	
 	private final DBService dbService;
 	private Util util = new Util();
@@ -72,6 +72,12 @@ public class TestController {
 		}
 		if (nameTest.equals("supplier_singleGB")||nameTest.equals("supplier_singleGBR")){
 			dbResource = new ClassPathResource(folderDBName+"/"+sqlFiles[1]+".sql");
+		}
+		if (nameTest.equals("bug_mapping")) {
+			dbResource = new ClassPathResource(folderDBName+"/"+sqlFiles[2]+".sql");
+		}
+		if (nameTest.equals("prodsupp_mapping")) {
+			dbResource = new ClassPathResource(folderDBName+"/"+sqlFiles[3]+".sql");
 		}
 		
 		final InputStream in = dbResource.getInputStream();

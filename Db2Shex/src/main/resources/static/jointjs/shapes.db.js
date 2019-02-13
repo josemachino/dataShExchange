@@ -324,7 +324,7 @@ paperTGDs.on('link:connect',function(linkView){
 				                linkParent.appendLabel({attrs: {text: {text: valueIRI}}});
 
 				                
-				                let tHead=linkView.sourceView.model.attributes.question;
+				                let tHead=linkView.targetView.model.attributes.question;
 				                drawNewGreenLinkInTable(linkParent,tablesConnected[0].text,valueIRI,tHead)
 				            }
 						
@@ -618,16 +618,7 @@ function loadModalPathAttribute(currentLink,parameters){
         bodyViewOptions: { displayParameters:parameters },
         onConfirm: function() {                           
             var joinPath=$("#ddParameter .btn").text().trim();
-            currentLink.appendLabel({
-                        attrs: {
-                            text: {
-                                text: joinPath
-                            }
-                        },
-                        position: {
-                            offset: -10
-                        }
-                    });
+            currentLink.appendLabel({attrs: {text: {text: joinPath}},position: {offset: -10}});
 			var linkView=currentLink.findView(paperTGDs)
 			currentLink.attr('line/stroke', 'blue');
 			createLinkTool(currentLink);
@@ -917,7 +908,7 @@ function loadModalRedFromTable(currentLink,iris, parameters,functionsMap,valueRe
             "click .dropdown-menu a":"changeName",
             "click #ddIriConstructor a":"changeInputText",
             "mouseover #ddParameter a":"selectPath",
-            "mouseout #ddParameter a":"unselectPath",
+            "mouseout #ddParameter a":"unselectPath"
         },
         changeName: function(e) {                                           
             $(e.target).parents(".dropdown").find('.btn').html($(e.target).text().replace(/,/g,'&#10781;') + ' <span class="caret"></span>');            
@@ -926,7 +917,7 @@ function loadModalRedFromTable(currentLink,iris, parameters,functionsMap,valueRe
         changeInputText:function (e) {
             $("#iriUrl").val(functionsMap.get($(e.target).text().trim()));            
         },
-        selectPath:function(e){
+        selectPath:function(e){            
             var tablesCombo=$(e.target).data('value').split(',');
             for (var id of tablesCombo){
                 graphTGDs.getElements().forEach(function(element){
@@ -998,31 +989,30 @@ function loadModalRedFromTable(currentLink,iris, parameters,functionsMap,valueRe
 			
 			if (!isPathEqSourceLink){
 
-                console.log("creating link green")
-                for (var element of graphTGDs.getElements()){                
-                    if (element.id==lastTable[lastTable.length-1]){					
-                        var pks=getKeys(element.attributes.options);					
-                        var fSymbol=getFunctionSymbol(mapSymbols,linkView.targetView.model.attributes.question);
-                        var valueIRI=fSymbol+"("+pks[0]+")";											
-                        var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
-                        createLinkTool(linkParent);
-                        
-                        linkParent.appendLabel({
-                            attrs: {
-                                text: {
-                                    text: valueIRI
-                                }
-                            }
-                        });
-                        
-                        let graphicTGDparent=$('<div>').append($('<span>').attr('class','li_tgd').append(element.attributes.question)).append($('<div>').attr({'class':'link_tgd'}).append($('<p>').attr({id:"text_"+linkParent.id}).append((((linkParent.labels()[0]|| {}).attrs||{}).text||{}).text)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:linkParent.id,class:'edit_green_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowGreen',x1:0,x2:widthSVGLine,y1:10,y2:10})))).append($('<span>').attr('class', 'li_tgd').append(linkView.targetView.model.attributes.question)).remove().html();
-                        $table.bootstrapTable('append',[{id:linkParent.id,ex:graphicTGDparent}])
+				//get the element of the path
+                var element;
+                for (let table of graphTGDs.getElements()){
+                    if (table.id==lastTable[lastTable.length-1]){
+                        element=table;
                     }
+                }
+                let isConnectedGL=false
+            	for (var greenL of graphTGDs.getLinks()){            		
+            		if(greenL.attributes.source.port==element.attributes.ports.items[0].id && greenL.attributes.target.port==linkView.targetView.model.attributes.ports.items[0].id){
+            			isConnectedGL=true;
+            			break;
+            		}
+            	}
+                if (!isConnectedGL){
+	                var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
+	                var pks=getKeys(element.attributes.options);
+	                let valueIRI=mapSymbols.keys().next().value+"("+pks[0]+")";
+	                linkParent.appendLabel({attrs: {text: {text: valueIRI}}});
+	                drawNewGreenLinkInTable(linkParent,lastTableName,valueIRI,linkView.targetView.model.attributes.question)
                 }
 			}
         },
-        onCancel: function(){
-            currentLink.remove();
+        onCancel: function(){            
         }        
     });
     modal.render();
@@ -1153,21 +1143,26 @@ function loadModalTypeReferenced(currentLink,iris, parameters,functionsMap,value
             }
 			
 			if (!isPathEqSourceLink){
-
-                console.log("creating link green")
-                for (var element of graphTGDs.getElements()){                
-                    if (element.id==lastTable[lastTable.length-1]){					
-                        var pks=getKeys(element.attributes.options);					
-                        var fSymbol=getFunctionSymbol(mapSymbols,linkView.targetView.model.attributes.question);
-                        var valueIRI=fSymbol+"("+pks[0]+")";											
-                        var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
-                        createLinkTool(linkParent);
-                        
-                        linkParent.appendLabel({attrs: {text: {text: valueIRI}}});
-                        
-                        drawNewGreenLinkInTable(linkParent,lastTableName,valueIRI,linkView.targetView.model.attributes.question);
+				var element;
+                for (let table of graphTGDs.getElements()){
+                    if (table.id==lastTable[lastTable.length-1]){
+                        element=table;
                     }
                 }
+                let isConnectedGL=false
+            	for (var greenL of graphTGDs.getLinks()){            		
+            		if(greenL.attributes.source.port==element.attributes.ports.items[0].id && greenL.attributes.target.port==linkView.targetView.model.attributes.ports.items[0].id){
+            			isConnectedGL=true;
+            			break;
+            		}
+            	}
+                if (!isConnectedGL){
+	                var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
+	                var pks=getKeys(element.attributes.options);
+	                let valueIRI=mapSymbols.keys().next().value+"("+pks[0]+")";
+	                linkParent.appendLabel({attrs: {text: {text: valueIRI}}});
+	                drawNewGreenLinkInTable(linkParent,lastTableName,valueIRI,linkView.targetView.model.attributes.question)
+                }                
 			}
 			drawNewRedLinkInTable(currentLink,linkView.sourceView.model.attributes.question,sAtt,joinPath,valueIRI,linkView.targetView.model.attributes.question)
         },
@@ -1358,7 +1353,7 @@ function loadPathIRIModal(currentLink,iris, parameters,functionsMap,lsPaths){
                 linkParent.appendLabel({attrs: {text: {text: valueIRI}}});
 
                 let sHead=getTokens(joinPath);
-                let tHead=linkView.sourceView.model.attributes.question;
+                let tHead=linkView.targetView.model.attributes.question;
                 drawNewGreenLinkInTable(linkParent,sHead[sHead.length-1],valueIRI,tHead)
             }
 			
