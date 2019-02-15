@@ -408,7 +408,7 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 		/*TODO
 		 * SELECT where Sh.mult=1 and Sh.label not in select p from triples  
 		*/
-		let F="SELECT Ts.term,Sh.label, CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n"; 
+		let F="SELECT Ts.term,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n"; 
 		//CREATE OR REPLACE VIEW Types (term,type) AS SELECT DISTINCT term,type from (SELECT * FROM TypesFact1 UNION SELECT * FROM TypesFact2) ;
 		
 		mQ=mQ.concat("/*2. CREATING A TOTAL VIEW OF TRIPLES AND TYPES */\n");
@@ -447,7 +447,7 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 		chase=chase.concat(c3).concat(schQ);
 		chaseQ=chaseQ.concat(c3).concat(schQ);
 		
-		let F="SELECT Ts.term,Sh.label,Sh.typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n";
+		let F="SELECT Ts.term,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n";
 		let tripleSimulation="CREATE OR REPLACE VIEW TripleSim (s,p,o) AS SELECT * FROM Triples UNION ".concat(F);
 		chaseQ=chaseQ.concat(allTri);
 		chase=chase.concat(allTri);
