@@ -1578,8 +1578,10 @@ function getJoinsTableAllPaths (currentModel, tables,currentNode,visited){
                         tables.push(obj);
                         visited.push(edge.id);
                         if (edgeView.sourceView.model.id!=edgeView.targetView.model.id){
+                        	var aux=Object.assign({}, currentNode);
                             currentNode=obj;                    
                             getJoinsTableAllPaths(edgeView.targetView.model,tables,currentNode,visited);
+                            currentNode=aux;
                         }                        
                     }
                 }else if (edgeView.targetView.model.id==currentModel.id){
@@ -1587,9 +1589,12 @@ function getJoinsTableAllPaths (currentModel, tables,currentNode,visited){
                     if (tables.some(ta=>ta['id']===obj.id)==false){
                         tables.push(obj);
                         visited.push(edge.id);
+                        
                         if (edgeView.sourceView.model.id!=edgeView.targetView.model.id){
-                            currentNode=obj;                    
+                        	var aux=Object.assign({}, currentNode);
+                            currentNode=obj;  
                             getJoinsTableAllPaths(edgeView.sourceView.model,tables,currentNode,visited);
+                            currentNode=aux;
                         }
                     }
                 }
@@ -1808,18 +1813,20 @@ function stTGD2(graph,paper,mapTables){
 									
                                     mapFD.set(name,[]);
                                     mapFD.set(relNames[i+1],[]);
-                                    for (var opt of elementView.model.attributes.options){                                        
+                                    for (var opt of elementView.model.attributes.options){
+                                    	//console.log(opt);
                                         if (!!opt.ref){											
                                             if (i<relNames.length && opt.ref.name==relNames[i+1]){
                                                 var joinsA=mapFD.get(name);
                                                 joinsA.push({name:opt.text});
-                                                
+                                                //console.log(joinsA);
                                                 //obtain the attribute to which goes
                                                 var nameAttRef="";
                                                 for (var taElem of graph.getElements()){
                                                     if (mapTables.get(opt.ref.name)==taElem.id){
                                                         var taView=taElem.findView(paper);
                                                         nameAttRef=getNameAttribute(taView.model.attributes.options,opt.ref.id);
+                                                        console.log(nameAttRef);
                                                         break;
                                                     }
                                                 }                                                
@@ -1829,6 +1836,7 @@ function stTGD2(graph,paper,mapTables){
                                                 if (mapBFD.has(name)){
                                                     var joinsA=mapBFD.get(name);
                                                     joinsA.push({name:opt.text});
+                                                    console.log(joinsA);
                                                 }else
                                                     mapBFD.set(name,[{name:opt.text}])
                                                 //obtain the attribute to which goes
@@ -1848,6 +1856,7 @@ function stTGD2(graph,paper,mapTables){
                                             }											
                                         }
                                     }
+                                    //Has reached the table do not need to continue searching other tables then break the loop 
                                     break;
                                 }
                             }                                                 

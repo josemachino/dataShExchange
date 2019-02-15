@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS ProdSupp (
 )  ENGINE=INNODB;
 
 INSERT INTO ProdSupp (P_ID, S_ID,product,supplier) VALUES ('P1', 'S1','Onion','Auchan');
-INSERT INTO ProdSupp (P_ID, S_ID,product,supplier) VALUES ('P1', 'S2','Carrot','Carrefour');
+INSERT INTO ProdSupp (P_ID, S_ID,product,supplier) VALUES ('P2', 'S2','Carrot','Carrefour');

@@ -386,6 +386,8 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	
 	let allTri="CREATE OR REPLACE VIEW Triples (s,p,o) AS ";
 	allTri=allTri.concat(triSql);
+	let allTy="CREATE OR REPLACE VIEW Types (term,type) AS "
+	allTy=allTy.concat(tySql)
 	
 	if (missing){
 		let msgDanger='<div class="alert alert-danger alert-dismissible fade show" role="alert"> The chase SQL script generates additional rows to satisfy approximatelly ShEx schema<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
@@ -406,10 +408,9 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 		/*TODO
 		 * SELECT where Sh.mult=1 and Sh.label not in select p from triples  
 		*/
-		let F="SELECT Ts.term,Sh.label,Sh.typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n"; 
+		let F="SELECT Ts.term,Sh.label, CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n"; 
 		//CREATE OR REPLACE VIEW Types (term,type) AS SELECT DISTINCT term,type from (SELECT * FROM TypesFact1 UNION SELECT * FROM TypesFact2) ;
-		let allTy="CREATE OR REPLACE VIEW Types (term,type) AS "
-		allTy=allTy.concat(tySql)
+		
 		mQ=mQ.concat("/*2. CREATING A TOTAL VIEW OF TRIPLES AND TYPES */\n");
 		mQ=mQ.concat(allTri);
 		chaseQ=chaseQ.concat(allTri)
@@ -427,7 +428,7 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 		mQ=mQ.concat(typesM);
 		chaseQ=chaseQ.concat(typesM);
 		let mTypeValue="CREATE OR REPLACE VIEW MissTypeValue (o,type) AS SELECT DISTINCT Tri.o,typeO FROM TripleSim AS Tri,AllTyped AS Ty,SHEX AS Sh WHERE Tri.o=Ty.term AND Ty.type=Sh.typeO AND Sh.mult IN ('1','+');\n";
-		mTypeValue=mTypeValue.concat("CREATE OR REPLACE VIEW TripleSim2 AS ").concat(" SELECT MV.o,Sh.label,Sh.typeO FROM MissTypeValue").concat(" AS MV,").concat(ShName).concat(" AS Sh WHERE MV.type=Sh.typeS AND Sh.mult IN ('1','+'); \n");
+		mTypeValue=mTypeValue.concat("CREATE OR REPLACE VIEW TripleSim2 AS ").concat(" SELECT MV.o,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM MissTypeValue").concat(" AS MV,").concat(ShName).concat(" AS Sh WHERE MV.type=Sh.typeS AND Sh.mult IN ('1','+'); \n");		
 		mQ=mQ.concat(mTypeValue);
 		chaseQ=chaseQ.concat(mTypeValue);
 		mQ=mQ.concat("/*UNIFYING THE SET WITH THE MISSING TRIPLES*/\n");
@@ -437,11 +438,30 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 		chase=chase.concat(schQTitle).concat(schQ);
 		chase=chase.concat(mQ);
 	}else{
+		let schQ="";
+		schShex.forEach(function(tcs, type, miMapa){
+			tcs.forEach(function(tc){
+				schQ=schQ.concat("INSERT INTO ").concat(ShName).concat(" (typeS,label,typeO,mult) VALUES ('").concat(type).concat("','").concat(tc.label).concat("','").concat(tc.type).concat("','").concat(tc.mult).concat("');\n");
+			})
+		});
+		chase=chase.concat(c3).concat(schQ);
+		chaseQ=chaseQ.concat(c3).concat(schQ);
+		
+		let F="SELECT Ts.term,Sh.label,Sh.typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n";
+		let tripleSimulation="CREATE OR REPLACE VIEW TripleSim (s,p,o) AS SELECT * FROM Triples UNION ".concat(F);
 		chaseQ=chaseQ.concat(allTri);
 		chase=chase.concat(allTri);
-		let solution="CREATE OR REPLACE VIEW Solution AS SELECT * FROM Triples;\n";
+		chaseQ=chaseQ.concat(allTy);
+		chase=chase.concat(allTy);
+		chaseQ=chaseQ.concat(tripleSimulation);
+		chase=chase.concat(tripleSimulation);
+		let objectTypes="SELECT DISTINCT Tri.o AS term,typeO AS type FROM TripleSim AS Tri,Types AS Ty,SHEX AS Sh WHERE Tri.s=Ty.term AND Ty.type=Sh.typeS AND Sh.mult IN ('1','+') AND Sh.label=Tri.p ;\n";
+		let typesM="CREATE OR REPLACE VIEW AllTyped (term,type) AS SELECT * FROM Types UNION ".concat(objectTypes);
+		let solution="CREATE OR REPLACE VIEW Solution AS SELECT * FROM Triples UNION SELECT * FROM TripleSim;\n";
 		chaseQ=chaseQ.concat(solution);
 		chase=chase.concat(solution);
+		chaseQ=chaseQ.concat(typesM);
+		chase=chase.concat(typesM);
 	}
 			
 	//return a set of triples
