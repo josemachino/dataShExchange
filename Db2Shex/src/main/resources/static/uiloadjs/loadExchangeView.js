@@ -278,11 +278,17 @@ exchange:function(e){
 		chase=chase.concat(tripleSimulation);
 		let objectTypes="SELECT DISTINCT Tri.o AS term,typeO AS type FROM TripleSim AS Tri,Types AS Ty,SHEX AS Sh WHERE Tri.s=Ty.term AND Ty.type=Sh.typeS AND Sh.mult IN ('1','+') AND Sh.label=Tri.p ;\n";
 		let typesM="CREATE OR REPLACE VIEW AllTyped (term,type) AS SELECT * FROM Types UNION ".concat(objectTypes);
+		chaseQ=chaseQ.concat(typesM);
+		chase=chase.concat(typesM);
+		/*let mTypeValue="CREATE OR REPLACE VIEW MissTypeValue (o,type) AS SELECT DISTINCT Tri.o,typeO FROM TripleSim AS Tri,AllTyped AS Ty,SHEX AS Sh WHERE Tri.o=Ty.term AND Ty.type=Sh.typeO AND Sh.mult IN ('1','+');\n";
+		mTypeValue=mTypeValue.concat("CREATE OR REPLACE VIEW TripleSim2 AS ").concat(" SELECT MV.o,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM MissTypeValue").concat(" AS MV,").concat(ShName).concat(" AS Sh WHERE MV.type=Sh.typeS AND Sh.mult IN ('1','+'); \n");
+		chaseQ=chaseQ.concat(mTypeValue);
+		chase=chase.concat(mTypeValue);*/
+		
 		let solution="CREATE OR REPLACE VIEW Solution AS SELECT * FROM Triples UNION SELECT * FROM TripleSim;\n";
 		chaseQ=chaseQ.concat(solution);
 		chase=chase.concat(solution);
-		chaseQ=chaseQ.concat(typesM);
-		chase=chase.concat(typesM);
+		
 	}	
 			
 	//return a set of triples

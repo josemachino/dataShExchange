@@ -26,7 +26,7 @@ describe("Mappings", function() {
 	    defaultLink:new joint.shapes.standard.Link()
 	});
   });
-/*
+
   it("Mapping two relational attributes to the same Triple constraint", function() {
 	  var triples=[];
 	  $.ajax({	  
@@ -159,7 +159,7 @@ describe("Mappings", function() {
 		];
 	expect(triplesExpected).toEqual(triples);
   });
-  /*
+  
   it("Mapping on Supplier DB single green, blue and red links", function() {
 	  var triples=[];
 	  $.ajax({	  
@@ -230,7 +230,7 @@ describe("Mappings", function() {
 		];
 	expect(triplesExpected).toEqual(triples);
   });
-  */
+  
   it("Bug Example Mapping with two Blank Nodes and four blank literals", function() {
 	  var triples=[];
 	  $.ajax({	  
@@ -287,7 +287,7 @@ describe("Mappings", function() {
 	        
 	      });	
 	var triplesExpected=[
-		/*{ subject: 'http://example.com/TBug/1', predicate: 'descr', object: 'Boom!' },
+		{ subject: 'http://example.com/TBug/1', predicate: 'descr', object: 'Boom!' },
 		{ subject: 'http://example.com/TBug/1', predicate: 'rep', object: 'http://example.com/TUser/1' },
 		{ subject: 'http://example.com/TBug/1', predicate: 'related', object: 'http://example.com/TBug/3' },
 		{ subject: 'http://example.com/TBug/2', predicate: 'descr', object: 'Kabang!' },
@@ -299,11 +299,13 @@ describe("Mappings", function() {
 		{ subject: 'http://example.com/TUser/1', predicate: 'tracks', object: 'http://example.com/TBug/1' },
 		{ subject: 'http://example.com/TUser/1', predicate: 'tracks', object: 'http://example.com/TBug/2' },
 		{ subject: 'http://example.com/TUser/1', predicate: 'name', object: 'Jose' },
+		{ subject: 'http://example.com/TUser/2', predicate: 'email', object: '@PERU@' },
+		{ subject: 'http://example.com/TUser/2', predicate: 'tracks', object: 'http://example.com/TBug/@PERU@' },
 		{ subject: 'http://example.com/TUser/2', predicate: 'name', object: 'Edith' }
-		*/];
+		];
 	expect(triplesExpected).toEqual(triples);
   });
-  /*
+  
   it("ProdSupp Example with one table and two Pks Mapping with single paths to two Shapes", function() {
 	  var triples=[];
 	  $.ajax({	  
