@@ -94,6 +94,11 @@ p{
 	 word-wrap:break-word;
 }
 .link_tgd{
+    width:210px;
+    display:inline-block;
+    text-align:center;
+}
+.link_tgdG{
     width:250px;
     display:inline-block;
     text-align:center;

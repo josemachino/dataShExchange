@@ -31,7 +31,9 @@ render: function(){
     this.$el.html( template );
 },
 events: {
-     "click #exportst":"export",     
+     "click #exportst":"export",  
+     "click #undost":"undost",
+     "click #savest":"savest",
      "change input[type=file]":"import",
      "click .edit_tgd":"modifyTGD",
      "click .edit_green_tgd":"modifyLinkGreen",
@@ -41,6 +43,54 @@ events: {
 },
 activate:function(e){    
     $('#sidebar-right').toggleClass('active');
+}
+,
+undost:function(e){
+	if (sessionGO.size>0){
+		let lastSaved=sessionGO.pop();
+		
+		graphTGDs.fromJSON(lastSaved);   
+		paperTGDs.fitToContent({
+	        padding: 50,
+	        allowNewOrigin: 'any'
+	    });    	
+		let num=1;
+		let namespace="http://example.com/"
+		graphTGDs.getElements().forEach(function(element){
+			if (element.attributes.type=="db.Table"){
+				mapTableIdCanvas.set(element.attributes.question,element.id)
+			}
+			if (element.attributes.type=="shex.Type"){
+				mapSymbols.set("f"+num,namespace+element.attributes.question);
+				num++;
+			}
+		})
+		var links=graphTGDs.getLinks();			
+		for (var link of links){
+			var edgeView=link.findView(paperTGDs);
+			if (edgeView.sourceView.model.attributes.type=="db.Table" && edgeView.targetView.model.attributes.type=="shex.Type"){
+				if (link.attr('line/stroke')=='green'){
+					let valueIRI=(((link.labels()[0]|| {}).attrs||{}).text||{}).text;
+					let taName=edgeView.sourceView.model.attributes.question;
+					drawNewGreenLinkInTable(link,taName,valueIRI,edgeView.targetView.model.attributes.question);
+				}
+				if (link.attr('line/stroke')=='blue'){					
+					drawNewBlueLinkInTable(link)
+				}
+				if (link.attr('line/stroke')=='red'){					
+					let sHead=edgeView.sourceView.model.attributes.question;
+					let sAtt=getSourceOptionNameLinkView(edgeView);
+					let path=(((link.labels()[0]|| {}).attrs||{}).text||{}).text;;
+					let fObject=(((link.labels()[1]|| {}).attrs||{}).text||{}).text;
+					let tHead=edgeView.targetView.model.attributes.question;
+					drawNewRedLinkInTable(link,sHead,sAtt,path,fObject,tHead)
+				}				
+			}
+		}
+	}
+},
+savest:function(e){
+	sessionGO.push(graphTGDs.toJSON());
 }
 ,
 import:function(e){	
@@ -97,12 +147,11 @@ import:function(e){
 export:function(e){
     var graphJson=graphTGDs.toJSON()
     //simpleGraph(graphJson.cells)
-    $('#syntax_tgds').rainbowJSON({
+    /*$('#syntax_tgds').rainbowJSON({
             maxElements: 1000,
             maxDepth: 10,
             json: simpleGraph(graphJson.cells)
-			//json: graphJson.cells
-        });
+        });*/
 	const jsonStr = JSON.stringify(graphJson);
     var link = document.createElement("a");
     link.download = 'gstgds.json';

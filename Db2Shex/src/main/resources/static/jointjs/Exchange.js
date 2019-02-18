@@ -186,6 +186,22 @@ Exchange.prototype.stTGD=function(mapSymbols,graph,paper,mapTables){
     
 };
 
+Exchange.prototype.getDeepSize=function(constraints,visited){
+	let onlyTypes=constraints.filter(tc=> tc.type!=='Literal')
+	if (onlyTypes.length==0){
+		return 0;
+	}else{
+		let max=1;
+		onlyTypes.forEach(function (curr,index,arr)){
+			if (!visited.contains(curr.type)){
+				visited.push(curr.type)
+				return 1+this.getDeepSize(map.get(curr.type));
+			}		
+		}
+		return 1+max;
+	}
+};
+
 Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTables) {		
 	let chaseQ="";
 	let msgs=[];
@@ -233,7 +249,14 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 			
 		}        	
     });	
+	let deePath=new Array(schShex.size);
+	let i=0;
+	schShex.forEach(function (value, key, map){
+		deePath[i]=this.getDeepSize(value);
+		i++;
+	});
 		
+	let max=Math.max.apply(Math, deePath);
 	//construct sql query
 	let tgds=this.stTGD(mapSymbols,graphST,paperTGDs,mapTables);
 	let TyName="TypesFact";
@@ -454,11 +477,22 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 		chaseQ=chaseQ.concat(allTy);
 		chase=chase.concat(allTy);
 		chaseQ=chaseQ.concat(tripleSimulation);
-		chase=chase.concat(tripleSimulation);
-		let objectTypes="SELECT DISTINCT Tri.o AS term,typeO AS type FROM TripleSim AS Tri,Types AS Ty,SHEX AS Sh WHERE Tri.s=Ty.term AND Ty.type=Sh.typeS AND Sh.mult IN ('1','+') AND Sh.label=Tri.p ;\n";
-		let typesM="CREATE OR REPLACE VIEW AllTyped (term,type) AS SELECT * FROM Types UNION ".concat(objectTypes);
-		chaseQ=chaseQ.concat(typesM);
-		chase=chase.concat(typesM);
+		chase=chase.concat(tripleSimulation);		
+		
+		//repeat the creation of triplesim many times as the long path is find in the schema
+		let i=1;
+		while (max>1){
+			let objectTypes="SELECT DISTINCT Tri.o AS term,typeO AS type FROM TripleSim AS Tri,Types AS Ty,SHEX AS Sh WHERE Tri.s=Ty.term AND Ty.type=Sh.typeS AND Sh.mult IN ('1','+') AND Sh.label=Tri.p ;\n";
+			let typesM="CREATE OR REPLACE VIEW AllTyped (term,type) AS SELECT * FROM Types UNION ".concat(objectTypes);
+			chaseQ=chaseQ.concat(typesM);
+			chase=chase.concat(typesM);
+			let MTriples="SELECT Ts.term,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM Shex AS Sh,AllTyped AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n";
+			let tripleSimIt="CREATE OR REPLACE VIEW TripleSim".concat(i).concat("(s,p,o) AS ".concat(MTriples);
+			chaseQ=chaseQ.concat(tripleSimIt);
+			chase=chase.concat(tripleSimIt);
+			max--;
+			i++;
+		}
 		/*let mTypeValue="CREATE OR REPLACE VIEW MissTypeValue (o,type) AS SELECT DISTINCT Tri.o,typeO FROM TripleSim AS Tri,AllTyped AS Ty,SHEX AS Sh WHERE Tri.o=Ty.term AND Ty.type=Sh.typeO AND Sh.mult IN ('1','+');\n";
 		mTypeValue=mTypeValue.concat("CREATE OR REPLACE VIEW TripleSim2 AS ").concat(" SELECT MV.o,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM MissTypeValue").concat(" AS MV,").concat(ShName).concat(" AS Sh WHERE MV.type=Sh.typeS AND Sh.mult IN ('1','+'); \n");
 		chaseQ=chaseQ.concat(mTypeValue);
