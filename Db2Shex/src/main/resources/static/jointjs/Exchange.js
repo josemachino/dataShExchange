@@ -186,19 +186,25 @@ Exchange.prototype.stTGD=function(mapSymbols,graph,paper,mapTables){
     
 };
 
-Exchange.prototype.getDeepSize=function(constraints,visited){
-	let onlyTypes=constraints.filter(tc=> tc.type!=='Literal')
+Exchange.prototype.getDeepSize=function(constraints,visited,map){
+	var self = this; 	
+	let onlyTypes=constraints.filter(tc=> tc.type!=='Literal');
 	if (onlyTypes.length==0){
-		return 0;
+		return 1;
 	}else{
-		let max=1;
-		onlyTypes.forEach(function (curr,index,arr)){
-			if (!visited.contains(curr.type)){
-				visited.push(curr.type)
-				return 1+this.getDeepSize(map.get(curr.type));
-			}		
-		}
-		return 1+max;
+		let times=1;
+		let max=0;
+		onlyTypes.forEach(function (curr,index,arr){
+			if (!visited.includes(curr.type)){
+				visited.push(curr.type)				
+				times= times+self.getDeepSize(map.get(curr.type),visited,map);
+			}
+			if (times>max){
+				max=times;
+			}
+		});
+		
+		return max;
 	}
 };
 
@@ -251,11 +257,14 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
     });	
 	let deePath=new Array(schShex.size);
 	let i=0;
-	schShex.forEach(function (value, key, map){
-		deePath[i]=this.getDeepSize(value);
+	var mapIter = schShex.entries();
+	for (let iterator =mapIter, r; !(r = iterator.next()).done; ) {
+	    console.log(r.value);
+	    let visit=[];
+		deePath[i]=this.getDeepSize(r.value[1],visit,schShex);
 		i++;
-	});
-		
+	}
+	console.log(deePath);
 	let max=Math.max.apply(Math, deePath);
 	//construct sql query
 	let tgds=this.stTGD(mapSymbols,graphST,paperTGDs,mapTables);
@@ -412,94 +421,59 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	let allTy="CREATE OR REPLACE VIEW Types (term,type) AS "
 	allTy=allTy.concat(tySql)
 	
+	let schQ="";
+	schShex.forEach(function(tcs, type, miMapa){
+		tcs.forEach(function(tc){
+			schQ=schQ.concat("INSERT INTO ").concat(ShName).concat(" (typeS,label,typeO,mult) VALUES ('").concat(type).concat("','").concat(tc.label).concat("','").concat(tc.type).concat("','").concat(tc.mult).concat("');\n");
+		})
+	});
+	chase=chase.concat(c3).concat(schQ);
+	chaseQ=chaseQ.concat(c3).concat(schQ);
+	
+	let F="SELECT Ts.term,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n";
+	let tripleSimulation="CREATE OR REPLACE VIEW TripleSim (s,p,o) AS SELECT * FROM Triples UNION ".concat(F);
+	chaseQ=chaseQ.concat(allTri);
+	chase=chase.concat(allTri);
+	chaseQ=chaseQ.concat(allTy);
+	chase=chase.concat(allTy);
+	chaseQ=chaseQ.concat(tripleSimulation);
+	chase=chase.concat(tripleSimulation);		
+	
+	//repeat the creation of triplesim many times as the long path is find in the schema
+	let idx=1;
+	while (max>0){
+		let numPrefix="";
+		if (idx-1>0){
+			numPrefix=idx-1;
+		}
+		let objectTypes="SELECT DISTINCT Tri.o AS term,typeO AS type FROM TripleSim"+numPrefix+" AS Tri,Types"+numPrefix+" AS Ty,SHEX AS Sh WHERE Tri.s=Ty.term AND Ty.type=Sh.typeS AND Sh.mult IN ('1','+') AND Sh.label=Tri.p ;\n";
+		let typesM="CREATE OR REPLACE VIEW Types"+idx+" (term,type) AS ".concat(objectTypes);
+		chaseQ=chaseQ.concat(typesM);
+		chase=chase.concat(typesM);
+		let MTriples="SELECT Ts.term,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM Shex AS Sh,Types"+idx+" AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ty.type,T.p) FROM TripleSim"+numPrefix+" as T, Types"+numPrefix+" AS Ty WHERE T.s=Ty.term);\n";
+		let tripleSimIt="CREATE OR REPLACE VIEW TripleSim".concat(idx).concat(" (s,p,o) AS ").concat(MTriples);
+		chaseQ=chaseQ.concat(tripleSimIt);
+		chase=chase.concat(tripleSimIt);
+		max--;
+		idx++;
+	}
+	let solution="CREATE OR REPLACE VIEW Solution AS ";
+	let allTyped="CREATE OR REPLACE VIEW AllTyped AS ";
+	while(idx>0){
+		solution=solution.concat("SELECT * FROM TripleSim").concat(idx-1==0?"":idx-1).concat(" UNION ");
+		allTyped=allTyped.concat("SELECT * FROM Types").concat(idx-1==0?"":idx-1).concat(" UNION ");
+		idx--;
+	}
+	solution=solution.slice(0,-7).concat(";\n");
+	allTyped=allTyped.slice(0,-7).concat(";\n");
+	chaseQ=chaseQ.concat(solution);
+	chase=chase.concat(solution);
+	chaseQ=chaseQ.concat(allTyped);
+	chase=chase.concat(allTyped);
+	
 	if (missing){
 		let msgDanger='<div class="alert alert-danger alert-dismissible fade show" role="alert"> The chase SQL script generates additional rows to satisfy approximatelly ShEx schema<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
 		msgs.push(msgDanger);
-		//completing the missing types
-		var mQ="";
-		//create the shex table with ShEx schema
-		var schQTitle="/*FOR MISSING PROPERTIES \n 1.CREATING THE SCHEMA*/\n".concat(c3);
-		let schQ="";
-		schShex.forEach(function(tcs, type, miMapa){
-			tcs.forEach(function(tc){
-				schQ=schQ.concat("INSERT INTO ").concat(ShName).concat(" (typeS,label,typeO,mult) VALUES ('").concat(type).concat("','").concat(tc.label).concat("','").concat(tc.type).concat("','").concat(tc.mult).concat("');\n");
-			})
-		})			
-		chaseQ=chaseQ.concat(c3).concat(schQ)
-		
-		
-		/*TODO
-		 * SELECT where Sh.mult=1 and Sh.label not in select p from triples  
-		*/
-		let F="SELECT Ts.term,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n"; 
-		//CREATE OR REPLACE VIEW Types (term,type) AS SELECT DISTINCT term,type from (SELECT * FROM TypesFact1 UNION SELECT * FROM TypesFact2) ;
-		
-		mQ=mQ.concat("/*2. CREATING A TOTAL VIEW OF TRIPLES AND TYPES */\n");
-		mQ=mQ.concat(allTri);
-		chaseQ=chaseQ.concat(allTri)
-		mQ=mQ.concat(allTy);
-		chaseQ=chaseQ.concat(allTy)
-		mQ=mQ.concat("/*3. ADDING MISSING VALUES */\n");
-		
-		
-		
-		let tripleSimulation="CREATE OR REPLACE VIEW TripleSim (s,p,o) AS SELECT * FROM Triples UNION ".concat(F);
-		mQ=mQ.concat(tripleSimulation);
-		chaseQ=chaseQ.concat(tripleSimulation);
-		let objectTypes="SELECT DISTINCT Tri.o AS term,typeO AS type FROM TripleSim AS Tri,Types AS Ty,SHEX AS Sh WHERE Tri.s=Ty.term AND Ty.type=Sh.typeS AND Sh.mult IN ('1','+') AND Sh.label=Tri.p ;\n";
-		let typesM="CREATE OR REPLACE VIEW AllTyped (term,type) AS SELECT * FROM Types UNION ".concat(objectTypes);
-		mQ=mQ.concat(typesM);
-		chaseQ=chaseQ.concat(typesM);
-		let mTypeValue="CREATE OR REPLACE VIEW MissTypeValue (o,type) AS SELECT DISTINCT Tri.o,typeO FROM TripleSim AS Tri,AllTyped AS Ty,SHEX AS Sh WHERE Tri.o=Ty.term AND Ty.type=Sh.typeO AND Sh.mult IN ('1','+');\n";
-		mTypeValue=mTypeValue.concat("CREATE OR REPLACE VIEW TripleSim2 AS ").concat(" SELECT MV.o,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM MissTypeValue").concat(" AS MV,").concat(ShName).concat(" AS Sh WHERE MV.type=Sh.typeS AND Sh.mult IN ('1','+'); \n");		
-		mQ=mQ.concat(mTypeValue);
-		chaseQ=chaseQ.concat(mTypeValue);
-		mQ=mQ.concat("/*UNIFYING THE SET WITH THE MISSING TRIPLES*/\n");
-		let solution="CREATE OR REPLACE VIEW Solution AS SELECT * FROM Triples UNION SELECT * FROM TripleSim UNION SELECT * FROM TripleSim2;\n";
-		chaseQ=chaseQ.concat(solution);
-		mQ=mQ.concat(solution);
-		chase=chase.concat(schQTitle).concat(schQ);
-		chase=chase.concat(mQ);
-	}else{
-		let schQ="";
-		schShex.forEach(function(tcs, type, miMapa){
-			tcs.forEach(function(tc){
-				schQ=schQ.concat("INSERT INTO ").concat(ShName).concat(" (typeS,label,typeO,mult) VALUES ('").concat(type).concat("','").concat(tc.label).concat("','").concat(tc.type).concat("','").concat(tc.mult).concat("');\n");
-			})
-		});
-		chase=chase.concat(c3).concat(schQ);
-		chaseQ=chaseQ.concat(c3).concat(schQ);
-		
-		let F="SELECT Ts.term,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n";
-		let tripleSimulation="CREATE OR REPLACE VIEW TripleSim (s,p,o) AS SELECT * FROM Triples UNION ".concat(F);
-		chaseQ=chaseQ.concat(allTri);
-		chase=chase.concat(allTri);
-		chaseQ=chaseQ.concat(allTy);
-		chase=chase.concat(allTy);
-		chaseQ=chaseQ.concat(tripleSimulation);
-		chase=chase.concat(tripleSimulation);		
-		
-		//repeat the creation of triplesim many times as the long path is find in the schema
-		let i=1;
-		while (max>1){
-			let objectTypes="SELECT DISTINCT Tri.o AS term,typeO AS type FROM TripleSim AS Tri,Types AS Ty,SHEX AS Sh WHERE Tri.s=Ty.term AND Ty.type=Sh.typeS AND Sh.mult IN ('1','+') AND Sh.label=Tri.p ;\n";
-			let typesM="CREATE OR REPLACE VIEW AllTyped (term,type) AS SELECT * FROM Types UNION ".concat(objectTypes);
-			chaseQ=chaseQ.concat(typesM);
-			chase=chase.concat(typesM);
-			let MTriples="SELECT Ts.term,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM Shex AS Sh,AllTyped AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n";
-			let tripleSimIt="CREATE OR REPLACE VIEW TripleSim".concat(i).concat("(s,p,o) AS ".concat(MTriples);
-			chaseQ=chaseQ.concat(tripleSimIt);
-			chase=chase.concat(tripleSimIt);
-			max--;
-			i++;
-		}
-		/*let mTypeValue="CREATE OR REPLACE VIEW MissTypeValue (o,type) AS SELECT DISTINCT Tri.o,typeO FROM TripleSim AS Tri,AllTyped AS Ty,SHEX AS Sh WHERE Tri.o=Ty.term AND Ty.type=Sh.typeO AND Sh.mult IN ('1','+');\n";
-		mTypeValue=mTypeValue.concat("CREATE OR REPLACE VIEW TripleSim2 AS ").concat(" SELECT MV.o,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM MissTypeValue").concat(" AS MV,").concat(ShName).concat(" AS Sh WHERE MV.type=Sh.typeS AND Sh.mult IN ('1','+'); \n");
-		chaseQ=chaseQ.concat(mTypeValue);
-		chase=chase.concat(mTypeValue);*/
-		let solution="CREATE OR REPLACE VIEW Solution AS SELECT * FROM Triples UNION SELECT * FROM TripleSim;\n";
-		chaseQ=chaseQ.concat(solution);
-		chase=chase.concat(solution);
 		
 	}
 			
@@ -515,4 +489,5 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	
 	this.chaseQueryDB=chaseQ;
 	this.chaseScript=chase;
+	this.RMLScript=file2RML;
 };

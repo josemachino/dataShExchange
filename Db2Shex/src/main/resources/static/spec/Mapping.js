@@ -27,6 +27,126 @@ describe("Mappings", function() {
 	});
   });
 
+  it("with paths of length 3 with two attributes that connect each other because they are pks", function() {
+	  var triples=[];
+	  $.ajax({	  
+	        url: "tgd/prodsupp_mapping",
+	        type: "GET",
+	        async: false
+	      })
+	      .done(function(data) {	    	  
+	    	 graphST.fromJSON(data);	
+	    	 let mapSymbols=new Map();
+	     	 let mapTableIdCanvas=new Map();
+	     	 let num=1;
+	     	 let namespace="http://example.com/"
+	     	 graphST.getElements().forEach(function(element){
+	    		if (element.attributes.type=="db.Table"){
+	    			mapTableIdCanvas.set(element.attributes.question,element.id)
+	    		}
+	    		if (element.attributes.type=="shex.Type"){
+	    			mapSymbols.set("f"+num,namespace+element.attributes.question);
+	    			num++;
+	    		}
+	     	 });	     	 
+	    	 exchange.generateQuery(mapSymbols,graphST,paperTGDs,mapTableIdCanvas);	    	 	    	 
+	      })
+	      .fail(function(jqXHR, textStatus, errorThrown) {        
+	        console.log(textStatus);
+	      })
+	      .always(function() {
+	        
+	      });		  
+	  $.ajax({	  
+	        url: "test",
+	        type: "POST",
+	        data:{nameTest:"prodsupp_mapping",queries:exchange.chaseQueryDB},
+	        async: false
+	      })
+	      .done(function(data) {
+	        console.log(data);
+	        for(var uri in data){
+	        	  for(var property in data[uri]){
+	        	     for(var i=0; i<data[uri][property].length; i++ ){
+	        	          var s = uri;
+	        	          var p = property;
+	        	          var o = data[uri][property][i]['value'];	        	          	        	         
+	        	          triples.push({subject:s,predicate:p,object:o})
+	        	     }
+	        	  }  
+	        }
+	      })
+	      .fail(function(jqXHR, textStatus, errorThrown) {        	        
+	        console.log(errorThrown)
+	      })
+	      .always(function() {
+	        
+	      });	
+	var triplesExpected=[	
+		];
+	expect(triplesExpected).toEqual(triples);
+  });
+  it("with long path with parameters in the attribute", function() {
+	  var triples=[];
+	  $.ajax({	  
+	        url: "tgd/prodsupp_mapping",
+	        type: "GET",
+	        async: false
+	      })
+	      .done(function(data) {	    	  
+	    	 graphST.fromJSON(data);	
+	    	 let mapSymbols=new Map();
+	     	 let mapTableIdCanvas=new Map();
+	     	 let num=1;
+	     	 let namespace="http://example.com/"
+	     	 graphST.getElements().forEach(function(element){
+	    		if (element.attributes.type=="db.Table"){
+	    			mapTableIdCanvas.set(element.attributes.question,element.id)
+	    		}
+	    		if (element.attributes.type=="shex.Type"){
+	    			mapSymbols.set("f"+num,namespace+element.attributes.question);
+	    			num++;
+	    		}
+	     	 });	     	 
+	    	 exchange.generateQuery(mapSymbols,graphST,paperTGDs,mapTableIdCanvas);	    	 	    	 
+	      })
+	      .fail(function(jqXHR, textStatus, errorThrown) {        
+	        console.log(textStatus);
+	      })
+	      .always(function() {
+	        
+	      });		  
+	  $.ajax({	  
+	        url: "test",
+	        type: "POST",
+	        data:{nameTest:"prodsupp_mapping",queries:exchange.chaseQueryDB},
+	        async: false
+	      })
+	      .done(function(data) {
+	        console.log(data);
+	        for(var uri in data){
+	        	  for(var property in data[uri]){
+	        	     for(var i=0; i<data[uri][property].length; i++ ){
+	        	          var s = uri;
+	        	          var p = property;
+	        	          var o = data[uri][property][i]['value'];	        	          	        	         
+	        	          triples.push({subject:s,predicate:p,object:o})
+	        	     }
+	        	  }  
+	        }
+	      })
+	      .fail(function(jqXHR, textStatus, errorThrown) {        	        
+	        console.log(errorThrown)
+	      })
+	      .always(function() {
+	        
+	      });	
+	var triplesExpected=[	
+		];
+	expect(triplesExpected).toEqual(triples);
+  });
+  /*
+  
   it("Mapping two relational attributes to the same Triple constraint", function() {
 	  var triples=[];
 	  $.ajax({	  
@@ -82,9 +202,28 @@ describe("Mappings", function() {
 	      .always(function() {
 	        
 	      });
-	console.log(triples)
 	var triplesExpected=[
-		{ subject: 'http://example.com/StudentShape/200', predicate: 'helps', object: 'http://example.com/CourseShape/@PERU@' },{ subject: 'http://example.com/StudentShape/200', predicate: 'course', object: 'http://example.com/CourseShape/@PERU@' },{ subject: 'http://example.com/StudentShape/200', predicate: 'name', object: 'Rosa' },{ subject: 'http://example.com/StudentShape/200', predicate: 'phone', object: '@PERU@' },{ subject: 'http://example.com/StudentShape/101', predicate: 'helps', object: 'http://example.com/CourseShape/@PERU@' },{ subject: 'http://example.com/StudentShape/101', predicate: 'course', object: 'http://example.com/CourseShape/@PERU@' },{ subject: 'http://example.com/StudentShape/101', predicate: 'name', object: 'Juan' },{ subject: 'http://example.com/StudentShape/101', predicate: 'phone', object: '@PERU@' },{ subject: 'http://example.com/StudentShape/201', predicate: 'helps', object: 'http://example.com/CourseShape/@PERU@' },{ subject: 'http://example.com/StudentShape/201', predicate: 'course', object: 'http://example.com/CourseShape/@PERU@' },{ subject: 'http://example.com/StudentShape/201', predicate: 'name', object: 'Pedro' },{ subject: 'http://example.com/StudentShape/201', predicate: 'phone', object: '@PERU@' },{ subject: 'http://example.com/StudentShape/100', predicate: 'helps', object: 'http://example.com/CourseShape/@PERU@' },{ subject: 'http://example.com/StudentShape/100', predicate: 'course', object: 'http://example.com/CourseShape/@PERU@' },{ subject: 'http://example.com/StudentShape/100', predicate: 'name', object: 'Ana' },{ subject: 'http://example.com/StudentShape/100', predicate: 'phone', object: '@PERU@' },{ subject: 'http://example.com/CourseShape/@PERU@', predicate: 'prof', object: 'http://example.com/ProfShape/@PERU@' },{ subject: 'http://example.com/CourseShape/@PERU@', predicate: 'name', object: '@PERU@' }
+		{ subject: 'http://example.com/ProfShape/@PERU@', predicate: 'office', object: '@PERU@' },
+		{ subject: 'http://example.com/ProfShape/@PERU@', predicate: 'course', object: 'http://example.com/CourseShape/@PERU@' },
+		{ subject: 'http://example.com/ProfShape/@PERU@', predicate: 'name', object: '@PERU@' },
+		{ subject: 'http://example.com/StudentShape/200', predicate: 'helps', object: 'http://example.com/CourseShape/@PERU@' },
+		{ subject: 'http://example.com/StudentShape/200', predicate: 'course', object: 'http://example.com/CourseShape/@PERU@' },
+		{ subject: 'http://example.com/StudentShape/200', predicate: 'name', object: 'Rosa' },
+		{ subject: 'http://example.com/StudentShape/200', predicate: 'phone', object: '@PERU@' },
+		{ subject: 'http://example.com/StudentShape/101', predicate: 'helps', object: 'http://example.com/CourseShape/@PERU@' },
+		{ subject: 'http://example.com/StudentShape/101', predicate: 'course', object: 'http://example.com/CourseShape/@PERU@' },
+		{ subject: 'http://example.com/StudentShape/101', predicate: 'name', object: 'Juan' },
+		{ subject: 'http://example.com/StudentShape/101', predicate: 'phone', object: '@PERU@' },
+		{ subject: 'http://example.com/StudentShape/201', predicate: 'helps', object: 'http://example.com/CourseShape/@PERU@' },
+		{ subject: 'http://example.com/StudentShape/201', predicate: 'course', object: 'http://example.com/CourseShape/@PERU@' },
+		{ subject: 'http://example.com/StudentShape/201', predicate: 'name', object: 'Pedro' },
+		{ subject: 'http://example.com/StudentShape/201', predicate: 'phone', object: '@PERU@' },
+		{ subject: 'http://example.com/StudentShape/100', predicate: 'helps', object: 'http://example.com/CourseShape/@PERU@' },
+		{ subject: 'http://example.com/StudentShape/100', predicate: 'course', object: 'http://example.com/CourseShape/@PERU@' },
+		{ subject: 'http://example.com/StudentShape/100', predicate: 'name', object: 'Ana' },
+		{ subject: 'http://example.com/StudentShape/100', predicate: 'phone', object: '@PERU@' },
+		{ subject: 'http://example.com/CourseShape/@PERU@', predicate: 'prof', object: 'http://example.com/ProfShape/@PERU@' },
+		{ subject: 'http://example.com/CourseShape/@PERU@', predicate: 'name', object: '@PERU@' }
 		];
 	expect(triplesExpected).toEqual(triples);
   });
@@ -301,11 +440,16 @@ describe("Mappings", function() {
 		{ subject: 'http://example.com/TUser/1', predicate: 'name', object: 'Jose' },
 		{ subject: 'http://example.com/TUser/2', predicate: 'email', object: '@PERU@' },
 		{ subject: 'http://example.com/TUser/2', predicate: 'tracks', object: 'http://example.com/TBug/@PERU@' },
-		{ subject: 'http://example.com/TUser/2', predicate: 'name', object: 'Edith' }
+		{ subject: 'http://example.com/TUser/2', predicate: 'name', object: 'Edith' },
+		{ subject: 'http://example.com/TBug/@PERU@', predicate: 'descr', object: '@PERU@' },
+		{ subject: 'http://example.com/TBug/@PERU@', predicate: 'rep', object: 'http://example.com/TUser/@PERU@' },
+		{ subject: 'http://example.com/TUser/@PERU@', predicate: 'email', object: '@PERU@' },
+		{ subject: 'http://example.com/TUser/@PERU@', predicate: 'tracks', object: 'http://example.com/TBug/@PERU@' },
+		{ subject: 'http://example.com/TUser/@PERU@', predicate: 'name', object: '@PERU@' }
 		];
 	expect(triplesExpected).toEqual(triples);
   });
-  
+ 
   it("ProdSupp Example with one table and two Pks Mapping with single paths to two Shapes", function() {
 	  var triples=[];
 	  $.ajax({	  
@@ -367,123 +511,6 @@ describe("Mappings", function() {
 		];
 	expect(triplesExpected).toEqual(triples);
   });
-/*  
-  it("with paths of length 3 with two attributes that connect each other because they are pks", function() {
-	  var triples=[];
-	  $.ajax({	  
-	        url: "tgd/prodsupp_mapping",
-	        type: "GET",
-	        async: false
-	      })
-	      .done(function(data) {	    	  
-	    	 graphST.fromJSON(data);	
-	    	 let mapSymbols=new Map();
-	     	 let mapTableIdCanvas=new Map();
-	     	 let num=1;
-	     	 let namespace="http://example.com/"
-	     	 graphST.getElements().forEach(function(element){
-	    		if (element.attributes.type=="db.Table"){
-	    			mapTableIdCanvas.set(element.attributes.question,element.id)
-	    		}
-	    		if (element.attributes.type=="shex.Type"){
-	    			mapSymbols.set("f"+num,namespace+element.attributes.question);
-	    			num++;
-	    		}
-	     	 });	     	 
-	    	 exchange.generateQuery(mapSymbols,graphST,paperTGDs,mapTableIdCanvas);	    	 	    	 
-	      })
-	      .fail(function(jqXHR, textStatus, errorThrown) {        
-	        console.log(textStatus);
-	      })
-	      .always(function() {
-	        
-	      });		  
-	  $.ajax({	  
-	        url: "test",
-	        type: "POST",
-	        data:{nameTest:"prodsupp_mapping",queries:exchange.chaseQueryDB},
-	        async: false
-	      })
-	      .done(function(data) {
-	        console.log(data);
-	        for(var uri in data){
-	        	  for(var property in data[uri]){
-	        	     for(var i=0; i<data[uri][property].length; i++ ){
-	        	          var s = uri;
-	        	          var p = property;
-	        	          var o = data[uri][property][i]['value'];	        	          	        	         
-	        	          triples.push({subject:s,predicate:p,object:o})
-	        	     }
-	        	  }  
-	        }
-	      })
-	      .fail(function(jqXHR, textStatus, errorThrown) {        	        
-	        console.log(errorThrown)
-	      })
-	      .always(function() {
-	        
-	      });	
-	var triplesExpected=[	
-		];
-	expect(triplesExpected).toEqual(triples);
-  });
-  it("with long path with parameters in the attribute", function() {
-	  var triples=[];
-	  $.ajax({	  
-	        url: "tgd/prodsupp_mapping",
-	        type: "GET",
-	        async: false
-	      })
-	      .done(function(data) {	    	  
-	    	 graphST.fromJSON(data);	
-	    	 let mapSymbols=new Map();
-	     	 let mapTableIdCanvas=new Map();
-	     	 let num=1;
-	     	 let namespace="http://example.com/"
-	     	 graphST.getElements().forEach(function(element){
-	    		if (element.attributes.type=="db.Table"){
-	    			mapTableIdCanvas.set(element.attributes.question,element.id)
-	    		}
-	    		if (element.attributes.type=="shex.Type"){
-	    			mapSymbols.set("f"+num,namespace+element.attributes.question);
-	    			num++;
-	    		}
-	     	 });	     	 
-	    	 exchange.generateQuery(mapSymbols,graphST,paperTGDs,mapTableIdCanvas);	    	 	    	 
-	      })
-	      .fail(function(jqXHR, textStatus, errorThrown) {        
-	        console.log(textStatus);
-	      })
-	      .always(function() {
-	        
-	      });		  
-	  $.ajax({	  
-	        url: "test",
-	        type: "POST",
-	        data:{nameTest:"prodsupp_mapping",queries:exchange.chaseQueryDB},
-	        async: false
-	      })
-	      .done(function(data) {
-	        console.log(data);
-	        for(var uri in data){
-	        	  for(var property in data[uri]){
-	        	     for(var i=0; i<data[uri][property].length; i++ ){
-	        	          var s = uri;
-	        	          var p = property;
-	        	          var o = data[uri][property][i]['value'];	        	          	        	         
-	        	          triples.push({subject:s,predicate:p,object:o})
-	        	     }
-	        	  }  
-	        }
-	      })
-	      .fail(function(jqXHR, textStatus, errorThrown) {        	        
-	        console.log(errorThrown)
-	      })
-	      .always(function() {
-	        
-	      });	
-	var triplesExpected=[	
-		];
-	expect(triplesExpected).toEqual(triples);
-  });*/
+  
+  */
 })
