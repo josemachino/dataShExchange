@@ -86,6 +86,7 @@ describe("Mappings", function() {
 		];
 	expect(triplesExpected).toEqual(triples);
   });
+  /*
   it("with long path with parameters in the attribute", function() {
 	  var triples=[];
 	  $.ajax({	  

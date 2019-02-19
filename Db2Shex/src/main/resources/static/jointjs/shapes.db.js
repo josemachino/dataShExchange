@@ -45,7 +45,7 @@
 let comparisonOp=["le","leq","gt","geq"]
 let widthSVGForLine='210px';
 let widthSVGForLineG='250px';
-let heightSVGForLine='10px';
+let heightSVGForLine='17px';
 let widthSVGLine='192';
 let widthSVGLineG='232';
 let sessionGO=[];
