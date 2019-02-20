@@ -94,15 +94,15 @@ public class DBService {
 		jdbcTemplate.execute("DROP ALL OBJECTS");
 		for (Table ta : db.getTables()) {
 
-			List<String> pks = ta.getPrimaryKey().getColumnNames();
+			List<String> pks = ta.getPrimaryKey().getColumnNames();			
 			StringBuilder rString = new StringBuilder();
 			String sep = ",";
 			AttRel[] atts = new AttRel[ta.getColumnByNames().size()];
 			int i = 0;
 			for (Column col : ta.getColumnByNames().values()) {
-				if (ta.getForeignKeyForColumnNameOrigin(col) == null) {
+				if (ta.getForeignKeyForColumnNameOrigin(col) == null) {					
 					atts[i] = new AttRel(ta.getName().substring(0, 2) + i, col.getName(), pks.contains(col.getName()));
-				} else {
+				} else {					
 					Table refTa = db.getTableForName(ta.getForeignKeyForColumnNameOrigin(col).getTableNameTarget());
 					int j = 0;
 					String refColName = ta.getForeignKeyForColumnNameOrigin(col).getColumnNameTargets().get(0);
@@ -114,7 +114,7 @@ public class DBService {
 					}
 					// Set id of the column
 					atts[i] = new AttRel(ta.getName().substring(0, 2) + i, col.getName(), pks.contains(col.getName()),
-							new ReFK(refTa.getName(), refTa.getName().substring(0, 2) + j));
+							new ReFK(refTa.getName(), refTa.getName().substring(0, 2) + j));					
 				}
 				rString.append(col.getName()).append(" ").append(col.getType()).append(sep);
 				i++;
@@ -124,8 +124,7 @@ public class DBService {
 			String taQ = "CREATE TABLE " + ta.getName() + " ( " + rString.toString() + " )";
 			jdbcTemplate.execute(taQ);
 		}
-		executeQueries(jdbcTemplate, db.getInserts());
-
+		executeQueries(jdbcTemplate, db.getInserts());		
 		return schemaTables;
 	}
 

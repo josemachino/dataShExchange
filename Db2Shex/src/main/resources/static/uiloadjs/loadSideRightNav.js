@@ -46,7 +46,11 @@ activate:function(e){
 }
 ,
 undost:function(e){
-	if (sessionGO.size>0){
+	console.log("undo");
+	//remove all elements from table
+	$table.bootstrapTable('removeAll');
+	//and import
+	if (sessionGO.length>0){
 		let lastSaved=sessionGO.pop();
 		
 		graphTGDs.fromJSON(lastSaved);   
@@ -90,6 +94,7 @@ undost:function(e){
 	}
 },
 savest:function(e){
+	console.log("save")
 	sessionGO.push(graphTGDs.toJSON());
 }
 ,
@@ -99,6 +104,8 @@ import:function(e){
     	var obj = JSON.parse(event.target.result);
     	mapSymbols=new Map();
     	mapTableIdCanvas=new Map();
+    	//clear the table with mappings
+    	$table.bootstrapTable('removeAll');
     	//TODO create the table of mappings and load the global variables
     	graphTGDs.fromJSON(obj);   
     	paperTGDs.fitToContent({

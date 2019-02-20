@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,7 +25,8 @@ public class DbController {
 	public DbController(DBService dbService) {
 		this.dbService = dbService;
 	}	
-	@PostMapping(path="/chase") 		
+	@PostMapping(path="/chase") 
+	@Transactional(timeout = 5000)
     public @ResponseBody ResponseEntity<StreamingResponseBody> chaseRule(@RequestParam("queries") String queries) {
 		String[] ls_Query=queries.split("\n");				
         final StreamingResponseBody body = out -> out.write(dbService.getResultFile("RDF/JSON",ls_Query));       		

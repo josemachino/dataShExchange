@@ -20,4 +20,9 @@ public class ReFK {
 	public void setId(String id) {
 		this.id = id;
 	}
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return name+" "+id;
+	}
 }

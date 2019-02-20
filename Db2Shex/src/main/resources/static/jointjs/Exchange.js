@@ -133,7 +133,7 @@ Exchange.prototype.stTGD=function(mapSymbols,graph,paper,mapTables){
                                                 for (var taElem of graph.getElements()){
                                                     if (mapTables.get(opt.ref.name)==taElem.id){
                                                         var taView=taElem.findView(paper);
-                                                        nameAttRef=getNameAttribute(taView.model.attributes.options,opt.ref.id);
+                                                        nameAttRef=this.getNameAttribute(taView.model.attributes.options,opt.ref.id);
                                                         break;
                                                     }
                                                 }

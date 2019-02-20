@@ -182,7 +182,7 @@ paperTGDs.on('link:connect',function(linkView){
         if (linkView.sourceMagnet.nodeName==linkView.targetMagnet.nodeName && linkView.targetView.model.attributes.ports.items[1].id==currentLink.attributes.target.port){
         	currentLink.remove()
         }
-        else if (linkView.sourceMagnet.nodeName==linkView.targetMagnet.nodeName){                        
+        else if (linkView.sourceMagnet.nodeName==linkView.targetMagnet.nodeName && !(linkView.sourceView.model.attributes.type=="db.Table" && linkView.targetView.model.attributes.type=="db.Table")){                        
             var auxKeySymbols=[];
             for (const key of mapSymbols.keys()) {
                 var obj={text:key};                        
@@ -298,8 +298,7 @@ paperTGDs.on('link:connect',function(linkView){
                             var tView=tlink.findView(paperTGDs);
                             var visited=[];
                             getJoinsTableFromTo(linkView.sourceView.model,tablesConnected,tView.sourceView.model.id,visited,tablesConnected[0]);	
-						}     		
-						console.log(tablesConnected)
+						}     								
 						//supposed that it is already connected with others but there is only one path then we have to create the green link first
 						if (tablesConnected.length==1){
 							
@@ -502,14 +501,17 @@ function loadModalFunctions(currentLink){
             }
             
             let objGraphic=$table.bootstrapTable('getRowByUniqueId',currentLink.id);            
-            var sourceHead=$(objGraphic.ex)[0].firstChild.textContent;
-            var sourceAtt=$(objGraphic.ex)[0].lastChild.textContent;
-            var path=$(objGraphic.ex)[1].firstChild.textContent;
-            var tHead=$(objGraphic.ex)[2].firstChild.textContent;
-            var tAtt=$(objGraphic.ex)[2].lastChild.textContent;
+            //var sourceHead=$(objGraphic.ex)[0].firstChild.textContent;
+            var sourceAtt=$(objGraphic.ex)[2].lastChild.textContent;
+            var path=$(objGraphic.ex)[3].firstChild.textContent;
+            //var tHead=$(objGraphic.ex)[2].firstChild.textContent;
+            var tAtt=$(objGraphic.ex)[4].lastChild.textContent;
             
-            let graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(sourceHead)).append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append(path)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({id:"param_"+currentLink.id,class:"param_tgd"}).append(constraintAtt)).append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:currentLink.id,class:'rem_param_blue_tgd'}).append($('<i>').attr('class','fas fa-trash-alt')))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(tHead)).append($('<div>').attr('class','li_body_tgd').append(tAtt))).remove().html();
-            
+            //This was when header was added in blue link
+            //let graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(sourceHead)).append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append(path)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({id:"param_"+currentLink.id,class:"param_tgd"}).append(constraintAtt)).append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:currentLink.id,class:'rem_param_blue_tgd'}).append($('<i>').attr('class','fas fa-trash-alt')))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(tHead)).append($('<div>').attr('class','li_body_tgd').append(tAtt))).remove().html();
+            //this without header
+            let graphicTGD=$('<div>').append('<i class="fas fa-dot-circle"></i><i class="fas fa-ellipsis-h"></i>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append(path)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({id:"param_"+currentLink.id,class:"param_tgd"}).append(constraintAtt)).append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:currentLink.id,class:'rem_param_blue_tgd'}).append($('<i>').attr('class','fas fa-trash-alt')))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_body_tgd').append(tAtt))).remove().html();
+            //TODO when update is deleting parent id and also the icons
             $table.bootstrapTable('updateByUniqueId',{id:currentLink.id,row:{ex:graphicTGD}})
         },
         onCancel: function(){
@@ -1582,31 +1584,34 @@ function getJoinsTableAllPaths (currentModel, tables,currentNode,visited){
         if (edgeView.sourceView.model.attributes.type=="db.Table" && edgeView.targetView.model.attributes.type=="db.Table"){            
             if (visited.includes(edge.id)==false){                                
                 if (edgeView.sourceView.model.id==currentModel.id){ //wrong never equal the same id always different REDO!!
-                    
-                    var obj={id:currentNode.id+","+edgeView.targetView.model.id, text:currentNode.text+","+edgeView.targetView.model.attributes.question}
-                    if (tables.some(ta=>ta['id']===obj.id)==false){
-                        tables.push(obj);
-                        visited.push(edge.id);
-                        if (edgeView.sourceView.model.id!=edgeView.targetView.model.id){
-                        	var aux=Object.assign({}, currentNode);
-                            currentNode=obj;                    
-                            getJoinsTableAllPaths(edgeView.targetView.model,tables,currentNode,visited);
-                            currentNode=aux;
-                        }                        
-                    }
+                	if (!currentNode.id.includes(edgeView.targetView.model.id)){
+	                    var obj={id:currentNode.id+","+edgeView.targetView.model.id, text:currentNode.text+","+edgeView.targetView.model.attributes.question}
+	                    if (tables.some(ta=>ta['id']===obj.id)==false){
+	                        tables.push(obj);
+	                        visited.push(edge.id);
+	                        if (edgeView.sourceView.model.id!=edgeView.targetView.model.id){
+	                        	var aux=Object.assign({}, currentNode);
+	                            currentNode=obj;                    
+	                            getJoinsTableAllPaths(edgeView.targetView.model,tables,currentNode,visited);
+	                            currentNode=aux;
+	                        }                        
+	                    }
+                	}
                 }else if (edgeView.targetView.model.id==currentModel.id){
-                    var obj={id:currentNode.id+","+edgeView.sourceView.model.id, text:currentNode.text+","+edgeView.sourceView.model.attributes.question}
-                    if (tables.some(ta=>ta['id']===obj.id)==false){
-                        tables.push(obj);
-                        visited.push(edge.id);
-                        
-                        if (edgeView.sourceView.model.id!=edgeView.targetView.model.id){
-                        	var aux=Object.assign({}, currentNode);
-                            currentNode=obj;  
-                            getJoinsTableAllPaths(edgeView.sourceView.model,tables,currentNode,visited);
-                            currentNode=aux;
-                        }
-                    }
+                	if (!currentNode.id.includes(edgeView.sourceView.model.id)){                	
+	                    var obj={id:currentNode.id+","+edgeView.sourceView.model.id, text:currentNode.text+","+edgeView.sourceView.model.attributes.question}
+	                    if (tables.some(ta=>ta['id']===obj.id)==false){
+	                        tables.push(obj);
+	                        visited.push(edge.id);
+	                        
+	                        if (edgeView.sourceView.model.id!=edgeView.targetView.model.id){
+	                        	var aux=Object.assign({}, currentNode);
+	                            currentNode=obj;  
+	                            getJoinsTableAllPaths(edgeView.sourceView.model,tables,currentNode,visited);
+	                            currentNode=aux;
+	                        }
+	                    }
+                	}
                 }
                 
             }
@@ -1617,27 +1622,34 @@ function getJoinsTableAllPaths (currentModel, tables,currentNode,visited){
 function getJoinsTableFromTo (currentModel,tables,targetNodeId,visited,currentJoin){
     if (currentModel.id==targetNodeId){
         if (tables.some(ta=>ta['id']===currentJoin.id)==false){
-        tables.push(currentJoin);}        
+        	
+        	tables.push(currentJoin);
+        }        
     }else{
         var inoutLinks = graphTGDs.getConnectedLinks(currentModel, { deep: true }); 
         for (var edge of inoutLinks){
             var edgeView=edge.findView(paperTGDs);
             if (edgeView.sourceView.model.attributes.type=="db.Table" && edgeView.targetView.model.attributes.type=="db.Table"){
                 if (visited.includes(edge.id)==false){
-                    if (edgeView.sourceView.model.id==currentModel.id){                    
-                        var aux=Object.assign({}, currentJoin);
-                        var obj={id:currentJoin.id+","+edgeView.targetView.model.id, text:currentJoin.text+","+edgeView.targetView.model.attributes.question}
-                        visited.push(edge.id);                            
-                        currentJoin=obj;
-                        getJoinsTableFromTo(edgeView.targetView.model,tables,targetNodeId,visited,currentJoin);                    
-                        currentJoin=aux;                                        
-                    }else if (edgeView.targetView.model.id==currentModel.id){                    
-                        var aux=Object.assign({}, currentJoin);
-                        var obj={id:currentJoin.id+","+edgeView.sourceView.model.id, text:currentJoin.text+","+edgeView.sourceView.model.attributes.question}                        
-                        visited.push(edge.id); 
-                        currentJoin=obj;
-                        getJoinsTableFromTo(edgeView.sourceView.model,tables,targetNodeId,visited,currentJoin);                    
-                        currentJoin=aux;                    
+                    if (edgeView.sourceView.model.id==currentModel.id){
+                    	
+                    	if (!currentJoin.id.includes(edgeView.targetView.model.id)){                    		
+	                        var aux=Object.assign({}, currentJoin);
+	                        var obj={id:currentJoin.id+","+edgeView.targetView.model.id, text:currentJoin.text+","+edgeView.targetView.model.attributes.question}
+	                        visited.push(edge.id);                            
+	                        currentJoin=obj;
+	                        getJoinsTableFromTo(edgeView.targetView.model,tables,targetNodeId,visited,currentJoin);                    
+	                        currentJoin=aux;                                        
+                    	}
+                    }else if (edgeView.targetView.model.id==currentModel.id){       
+                    	if (!currentJoin.id.includes(edgeView.sourceView.model.id)){                    		
+	                        var aux=Object.assign({}, currentJoin);
+	                        var obj={id:currentJoin.id+","+edgeView.sourceView.model.id, text:currentJoin.text+","+edgeView.sourceView.model.attributes.question}                        
+	                        visited.push(edge.id); 
+	                        currentJoin=obj;
+	                        getJoinsTableFromTo(edgeView.sourceView.model,tables,targetNodeId,visited,currentJoin);                    
+	                        currentJoin=aux;                    
+                    	}
                     }else{
 						console.log(edgeView)
 					}
@@ -1663,9 +1675,9 @@ function link(g,source, portSource, target,portTarget,color,vertices){
     return link;
 }
 
-function linkDataBase(g,source, portSource, target,portTarget,vertices) {      	
+function linkDataBase(g,source, portSource, target,taTarget,portTarget,vertices) {      	
     var link = new joint.shapes.standard.Link({
-        source: { id: target , port:'pk-'.concat(portTarget)},
+        source: { id: target , port:'pk-'.concat(taTarget).concat(portTarget)},
         target: { id: source , port:'fk-'.concat(portSource)}, 
         router: { name: 'manhattan' },
         connector: { name: 'jumpover' },
@@ -1835,8 +1847,7 @@ function stTGD2(graph,paper,mapTables){
                                                 for (var taElem of graph.getElements()){
                                                     if (mapTables.get(opt.ref.name)==taElem.id){
                                                         var taView=taElem.findView(paper);
-                                                        nameAttRef=getNameAttribute(taView.model.attributes.options,opt.ref.id);
-                                                        console.log(nameAttRef);
+                                                        nameAttRef=getNameAttribute(taView.model.attributes.options,opt.ref.id);                                                        
                                                         break;
                                                     }
                                                 }                                                

@@ -27,10 +27,11 @@ describe("Mappings", function() {
 	});
   });
 
-  it("with paths of length 3 with two attributes in the join that connect each other because they are pks", function() {
+  
+  it("Mapping with filters in the attribute", function() {
 	  var triples=[];
 	  $.ajax({	  
-	        url: "tgd/prodsupp_mapping",
+	        url: "tgd/faculty_filtermap",
 	        type: "GET",
 	        async: false
 	      })
@@ -60,7 +61,7 @@ describe("Mappings", function() {
 	  $.ajax({	  
 	        url: "test",
 	        type: "POST",
-	        data:{nameTest:"prodsupp_mapping",queries:exchange.chaseQueryDB},
+	        data:{nameTest:"faculty_filtermap",queries:exchange.chaseQueryDB},
 	        async: false
 	      })
 	      .done(function(data) {
@@ -87,10 +88,10 @@ describe("Mappings", function() {
 	expect(triplesExpected).toEqual(triples);
   });
   /*
-  it("with long path with parameters in the attribute", function() {
+  it("Mapping with paths of length 4 with two attributes in the join that connect each other because they are pks", function() {
 	  var triples=[];
 	  $.ajax({	  
-	        url: "tgd/prodsupp_mapping",
+	        url: "tgd/department_mapping",
 	        type: "GET",
 	        async: false
 	      })
@@ -120,7 +121,7 @@ describe("Mappings", function() {
 	  $.ajax({	  
 	        url: "test",
 	        type: "POST",
-	        data:{nameTest:"prodsupp_mapping",queries:exchange.chaseQueryDB},
+	        data:{nameTest:"department_mapping",queries:exchange.chaseQueryDB},
 	        async: false
 	      })
 	      .done(function(data) {
@@ -143,10 +144,24 @@ describe("Mappings", function() {
 	        
 	      });	
 	var triplesExpected=[	
+		{ subject: 'http://example.com/ProfShape/@PERU@', predicate: 'office', object: '@PERU@' },
+		{ subject: 'http://example.com/ProfShape/@PERU@', predicate: 'course', object: 'http://example.com/CourseShape/@PERU@' },
+		{ subject: 'http://example.com/ProfShape/@PERU@', predicate: 'name', object: '@PERU@' },
+		{ subject: 'http://example.com/CourseShape/300', predicate: 'prof', object: 'http://example.com/ProfShape/@PERU@' },
+		{ subject: 'http://example.com/CourseShape/300', predicate: 'name', object: '@PERU@' },
+		{ subject: 'http://example.com/ProfShape/101', predicate: 'worksWith', object: 'http://example.com/StudentShape/100' },
+		{ subject: 'http://example.com/ProfShape/101', predicate: 'helpsIn', object: 'http://example.com/CourseShape/300' },
+		{ subject: 'http://example.com/ProfShape/101', predicate: 'name', object: 'Pame' },
+		{ subject: 'http://example.com/ProfShape/101', predicate: 'attends', object: 'http://example.com/CourseShape/300' },
+		{ subject: 'http://example.com/ProfShape/100', predicate: 'name', object: 'Ana' },
+		{ subject: 'http://example.com/ProfShape/100', predicate: 'attends', object: 'http://example.com/CourseShape/300' },
+		{ subject: 'http://example.com/CourseShape/@PERU@', predicate: 'prof', object: 'http://example.com/ProfShape/@PERU@' },
+		{ subject: 'http://example.com/CourseShape/@PERU@', predicate: 'name', object: '@PERU@' }
 		];
 	expect(triplesExpected).toEqual(triples);
   });
-  /*
+  
+  
   
   it("Mapping two relational attributes to the same Triple constraint", function() {
 	  var triples=[];

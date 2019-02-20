@@ -13,6 +13,20 @@ CREATE TABLE IF NOT EXISTS Professor (
     PRIMARY KEY (p_id)
 )  ENGINE=INNODB;
 
+CREATE TABLE IF NOT EXISTS Faculty (
+    f_id VARCHAR(255) NOT NULL,
+    f_name VARCHAR(255) NOT NULL,	
+    PRIMARY KEY (f_id)
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS FacultyProfessor (
+    fac_id VARCHAR(255) NOT NULL,
+    prof_id VARCHAR(255) NOT NULL,	
+    PRIMARY KEY (fac_id,prof_id),
+    FOREIGN KEY (prof_id) REFERENCES Professor(p_id),
+    FOREIGN KEY (fac_id) REFERENCES Faculty(f_id)
+)  ENGINE=INNODB;
+
 CREATE TABLE IF NOT EXISTS Course (
     c_id VARCHAR(255) NOT NULL,
     c_name VARCHAR(255) NOT NULL,
@@ -24,7 +38,7 @@ CREATE TABLE IF NOT EXISTS Course (
 CREATE TABLE IF NOT EXISTS Enrollment (
     stud_id VARCHAR(255) NOT NULL,
     cour_id VARCHAR(255) NOT NULL,
-	e_grade VARCHAR(255) NOT NULL,
+	e_grade int,
     e_year VARCHAR(255) NOT NULL,
     PRIMARY KEY (stud_id, cour_id, e_year),
 	FOREIGN KEY (stud_id) REFERENCES Student(s_id),
@@ -47,8 +61,8 @@ INSERT INTO Student (s_id, s_name,s_phone,s_ssn) VALUES ('101', 'Pame','06122080
 INSERT INTO Professor (p_id, p_name,p_office) VALUES ('100', 'Raul','B101');
 INSERT INTO Course (c_id, c_name,prof_id) VALUES ('300', 'Math','100');
 
-INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('100', '300', '09', '2016');
-INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('100', '300', '15', '2017');
-INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('101', '300', '18', '2016');
+INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('100', '300', 9, '2016');
+INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('100', '300', 15, '2017');
+INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('101', '300', 18, '2016');
 
 INSERT INTO TA (stud_id, cour_id,e_year,salary) VALUES ('101', '300','2016','100');

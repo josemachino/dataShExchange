@@ -178,10 +178,12 @@ joint.dia.Element.define('db.Table',{
             offsetY += optionHeight;
 
             var portY = offsetY - optionHeight / 2 + questionHeight;
-            if (option.iskey && option.ref==null ){
-            	if (!this.getPort('pk-'+option.id)) {
-            		this.addPort({group:'pk',id:'pk-'.concat(option.id),args:{y: portY }});
-            	}                  
+            if (option.iskey ){          
+            	console.log('pk-'.concat(this.get('question')).concat(option.id));
+            	if(!this.getPort('pk-'.concat(this.get('question')).concat(option.id))){
+            		this.addPort({group:'pk',id:'pk-'.concat(this.get('question')).concat(option.id),args:{y: portY }});
+            	}
+            	            	                  
             }
             if (!this.getPort(option.id)) {
                 if (option.ref!=null){
