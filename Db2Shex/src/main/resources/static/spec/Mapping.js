@@ -27,7 +27,7 @@ describe("Mappings", function() {
 	});
   });
 
-  it("with paths of length 3 with two attributes that connect each other because they are pks", function() {
+  it("with paths of length 3 with two attributes in the join that connect each other because they are pks", function() {
 	  var triples=[];
 	  $.ajax({	  
 	        url: "tgd/prodsupp_mapping",

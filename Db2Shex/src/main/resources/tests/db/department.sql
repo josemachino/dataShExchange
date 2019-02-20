@@ -34,9 +34,12 @@ CREATE TABLE IF NOT EXISTS Enrollment (
 CREATE TABLE IF NOT EXISTS TA (
     stud_id VARCHAR(255) NOT NULL,
     cour_id VARCHAR(255) NOT NULL,
-    PRIMARY KEY (stud_id, cour_id),
-	FOREIGN KEY (stud_id) REFERENCES Student(s_id),
-	FOREIGN KEY (cour_id) REFERENCES Course(c_id)
+	e_year VARCHAR(255) NOT NULL,
+	salary VARCHAR(255) NOT NULL,
+    PRIMARY KEY (stud_id, cour_id,e_year),
+	FOREIGN KEY (stud_id) REFERENCES Enrollment(stud_id),
+	FOREIGN KEY (cour_id) REFERENCES Enrollment(cour_id),
+	FOREIGN KEY (e_year) REFERENCES Enrollment(e_year),
 )ENGINE=INNODB;
 
 INSERT INTO Student (s_id, s_name) VALUES ('100', 'Ana');
