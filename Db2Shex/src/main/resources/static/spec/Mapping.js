@@ -28,7 +28,7 @@ describe("Mappings", function() {
   });
 
   
-  it("Mapping with filters in the attribute", function() {
+  it("Mapping with filters in the attribute and long paths. Also the result does not satisfy the schema", function() {
 	  var triples=[];
 	  $.ajax({	  
 	        url: "tgd/faculty_filtermap",
@@ -83,11 +83,27 @@ describe("Mappings", function() {
 	      .always(function() {
 	        
 	      });	
-	var triplesExpected=[	
+	var triplesExpected=[
+		{ subject: 'http://example.com/StudentShape/102', predicate: 'worksWith', object: 'RAUL' },
+		{ subject: 'http://example.com/StudentShape/102', predicate: 'worksWith', object: 'JOSE' },
+		{ subject: 'http://example.com/StudentShape/102', predicate: 'scores', object: '18' },
+		{ subject: 'http://example.com/StudentShape/102', predicate: 'name', object: 'Ines' },
+		{ subject: 'http://example.com/StudentShape/102', predicate: 'goesTo', object: 'BIO-Agriculture' },
+		{ subject: 'http://example.com/StudentShape/102', predicate: 'goesTo', object: 'BIO-Molecular' },
+		{ subject: 'http://example.com/StudentShape/101', predicate: 'worksWith', object: 'RAUL' },
+		{ subject: 'http://example.com/StudentShape/101', predicate: 'scores', object: '@PERU@' },
+		{ subject: 'http://example.com/StudentShape/101', predicate: 'name', object: 'Pame' },
+		{ subject: 'http://example.com/StudentShape/101', predicate: 'goesTo', object: 'BIO-Agriculture' },
+		{ subject: 'http://example.com/StudentShape/101', predicate: 'goesTo', object: 'BIO-Molecular' },
+		{ subject: 'http://example.com/StudentShape/103', predicate: 'worksWith', object: 'RAUL' },
+		{ subject: 'http://example.com/StudentShape/103', predicate: 'scores', object: '17' },
+		{ subject: 'http://example.com/StudentShape/103', predicate: 'name', object: 'Juan' },
+		{ subject: 'http://example.com/StudentShape/103', predicate: 'goesTo', object: 'BIO-Agriculture' },
+		{ subject: 'http://example.com/StudentShape/103', predicate: 'goesTo', object: 'BIO-Molecular' }
 		];
 	expect(triplesExpected).toEqual(triples);
   });
-  /*
+  
   it("Mapping with paths of length 4 with two attributes in the join that connect each other because they are pks", function() {
 	  var triples=[];
 	  $.ajax({	  
@@ -528,5 +544,5 @@ describe("Mappings", function() {
 	expect(triplesExpected).toEqual(triples);
   });
   
-  */
+  
 })

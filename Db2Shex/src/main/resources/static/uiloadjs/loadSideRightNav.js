@@ -73,15 +73,15 @@ undost:function(e){
 		for (var link of links){
 			var edgeView=link.findView(paperTGDs);
 			if (edgeView.sourceView.model.attributes.type=="db.Table" && edgeView.targetView.model.attributes.type=="shex.Type"){
-				if (link.attr('line/stroke')=='green'){
+				if (link.attr('line/stroke')==subjectLinkColor){
 					let valueIRI=(((link.labels()[0]|| {}).attrs||{}).text||{}).text;
 					let taName=edgeView.sourceView.model.attributes.question;
 					drawNewGreenLinkInTable(link,taName,valueIRI,edgeView.targetView.model.attributes.question);
 				}
-				if (link.attr('line/stroke')=='blue'){					
+				if (link.attr('line/stroke')==attributeLinkColor){					
 					drawNewBlueLinkInTable(link)
 				}
-				if (link.attr('line/stroke')=='red'){					
+				if (link.attr('line/stroke')==attributeRefLinkColor){					
 					let sHead=edgeView.sourceView.model.attributes.question;
 					let sAtt=getSourceOptionNameLinkView(edgeView);
 					let path=(((link.labels()[0]|| {}).attrs||{}).text||{}).text;;
@@ -127,15 +127,15 @@ import:function(e){
 		for (var link of links){
 			var edgeView=link.findView(paperTGDs);
 			if (edgeView.sourceView.model.attributes.type=="db.Table" && edgeView.targetView.model.attributes.type=="shex.Type"){
-				if (link.attr('line/stroke')=='green'){
+				if (link.attr('line/stroke')==subjectLinkColor){
 					let valueIRI=(((link.labels()[0]|| {}).attrs||{}).text||{}).text;
 					let taName=edgeView.sourceView.model.attributes.question;
 					drawNewGreenLinkInTable(link,taName,valueIRI,edgeView.targetView.model.attributes.question);
 				}
-				if (link.attr('line/stroke')=='blue'){					
+				if (link.attr('line/stroke')==attributeLinkColor){					
 					drawNewBlueLinkInTable(link)
 				}
-				if (link.attr('line/stroke')=='red'){					
+				if (link.attr('line/stroke')==attributeRefLinkColor){					
 					let sHead=edgeView.sourceView.model.attributes.question;
 					let sAtt=getSourceOptionNameLinkView(edgeView);
 					let path=(((link.labels()[0]|| {}).attrs||{}).text||{}).text;;

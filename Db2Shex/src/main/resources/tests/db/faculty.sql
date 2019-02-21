@@ -68,14 +68,15 @@ INSERT INTO Course (c_id, c_name,prof_id) VALUES ('302', 'Biology','100');
 
 INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('100', '300', 19, '2016');
 INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('100', '300', 15, '2017');
-INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('101', '301', 18, '2016');
+INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('101', '301', 12, '2016');
 INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('102', '301', 13, '2016');
+INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('102', '300', 18, '2015');
 INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('103', '302', 17, '2016');
 
-INSERT INTO TA (stud_id, cour_id,e_year,salary) VALUES ('101', '300','2016','100');
+INSERT INTO TA (stud_id, cour_id,e_year,salary) VALUES ('101', '301','2016','100');
 INSERT INTO TA (stud_id, cour_id,e_year,salary) VALUES ('102', '301','2016','100');
 INSERT INTO TA (stud_id, cour_id,e_year,salary) VALUES ('102', '300','2015','100');
-INSERT INTO TA (stud_id, cour_id,e_year,salary) VALUES ('103', '301','2016','100');
+INSERT INTO TA (stud_id, cour_id,e_year,salary) VALUES ('103', '302','2016','100');
 
 INSERT INTO Faculty (f_id, f_name) VALUES ('1', 'BIO-Molecular');
 INSERT INTO Faculty (f_id, f_name) VALUES ('2', 'BIO-Agriculture');

@@ -57,19 +57,19 @@ p{
 #sidebar-right.active .sidebar-header strong {
     display: block;
 }
-
+/*WHEN MODIFYING COLORS WE SHOULD MODIFY IN INDEX.HTML THE ARROW COLORS FOR THE SVG LINE*/
 .arrowBlue{
-  stroke:blue;
+  stroke:black;
   stroke-width:2; 
   marker-end:url(#markerArrowBlue)
 }
 .arrowRed{
-  stroke:red;
+  stroke:green;
   stroke-width:2; 
   marker-end:url(#markerArrowRed)
 }
 .arrowGreen{
-  stroke:green;
+  stroke:blue;
   stroke-width:2; 
   marker-end:url(#markerArrowGreen)
 }

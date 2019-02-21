@@ -49,6 +49,9 @@ let heightSVGForLine='17px';
 let widthSVGLine='192';
 let widthSVGLineG='232';
 let sessionGO=[];
+let subjectLinkColor="blue";
+let attributeLinkColor="black";
+let attributeRefLinkColor="green";
 var graphTGDs = new joint.dia.Graph;
 var paperTGDs = new joint.dia.Paper({
     el: document.getElementById('mydb'),
@@ -76,7 +79,7 @@ paperTGDs.on('link:mouseleave', function(linkView) {
     linkView.hideTools();
 });
 
-paperTGDs.on('link:pointerdblclick', function(linkView){  
+/*paperTGDs.on('link:pointerdblclick', function(linkView){  
     var currentLink=linkView.model;
     if (linkView.sourceMagnet.nodeName=='rect'){
         var auxKeySymbols=[];
@@ -103,11 +106,11 @@ paperTGDs.on('link:pointerdblclick', function(linkView){
             loadModalFunctions(currentLink);
         }    
     }
-});
+});*/
 
 graphTGDs.on('remove', function(cell, collection, opt) {
    if (cell.isLink()) {	         
-        if (cell.attr('line/stroke')=="green"){     
+        if (cell.attr('line/stroke')==subjectLinkColor){     
         	//TODO NOTIFY THAT WE ARE REMOVING ALL LINKS THAT ARE CONNECTED TO THE TABLE WITH ITS TYPE
         	
         	
@@ -122,7 +125,7 @@ graphTGDs.on('remove', function(cell, collection, opt) {
 			links=graphTGDs.getLinks();
 			for (var link of links){
 				var edgeView=link.findView(paperTGDs);
-				if (edgeView.sourceView.model.attributes.type=="db.Table" && edgeView.targetView.model.attributes.type=="shex.Type" && link.attr('line/stroke')=='blue'){
+				if (edgeView.sourceView.model.attributes.type=="db.Table" && edgeView.targetView.model.attributes.type=="shex.Type" && link.attr('line/stroke')==attributeLinkColor){
 					let path=(((link.labels()[0]|| {}).attrs||{}).text||{}).text;					
 					let names=getTokens(path)					
 					if (mapTableIdCanvas.get(names[names.length-1])==cell.attributes.source.id){						
@@ -190,7 +193,7 @@ paperTGDs.on('link:connect',function(linkView){
             }
             
             if ((V(linkView.sourceMagnet.parentNode).attr('port-group')==='outfk' || V(linkView.sourceMagnet.parentNode).attr('port-group')==='outpk') &&       V(linkView.targetMagnet.parentNode).attr('port-group')==='outype'){
-                currentLink.attr('line/stroke', 'red');
+                currentLink.attr('line/stroke', attributeRefLinkColor);
                 //Obtain the text of attribute selected
                 var attributeSelected="";
                 for (var option of linkView.sourceView.model.attributes.options){                    
@@ -243,7 +246,7 @@ paperTGDs.on('link:connect',function(linkView){
                 currentLink.remove();
             }else{
                 if (linkView.sourceMagnet.nodeName=='rect'){
-                    currentLink.attr('line/stroke', 'green');
+                    currentLink.attr('line/stroke', subjectLinkColor);
                     //if the primary key is only one set by default if not load modal
 					var pks=getKeys(linkView.sourceView.model.attributes.options);
 					if (pks.length==1){
@@ -321,7 +324,7 @@ paperTGDs.on('link:connect',function(linkView){
 								var pks=getKeys(element.attributes.options);					
 				                var fSymbol=getFunctionSymbol(mapSymbols,linkView.targetView.model.attributes.question);
 								var valueIRI=fSymbol+"("+pks[0]+")";											
-								var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
+								var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,subjectLinkColor);
 								createLinkTool(linkParent);
 				                
 				                linkParent.appendLabel({attrs: {text: {text: valueIRI}}});
@@ -332,7 +335,7 @@ paperTGDs.on('link:connect',function(linkView){
 				            }
 						
                             currentLink.appendLabel({attrs: {text: {text: tablesConnected[0].text}},position: {offset: -10}});							
-                            currentLink.attr('line/stroke', 'blue');
+                            currentLink.attr('line/stroke', attributeLinkColor);
 							createLinkTool(currentLink);
 							console.log("creating blue link")
 							drawNewBlueLinkInTable(currentLink);							
@@ -638,7 +641,7 @@ function loadModalPathAttribute(currentLink,parameters){
             var joinPath=$("#ddParameter .btn").text().trim();
             currentLink.appendLabel({attrs: {text: {text: joinPath}},position: {offset: -10}});
 			var linkView=currentLink.findView(paperTGDs)
-			currentLink.attr('line/stroke', 'blue');
+			currentLink.attr('line/stroke', attributeLinkColor);
 			createLinkTool(currentLink);
 			
             var paramValue=$('#ddParameter .btn').val();            
@@ -687,7 +690,7 @@ function loadModalPathAttribute(currentLink,parameters){
             		}
             	}
                 if (!isConnectedGL){
-	                var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
+	                var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,subjectLinkColor);
 	                var pks=getKeys(element.attributes.options);
 	                let valueIRI=mapSymbols.keys().next().value+"("+pks[0]+")";
 	                linkParent.appendLabel({attrs: {text: {text: valueIRI}}});
@@ -1015,7 +1018,7 @@ function loadModalRedFromTable(currentLink,iris, parameters,functionsMap,valueRe
             		}
             	}
                 if (!isConnectedGL){
-	                var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
+	                var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,subjectLinkColor);
 	                var pks=getKeys(element.attributes.options);
 	                let valueIRI=mapSymbols.keys().next().value+"("+pks[0]+")";
 	                linkParent.appendLabel({attrs: {text: {text: valueIRI}}});
@@ -1168,7 +1171,7 @@ function loadModalTypeReferenced(currentLink,iris, parameters,functionsMap,value
             		}
             	}
                 if (!isConnectedGL){
-	                var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
+	                var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,subjectLinkColor);
 	                var pks=getKeys(element.attributes.options);
 	                let valueIRI=mapSymbols.keys().next().value+"("+pks[0]+")";
 	                linkParent.appendLabel({attrs: {text: {text: valueIRI}}});
@@ -1337,7 +1340,7 @@ function loadPathIRIModal(currentLink,iris, parameters,functionsMap,lsPaths){
             currentLink.appendLabel({attrs: {text: {text: joinPath}},position: {offset: -10}});
 						
 			var linkView=currentLink.findView(paperTGDs)			
-			currentLink.attr('line/stroke', 'blue');
+			currentLink.attr('line/stroke', attributeLinkColor);
 			createLinkTool(currentLink);
 			
 			
@@ -1367,7 +1370,7 @@ function loadPathIRIModal(currentLink,iris, parameters,functionsMap,lsPaths){
 				var pks=getKeys(element.attributes.options);					
                 var fSymbol=getFunctionSymbol(mapSymbols,linkView.targetView.model.attributes.question);
 				var valueIRI=fSymbol+"("+pks[0]+")";											
-				var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,'green');
+				var linkParent=link(graphTGDs,element.id,element.attributes.ports.items[0].id,linkView.targetView.model.id,linkView.targetView.model.attributes.ports.items[0].id,subjectLinkColor);
 				createLinkTool(linkParent);
                 
                 linkParent.appendLabel({attrs: {text: {text: valueIRI}}});
