@@ -454,18 +454,25 @@ function loadModalFunctions(currentLink){
                 }
                 i++;
             }
-            var constraintAtt
+            var constraintAtt="";
             if (document.getElementById('fun-filter').style.visibility=='hidden'){
-                constraintAtt="[function:"+ $('#att-func').val()
-            }else{
-                constraintAtt="[function:"+ $('#att-func').val()+" "+$('#fun-filter').val()
+            	if ($('#att-func').val().length>0){
+            		console.log("valor fun:"+$('#att-func').val());
+            		constraintAtt="[function:"+ $('#att-func').val();
+            	}
+            }else{            	
+            	constraintAtt="[function:"+ $('#att-func').val()+" "+$('#fun-filter').val();
             }
-            if ($('#att-filter').val().length>0){
-                constraintAtt=constraintAtt.concat(",filter:"+$('#att-filter').val())
+            if ($('#att-filter').val().length>0 && constraintAtt.length>0){
+                constraintAtt=constraintAtt.concat(",filter:"+$('#att-filter').val()).concat("]");
+            }else if ($('#att-filter').val().length>0){
+            	constraintAtt="[filter:"+$('#att-filter').val()+"]";
+            }else if (constraintAtt.length>0){
+            	constraintAtt=constraintAtt.concat("]");
             }
-            constraintAtt=constraintAtt.concat("]")
             
-            var offsetNew=currentLink.labels().length+1*10
+            var offsetNew=currentLink.labels().length+1*10;
+            if (constraintAtt.length>0){
             if (index==-1){                
                 currentLink.appendLabel({
                         markup: [{tagName: 'rect',selector: 'labelBody'}, {tagName: 'text',selector: 'text'}],
@@ -513,6 +520,7 @@ function loadModalFunctions(currentLink){
             let graphicTGD=$('<div>').append('<i class="fas fa-dot-circle"></i><i class="fas fa-ellipsis-h"></i>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append(path)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({id:"param_"+currentLink.id,class:"param_tgd"}).append(constraintAtt)).append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:currentLink.id,class:'rem_param_blue_tgd'}).append($('<i>').attr('class','fas fa-trash-alt')))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_body_tgd').append(tAtt))).remove().html();
             //TODO when update is deleting parent id and also the icons
             $table.bootstrapTable('updateByUniqueId',{id:currentLink.id,row:{ex:graphicTGD}})
+            }
         },
         onCancel: function(){
             
@@ -528,6 +536,9 @@ function addPrimitiveFunctions(divForm1){
     var select = document.createElement("SELECT");
     select.id="att-func";
     select.setAttribute("class","form-control");
+    var option0 = document.createElement("option");
+    option0.text = "";
+    option0.value="";
     var option1 = document.createElement("option");
     option1.text = "Uppercase";
     option1.value="UPPER";
@@ -549,6 +560,7 @@ function addPrimitiveFunctions(divForm1){
 	var option7 = document.createElement("option");
     option7.text = ">=";
     option7.value="geq";
+    select.add(option0);
     select.add(option1);
     select.add(option2);
     select.add(option3);
@@ -789,13 +801,7 @@ function loadModalPathAttributeDetail(currentLink,parameters){
         bodyViewOptions: { displayParameters:parameters },
         onConfirm: function() {                           
             var joinPath=$("#ddParameter .btn").text().trim();            
-			currentLink.label(0,{
-                        attrs: {
-                            text: {
-                                text: joinPath
-                            }
-                        }
-                    });
+			currentLink.label(0,{attrs: {text: {text: joinPath}}});
 			let i=0
             let index=-1
             for (let label of currentLink.labels()){
@@ -804,27 +810,28 @@ function loadModalPathAttributeDetail(currentLink,parameters){
                 }
                 i++;
             }
-            var constraintAtt
+            var constraintAtt="";
             if (document.getElementById('fun-filter').style.visibility=='hidden'){
-                constraintAtt="[function:"+ $('#att-func').val()
-            }else{
-                constraintAtt="[function:"+ $('#att-func').val()+" "+$('#fun-filter').val()
+            	if ($('#att-func').val().length>0){
+            		console.log("valor fun:"+$('#att-func').val());
+            		constraintAtt="[function:"+ $('#att-func').val();
+            	}
+            }else{            	
+            	constraintAtt="[function:"+ $('#att-func').val()+" "+$('#fun-filter').val();
             }
-            if ($('#att-filter').val().length>0){
-                constraintAtt=constraintAtt.concat(",filter:"+$('#att-filter').val())
-            }
-            constraintAtt=constraintAtt.concat("]")
+            if ($('#att-filter').val().length>0 && constraintAtt.length>0){
+                constraintAtt=constraintAtt.concat(",filter:"+$('#att-filter').val()).concat("]");
+            }else if ($('#att-filter').val().length>0){
+            	constraintAtt="[filter:"+$('#att-filter').val()+"]";
+            }else if (constraintAtt.length>0){
+            	constraintAtt=constraintAtt.concat("]");
+            }            
             
-            var offsetNew=currentLink.labels().length+1*10
+            var offsetNew=currentLink.labels().length+1*10;
+            if (constraintAtt.length>0){
             if (index==-1){                
                 currentLink.appendLabel({
-                        markup: [{
-                            tagName: 'rect',
-                            selector: 'labelBody'
-                        }, {
-                            tagName: 'text',
-                            selector: 'text'
-                        }],
+                        markup: [{tagName: 'rect',selector: 'labelBody'}, {tagName: 'text',selector: 'text'}],
                         attrs: {
                             text: {
                                 text: constraintAtt,
@@ -834,10 +841,7 @@ function loadModalPathAttributeDetail(currentLink,parameters){
                                 textVerticalAnchor: 'middle'
                             },
                             labelBody: {
-                                ref: 'text',
-                                refX: -5,
-                                refY: -5,
-                                refWidth: '100%',
+                                ref: 'text',refX: -5,refY: -5,refWidth: '100%',
                                 refHeight: '100%',
                                 refWidth2: 10,
                                 refHeight2: 10,
@@ -848,25 +852,26 @@ function loadModalPathAttributeDetail(currentLink,parameters){
                                 ry: 5
                             }
                         },
-                        position: {
-                            offset: -40
-                        }
+                        position: {offset: -40}
                     });
             }else{
 				currentLink.label(index,{attrs: {text: {text: constraintAtt}}});            
             }
             
             let objGraphic=$table.bootstrapTable('getRowByUniqueId',currentLink.id);
-            console.log($(objGraphic.ex))
-            var sourceHead=$(objGraphic.ex)[0].firstChild.textContent;
-            var sourceAtt=$(objGraphic.ex)[0].lastChild.textContent;
-            var path=joinPath;
-            var tHead=$(objGraphic.ex)[2].firstChild.textContent;
-            var tAtt=$(objGraphic.ex)[2].lastChild.textContent;
+          //var sourceHead=$(objGraphic.ex)[0].firstChild.textContent;
+            var sourceAtt=$(objGraphic.ex)[2].lastChild.textContent;
+            var path=$(objGraphic.ex)[3].firstChild.textContent;
+            //var tHead=$(objGraphic.ex)[2].firstChild.textContent;
+            var tAtt=$(objGraphic.ex)[4].lastChild.textContent;
             
-            let graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(sourceHead)).append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append(path)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({id:"param_"+currentLink.id,class:"param_tgd"}).append(constraintAtt)).append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:currentLink.id,class:'rem_param_blue_tgd'}).append($('<i>').attr('class','fas fa-trash-alt')))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(tHead)).append($('<div>').attr('class','li_body_tgd').append(tAtt))).remove().html();
+            //This was when header was added in blue link
+            //let graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(sourceHead)).append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append(path)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({id:"param_"+currentLink.id,class:"param_tgd"}).append(constraintAtt)).append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:currentLink.id,class:'rem_param_blue_tgd'}).append($('<i>').attr('class','fas fa-trash-alt')))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(tHead)).append($('<div>').attr('class','li_body_tgd').append(tAtt))).remove().html();
+            //this without header
+            let graphicTGD=$('<div>').append('<i class="fas fa-dot-circle"></i><i class="fas fa-ellipsis-h"></i>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append(path)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({id:"param_"+currentLink.id,class:"param_tgd"}).append(constraintAtt)).append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:currentLink.id,class:'rem_param_blue_tgd'}).append($('<i>').attr('class','fas fa-trash-alt')))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_body_tgd').append(tAtt))).remove().html();
             
-            $table.bootstrapTable('updateByUniqueId',{id:currentLink.id,row:{ex:graphicTGD}})
+            $table.bootstrapTable('updateByUniqueId',{id:currentLink.id,row:{ex:graphicTGD}});
+            }
         },
         onCancel: function(){            
         }        
@@ -1229,7 +1234,7 @@ function drawNewGreenLinkInTable(greenLink,sHead,fSubject,tHead){
 
 function drawNewBlueLinkInTable(blueLink){
 	//TODO GET THE PARENT ID	
-	let joinPath=(((blueLink.labels()[0]|| {}).attrs||{}).text||{}).text;;	
+	let joinPath=(((blueLink.labels()[0]|| {}).attrs||{}).text||{}).text;
 	let relNames=getTokens(joinPath)
 	let linkView=blueLink.findView(paperTGDs);
 	var inTargetLinks=graphTGDs.getConnectedLinks(linkView.targetView.model, {inbound:true});
@@ -1254,11 +1259,14 @@ function drawNewBlueLinkInTable(blueLink){
         }
     }
 	let sourceTName=linkView.sourceView.model.attributes.question;
-	let sourceAtt=getSourceOptionNameLinkView(linkView)
+	let sourceAtt=getSourceOptionNameLinkView(linkView);
+	let constraintAtt="";
+	if (blueLink.labels().length>1)
+		constraintAtt=(((blueLink.labels()[1]|| {}).attrs||{}).text||{}).text;
 	//this draw with head text
 	//let graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(sourceTName)).append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr({'class':'link_tgd'}).append($('<div>').attr({class:"path_tgd"}).append(joinPath)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:blueLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<p>').attr({id:"param_"+blueLink.id,class:"param_tgd"}))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(linkView.targetView.model.attributes.question)).append($('<div>').attr('class','li_body_tgd').append(blueLink.attributes.target.port.split(",")[0]))).remove().html();
 	//this draw without head text
-	let graphicTGD=$('<div>').append('<i class="fas fa-dot-circle"></i><i class="fas fa-ellipsis-h"></i>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr({'class':'link_tgd'}).append($('<div>').attr({class:"path_tgd"}).append(joinPath)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:blueLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:heightSVGForLine,width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<p>').attr({id:"param_"+blueLink.id,class:"param_tgd"}))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_body_tgd').append(blueLink.attributes.target.port.split(",")[0]))).remove().html();
+	let graphicTGD=$('<div>').append('<i class="fas fa-dot-circle"></i><i class="fas fa-ellipsis-h"></i>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr({'class':'link_tgd'}).append($('<div>').attr({class:"path_tgd"}).append(joinPath)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:blueLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:heightSVGForLine,width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({id:"param_"+blueLink.id,class:"param_tgd"}).append(constraintAtt)).append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:blueLink.id,class:'rem_param_blue_tgd'}).append($('<i>').attr('class','fas fa-trash-alt')))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_body_tgd').append(blueLink.attributes.target.port.split(",")[0]))).remove().html();
     $table.bootstrapTable('append',[{pid:parentId,id:blueLink.id,ex:graphicTGD}])
     $table.treegrid({treeColumn: 1,expanderExpandedClass: 'glyphicon glyphicon-minus',
         expanderCollapsedClass: 'glyphicon glyphicon-plus'});

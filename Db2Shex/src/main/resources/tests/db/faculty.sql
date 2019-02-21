@@ -58,11 +58,28 @@ CREATE TABLE IF NOT EXISTS TA (
 
 INSERT INTO Student (s_id, s_name,s_phone,s_ssn) VALUES ('100', 'Ana','0612208026','12');
 INSERT INTO Student (s_id, s_name,s_phone,s_ssn) VALUES ('101', 'Pame','0612208027','13');
+INSERT INTO Student (s_id, s_name,s_phone,s_ssn) VALUES ('102', 'Ines','0612208028','14');
+INSERT INTO Student (s_id, s_name,s_phone,s_ssn) VALUES ('103', 'Juan','0612208029','15');
 INSERT INTO Professor (p_id, p_name,p_office) VALUES ('100', 'Raul','B101');
-INSERT INTO Course (c_id, c_name,prof_id) VALUES ('300', 'Math','100');
+INSERT INTO Professor (p_id, p_name,p_office) VALUES ('103', 'Jose','B102');
+INSERT INTO Course (c_id, c_name,prof_id) VALUES ('300', 'Math','103');
+INSERT INTO Course (c_id, c_name,prof_id) VALUES ('301', 'Medicine','100');
+INSERT INTO Course (c_id, c_name,prof_id) VALUES ('302', 'Biology','100');
 
-INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('100', '300', 9, '2016');
+INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('100', '300', 19, '2016');
 INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('100', '300', 15, '2017');
-INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('101', '300', 18, '2016');
+INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('101', '301', 18, '2016');
+INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('102', '301', 13, '2016');
+INSERT INTO Enrollment (stud_id, cour_id, e_grade, e_year) VALUES ('103', '302', 17, '2016');
 
 INSERT INTO TA (stud_id, cour_id,e_year,salary) VALUES ('101', '300','2016','100');
+INSERT INTO TA (stud_id, cour_id,e_year,salary) VALUES ('102', '301','2016','100');
+INSERT INTO TA (stud_id, cour_id,e_year,salary) VALUES ('102', '300','2015','100');
+INSERT INTO TA (stud_id, cour_id,e_year,salary) VALUES ('103', '301','2016','100');
+
+INSERT INTO Faculty (f_id, f_name) VALUES ('1', 'BIO-Molecular');
+INSERT INTO Faculty (f_id, f_name) VALUES ('2', 'BIO-Agriculture');
+INSERT INTO Faculty (f_id, f_name) VALUES ('3', 'Computer Science');
+INSERT INTO FacultyProfessor (fac_id, prof_id) VALUES ('1', '100');
+INSERT INTO FacultyProfessor (fac_id, prof_id) VALUES ('2', '100');
+INSERT INTO FacultyProfessor (fac_id, prof_id) VALUES ('3', '103');

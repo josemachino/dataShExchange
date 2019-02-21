@@ -1,5 +1,13 @@
 function Exchange(){}
 
+Exchange.prototype.getSourceOptionNameLinkView=function(linkView){
+	for (var opt of linkView.sourceView.model.attributes.options){                        
+        if (opt.id==V(linkView.sourceMagnet.parentNode).attr('port')){                            
+            return opt.text;            
+        }
+    }
+};
+
 Exchange.prototype.getNameAttribute=function(attributes,id){
     for (var att of attributes){
         if (att.id==id)
@@ -46,6 +54,7 @@ Exchange.prototype.getTokens=function (value){
 }
 
 Exchange.prototype.stTGD=function(mapSymbols,graph,paper,mapTables){
+	let comparisonOp=["le","leq","gt","geq"];
     var bindNames={}
     graph.getElements().forEach(function(element){
         if (element.attributes.type=="db.Table"){
@@ -68,18 +77,18 @@ Exchange.prototype.stTGD=function(mapSymbols,graph,paper,mapTables){
                 if (annotation.includes('(')){
                     var fterm=annotation.split('(');                                        
                     objterm.push({function:fterm[0],args:[{rel:this.getKeyByValue(rule.bind,linkView.sourceView.model.attributes.question),attr:fterm[1].slice(0,-1)}]});                                   
-                } else if (annotation.includes('function')){
+                } else if (annotation.includes('function')||annotation.includes('filter')){
 					
 					annotation=annotation.replace(/[\[\]]/g,"")					
 					let paramAnnots=annotation.split(",")
 					for (let  paramAnnot of paramAnnots){
                         if (paramAnnot.includes("function") && comparisonOp.includes(paramAnnot.split(":")[1].split(" ")[0]) ){                            
-							rule.constraints.push({type:paramAnnot.split(":")[1].split(" ")[0],left:{rel:linkView.sourceView.model.attributes.question,attrs:[{attr:getSourceOptionNameLinkView(linkView)}]},right:{value:paramAnnot.split(":")[1].split(" ")[1]}})
+							rule.constraints.push({type:paramAnnot.split(":")[1].split(" ")[0],left:{rel:linkView.sourceView.model.attributes.question,attrs:[{attr:this.getSourceOptionNameLinkView(linkView)}]},right:{value:paramAnnot.split(":")[1].split(" ")[1]}})
 						} else if (paramAnnot.includes("function")){                            
-							rule.constraints.push({type:"apply",left:{rel:linkView.sourceView.model.attributes.question,attrs:[{attr:getSourceOptionNameLinkView(linkView)}]},right:{function:paramAnnot.split(":")[1]}})
+							rule.constraints.push({type:"apply",left:{rel:linkView.sourceView.model.attributes.question,attrs:[{attr:this.getSourceOptionNameLinkView(linkView)}]},right:{function:paramAnnot.split(":")[1]}})
 						}
 						if (paramAnnot.includes("filter")){							
-							rule.constraints.push({type:"like",left:{rel:linkView.sourceView.model.attributes.question,attrs:[{attr:getSourceOptionNameLinkView(linkView)}]},right:{value:paramAnnot.split(":")[1]}})
+							rule.constraints.push({type:"like",left:{rel:linkView.sourceView.model.attributes.question,attrs:[{attr:this.getSourceOptionNameLinkView(linkView)}]},right:{value:paramAnnot.split(":")[1]}})
 						}
 					}
 					
@@ -296,11 +305,12 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 				let simpleQRML="";
 				atom.args.forEach(function(term){
 					if (Array.isArray(term)){							
-						if (typeof(term[0].function)==='undefined'){								
-							q=q.concat(term[0].attr);
-							lastRel=term[0].rel;
+						if (typeof(term[0].function)==='undefined'){
+							lastRel=term[0].rel;//concat(lastRel).concat(".")
+							q=q.concat("cast( ").concat(lastRel).concat(".").concat(term[0].attr).concat(" as varchar )");							
 						}else{								
 							lastRel=term[0].args[0].rel;
+							//q=q.concat("CONCAT('").concat(tgds.functions[term[0].function]).concat("/',").concat("Convert(varchar,").concat(lastRel).concat(".").concat(term[0].args[0].attr).concat("))");
 							q=q.concat("CONCAT('").concat(tgds.functions[term[0].function]).concat("/',").concat(lastRel).concat(".").concat(term[0].args[0].attr).concat(")");
 						}														
 					}else{
@@ -314,13 +324,17 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 										
 					simpleQRML="SELECT "+ sT[0].args[0].attr+","+oT[0].attr +" FROM "+lastRel;
 				}else{
-					let lsTables=[]
-					let whereQ=""
+					let lsTables=[];
+					let whereQ="";
+					if (rule.constraints.length==1 && rule.constraints[0].type=="apply"){
+						q=q.replace(rule.constraints[0].left.attrs[0].attr,rule.constraints[0].right.function+"("+rule.constraints[0].left.attrs[0].attr+")");
+						simpleQRML=simpleQRML.replace(rule.constraints[0].left.attrs[0].attr,rule.constraints[0].right.function+"("+rule.constraints[0].left.attrs[0].attr+")");
+					}else{
+					
 					whereQ=whereQ.concat(" WHERE ");
 					simpleQRML="SELECT "+ sT[0].args[0].attr+","+oT[0].attr;
 					rule.constraints.forEach(function(joinQ){
 						if (joinQ.type=="apply"){
-							//TODO REPLACE THE FUNCTION
 							q=q.replace(joinQ.left.attrs[0].attr,joinQ.right.function+"("+joinQ.left.attrs[0].attr+")");
 							simpleQRML=simpleQRML.replace(joinQ.left.attrs[0].attr,joinQ.right.function+"("+joinQ.left.attrs[0].attr+")");
 						}
@@ -354,7 +368,8 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 							})
 						}	
 					});
-					whereQ=whereQ.slice(0,-5)
+					whereQ=whereQ.slice(0,-5);
+					}
 					q=q.concat(" FROM ");
 					simpleQRML=simpleQRML.concat(" FROM ");
 					if (lsTables.length==0){
