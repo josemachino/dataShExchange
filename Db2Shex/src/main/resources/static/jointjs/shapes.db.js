@@ -6,6 +6,7 @@
  * Deleting red links cause problems
  * Recommend what to do when user is going to exchange
  */
+//https://es.slideshare.net/juansequeda/rdb2-rdf-tutorial-iswc2013
 //https://dzone.com/articles/writing-web-based-client-side-unit-tests-with-jasm
 //https://jasmine.github.io/tutorials/your_first_suite
 //http://shexjava.lille.inria.fr/demonstrator
