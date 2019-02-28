@@ -1,6 +1,10 @@
 //https://stackoverflow.com/questions/39059349/dynamic-predicate-in-r2rml
 function Exchange(){}
 
+Exchange.prototype.buildRMLMap=function(){
+	
+}
+
 Exchange.prototype.getSourceOptionNameLinkView=function(linkView){
 	for (var opt of linkView.sourceView.model.attributes.options){                        
         if (opt.id==V(linkView.sourceMagnet.parentNode).attr('port')){                            
