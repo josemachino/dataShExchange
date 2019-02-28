@@ -142,6 +142,7 @@
 	<div class="form-group">    
 		<label class="radio-inline"><input id="rb_sql "type="radio" name="optradio" checked value="sql">Script SQL</label>
 		<label class="radio-inline"><input id="rb_rml" type="radio" name="optradio" value="rml">R2RML</label>
+		<label class="radio-inline"><input id="rb_sqldb" type="radio" name="optradio" value="sqldb">TripleStore</label>
 	    <button type="submit" class="btn btn-primary form-control">Exchange</button>        		
 	</div>
 	</form>
@@ -173,18 +174,8 @@
 		<div class="form-group">
 			<label for="importst">Import Graphic File</label>
 		   <input id="importst" type="file" placeholder="Import Graphics" class="form-control-file form-control"/> 
-		</div>
-        <div id="toolbar">
-            <div class="form-inline" role="form">
-				<div class="form-group">
-                    <span>Filter by Type Function </span>                    
-					<select class="form-control">
-						<option>F1</option>
-					</select>
-                </div>								
-			</div>
-		</div>
-        <table id="table" class="table table-striped" data-toggle="table" data-toolbar="#toolbar" data-search="true" data-unique-id="id">            
+		</div>        
+        <table id="table" class="table table-striped" data-toggle="table" data-search="true" data-unique-id="id">            
         </table>                   
         <div id="syntax_tgds"> </div>
         </div>

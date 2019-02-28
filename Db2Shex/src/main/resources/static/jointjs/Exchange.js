@@ -1,3 +1,4 @@
+//https://stackoverflow.com/questions/39059349/dynamic-predicate-in-r2rml
 function Exchange(){}
 
 Exchange.prototype.getSourceOptionNameLinkView=function(linkView){
@@ -268,7 +269,6 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	let i=0;
 	var mapIter = schShex.entries();
 	for (let iterator =mapIter, r; !(r = iterator.next()).done; ) {
-	    console.log(r.value);
 	    let visit=[];
 		deePath[i]=this.getDeepSize(r.value[1],visit,schShex);
 		i++;
@@ -282,21 +282,23 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	let ShName="SHEX";
 	let c1="CREATE TABLE "+ TriName +" (s varchar,p varchar, o varchar);\n";
 	let c2="CREATE TABLE "+TyName +" (term varchar,type varchar);\n";
-	let c3="CREATE TABLE "+ShName+ "(typeS varchar,label varchar,typeO varchar, mult varchar);\n";	
+	let c3="DROP TABLE IF EXISTS "+ShName+";\n CREATE TABLE "+ShName+ "(typeS varchar,label varchar,typeO varchar, mult varchar);\n";	
 	let chase="";
 	
 	let indexTM=1;
-	let file2RML="@prefix rr: <http://www.w3.org/ns/r2rml#>.\n";
+	let file2RML="@prefix rr: <http://www.w3.org/ns/r2rml#>.\n@prefix vocab: <vocab/>.\n";
 	try{
 	tgds.rules.forEach(function(rule){
 		let tmQ="";
 		tmQ=tmQ.concat("<#TriplesMap").concat(indexTM).concat(">\n");
+		let typesRML="";
 		rule.yield.forEach(function(atom){
 			var q="";				
 			if (atom.args.length==1){					
 				q=q.concat("CREATE OR REPLACE VIEW").concat(" ").concat(TyName).concat(indexTM).concat(" (term,type) AS ");			
 				//consider that the length of args in case of type atom will allays be one 			
 				q=q.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("/',").concat(atom.args[0].args[0].attr).concat(")").concat(",").concat("'").concat(atom.atom).concat("'").concat(" ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel);
+				typesRML=typesRML.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("/',").concat(atom.args[0].args[0].attr).concat(")").concat(",").concat("'").concat(atom.atom).concat("'").concat(" ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel).concat(" UNION ");
 				q=q.concat(";\n");			
 			}else if (atom.args.length==3){//it is the triple atom
 				q=q.concat("CREATE OR REPLACE VIEW").concat(" ").concat(TriName).concat(indexTM).concat(" AS ");
@@ -318,11 +320,16 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 					}						
 				});
 				let sT=atom.args[0];					
-				let oT=atom.args[2];
+				let oT=atom.args[2];				
+				if (typeof(oT[0].function)==='undefined'){
+					simpleQRML="SELECT "+ sT[0].args[0].attr+","+oT[0].rel+"."+oT[0].attr;
+				}else{					
+					simpleQRML="SELECT "+ sT[0].args[0].attr+", "+oT[0].args[0].rel+"."+oT[0].args[0].attr;
+				}
 				if (rule.constraints.length==0){					
 					q=q.concat(" FROM ").concat(lastRel).concat(";\n");									
 										
-					simpleQRML="SELECT "+ sT[0].args[0].attr+","+oT[0].attr +" FROM "+lastRel;
+					simpleQRML=simpleQRML.concat(" FROM ").concat(lastRel);
 				}else{
 					let lsTables=[];
 					let whereQ="";
@@ -332,7 +339,6 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 					}else{
 					
 					whereQ=whereQ.concat(" WHERE ");
-					simpleQRML="SELECT "+ sT[0].args[0].attr+","+oT[0].attr;
 					rule.constraints.forEach(function(joinQ){
 						if (joinQ.type=="apply"){
 							q=q.replace(joinQ.left.attrs[0].attr,joinQ.right.function+"("+joinQ.left.attrs[0].attr+")");
@@ -398,12 +404,13 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 				tmQ=tmQ.concat('rr:template "').concat(tgds.functions[subTerm.function]).concat('/{').concat(fpTerm.attr).concat('}"];');
 				tmQ=tmQ.concat("rr:predicateObjectMap [");
 				let termP=atom.args[1];
-				tmQ=tmQ.concat("rr:predicate ").concat(termP).concat(";");
+				tmQ=tmQ.concat("rr:predicate vocab:").concat(termP).concat(";");
 				tmQ=tmQ.concat("rr:objectMap [");
 				let termO=atom.args[2];
 				let objTerm=termO[0];
+				console.log(objTerm);
 				if (typeof(objTerm.function)!=='undefined'){
-					tmQ=tmQ.concat('rr:template "').concat(tgds.functions[objTerm.function]).concat('{').concat(objTerm.attr).concat('}"];');
+					tmQ=tmQ.concat('rr:template "').concat(tgds.functions[objTerm.function]).concat('/{').concat(objTerm.args[0].attr).concat('}"];');
 				}else{
 					tmQ=tmQ.concat('rr:column  "').concat(objTerm.attr).concat('"];');
 				}
@@ -420,6 +427,9 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	catch(err){
 		alert("Error in mappings "+err.message)
 	}
+	
+	
+	
 	let headerTri="INSERT INTO "+TriName+" ";
 	let headerTy="INSERT INTO "+TyName+" ";
 	let triSql=""
@@ -437,16 +447,26 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	allTy=allTy.concat(tySql)
 	
 	let schQ="";
+	let shexView="(";
 	schShex.forEach(function(tcs, type, miMapa){
 		tcs.forEach(function(tc){
 			schQ=schQ.concat("INSERT INTO ").concat(ShName).concat(" (typeS,label,typeO,mult) VALUES ('").concat(type).concat("','").concat(tc.label).concat("','").concat(tc.type).concat("','").concat(tc.mult).concat("');\n");
+			shexView=shexView.concat("SELECT ").concat(type).concat("' AS typeS,'").concat(tc.label).concat("' AS label,'").concat(tc.type).concat("' AS typeO,'").concat(tc.mult).concat("' AS mult").concat(" UNION ");
 		})
 	});
+	typesRML=typesRML.slice(0,-7).concat(") AS Ts");
+	shexView=shexView.slice(0,-7).concat(") AS Sh");
 	chase=chase.concat(c3).concat(schQ);
 	chaseQ=chaseQ.concat(c3).concat(schQ);
 	
 	let F="SELECT Ts.term,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n";
 	let tripleSimulation="CREATE OR REPLACE VIEW TripleSim (s,p,o) AS SELECT * FROM Triples UNION ".concat(F);
+	
+	let tripleSimRML="SELECT Ts.term,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM "+shexView +","+typesRML+" WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ty.type,T.p) FROM Triples as T, "+typesRML+" AS Ts WHERE T.s=Ts.term);\n";
+	let qRML="<#TM>\n");
+	qRML=qRML.concat('rr:logicalTable [ rr:sqlQuery """ ').concat(tripleSimRML).concat('""" ];');
+	
+	
 	chaseQ=chaseQ.concat(allTri);
 	chase=chase.concat(allTri);
 	chaseQ=chaseQ.concat(allTy);
