@@ -1,8 +1,17 @@
 //https://stackoverflow.com/questions/39059349/dynamic-predicate-in-r2rml
 function Exchange(){}
 
-Exchange.prototype.buildRMLMap=function(){
-	
+Exchange.prototype.buildRMLMap=function(simpleQRML){
+	let qRML="";
+	qRML=qRML.concat('rr:logicalTable [ rr:sqlQuery """ ').concat(simpleQRML).concat('""" ];');								
+	qRML=qRML.concat("rr:subjectMap [");	
+	qRML=qRML.concat('rr:column "s"];');
+	qRML=qRML.concat("rr:predicateObjectMap [");	
+	qRML=qRML.concat('rr:predicateMap [rr:template  "vocab:{p}"];');
+	qRML=qRML.concat("rr:objectMap [");
+	qRML=qRML.concat('rr:column  "o"];');	
+	qRML=qRML.concat("].\n");
+	return qRML;
 }
 
 Exchange.prototype.getSourceOptionNameLinkView=function(linkView){
@@ -291,36 +300,37 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	
 	let indexTM=1;
 	let file2RML="@prefix rr: <http://www.w3.org/ns/r2rml#>.\n@prefix vocab: <vocab/>.\n";
+	let typesRML="(";
+	let triplesAllRML="(";
 	try{
 	tgds.rules.forEach(function(rule){
 		let tmQ="";
-		tmQ=tmQ.concat("<#TriplesMap").concat(indexTM).concat(">\n");
-		let typesRML="";
+		tmQ=tmQ.concat("<#TriplesMap").concat(indexTM).concat(">\n");		
 		rule.yield.forEach(function(atom){
 			var q="";				
 			if (atom.args.length==1){					
 				q=q.concat("CREATE OR REPLACE VIEW").concat(" ").concat(TyName).concat(indexTM).concat(" (term,type) AS ");			
 				//consider that the length of args in case of type atom will allays be one 			
 				q=q.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("/',").concat(atom.args[0].args[0].attr).concat(")").concat(",").concat("'").concat(atom.atom).concat("'").concat(" ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel);
-				typesRML=typesRML.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("/',").concat(atom.args[0].args[0].attr).concat(")").concat(",").concat("'").concat(atom.atom).concat("'").concat(" ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel).concat(" UNION ");
+				typesRML=typesRML.concat("SELECT").concat(" ").concat("CONCAT('").concat(tgds.functions[atom.args[0].function]).concat("/',").concat(atom.args[0].args[0].attr).concat(") as term").concat(",").concat("'").concat(atom.atom).concat("'").concat(" as type ").concat("FROM").concat(" ").concat(atom.args[0].args[0].rel).concat(" UNION ");
 				q=q.concat(";\n");			
-			}else if (atom.args.length==3){//it is the triple atom
+			}else if (atom.args.length==3){//it is the triple atom				
 				q=q.concat("CREATE OR REPLACE VIEW").concat(" ").concat(TriName).concat(indexTM).concat(" AS ");
-				q=q.concat("SELECT DISTINCT ").concat(" ");
+				let qTri="SELECT DISTINCT  ";
 				let lastRel="";
 				let simpleQRML="";
 				atom.args.forEach(function(term){
 					if (Array.isArray(term)){							
 						if (typeof(term[0].function)==='undefined'){
 							lastRel=term[0].rel;//concat(lastRel).concat(".")
-							q=q.concat("cast( ").concat(lastRel).concat(".").concat(term[0].attr).concat(" as varchar )");							
+							qTri=qTri.concat("cast( ").concat(lastRel).concat(".").concat(term[0].attr).concat(" as varchar )");							
 						}else{								
 							lastRel=term[0].args[0].rel;
 							//q=q.concat("CONCAT('").concat(tgds.functions[term[0].function]).concat("/',").concat("Convert(varchar,").concat(lastRel).concat(".").concat(term[0].args[0].attr).concat("))");
-							q=q.concat("CONCAT('").concat(tgds.functions[term[0].function]).concat("/',").concat(lastRel).concat(".").concat(term[0].args[0].attr).concat(")");
+							qTri=qTri.concat("CONCAT('").concat(tgds.functions[term[0].function]).concat("/',").concat(lastRel).concat(".").concat(term[0].args[0].attr).concat(")");
 						}														
 					}else{
-						q=q.concat(",'").concat(term).concat("' as p,");							
+						qTri=qTri.concat(",'").concat(term).concat("' as p,");							
 					}						
 				});
 				let sT=atom.args[0];					
@@ -330,75 +340,80 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 				}else{					
 					simpleQRML="SELECT "+ sT[0].args[0].attr+", "+oT[0].args[0].rel+"."+oT[0].args[0].attr;
 				}
-				if (rule.constraints.length==0){					
-					q=q.concat(" FROM ").concat(lastRel).concat(";\n");									
-										
+				if (rule.constraints.length==0){
+					
+					qTri=qTri.concat(" FROM ").concat(lastRel);									
+					triplesAllRML=triplesAllRML.concat(qTri).concat(" UNION ");
+					qTri=qTri.concat(";\n");
 					simpleQRML=simpleQRML.concat(" FROM ").concat(lastRel);
 				}else{
 					let lsTables=[];
 					let whereQ="";
 					if (rule.constraints.length==1 && rule.constraints[0].type=="apply"){
-						q=q.replace(rule.constraints[0].left.attrs[0].attr,rule.constraints[0].right.function+"("+rule.constraints[0].left.attrs[0].attr+")");
+						qTri=qTri.replace(rule.constraints[0].left.attrs[0].attr,rule.constraints[0].right.function+"("+rule.constraints[0].left.attrs[0].attr+")");
 						simpleQRML=simpleQRML.replace(rule.constraints[0].left.attrs[0].attr,rule.constraints[0].right.function+"("+rule.constraints[0].left.attrs[0].attr+")");
 					}else{
 					
-					whereQ=whereQ.concat(" WHERE ");
-					rule.constraints.forEach(function(joinQ){
-						if (joinQ.type=="apply"){
-							q=q.replace(joinQ.left.attrs[0].attr,joinQ.right.function+"("+joinQ.left.attrs[0].attr+")");
-							simpleQRML=simpleQRML.replace(joinQ.left.attrs[0].attr,joinQ.right.function+"("+joinQ.left.attrs[0].attr+")");
-						}
-						if (joinQ.type=="like"){
-							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" LIKE '%").concat(joinQ.right.value).concat("%' AND ");
-						}
-						if (joinQ.type=='le'){
-							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" < ").concat(joinQ.right.value).concat(" AND ");
-						}
-						
-						if (joinQ.type=='leq'){
-							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" <= ").concat(joinQ.right.value).concat(" AND ");
-						}
-						
-						if (joinQ.type=='gt'){
-							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" > ").concat(joinQ.right.value).concat(" AND ");
-						}
-						
-						if (joinQ.type=='geq'){
-							whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" >= ").concat(joinQ.right.value).concat(" AND ");
-						}
-						if (joinQ.type=='eq' && typeof(joinQ.right.rel)!=='undefined'){							
-							if (!lsTables.includes(joinQ.left.rel))
-								lsTables.push(joinQ.left.rel)
-							if (!lsTables.includes(joinQ.right.rel))
-								lsTables.push(joinQ.right.rel)
-							let indexAtt=0;
-							joinQ.left.attrs.forEach(function(attribute){
-								whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(attribute.name).concat("=").concat(joinQ.right.rel).concat(".").concat(joinQ.right.attrs[indexAtt].name).concat(" AND ");
-								indexAtt++;
-							})
-						}	
-					});
-					whereQ=whereQ.slice(0,-5);
+						whereQ=whereQ.concat(" WHERE ");
+						rule.constraints.forEach(function(joinQ){
+							if (joinQ.type=="apply"){
+								qTri=qTri.replace(joinQ.left.attrs[0].attr,joinQ.right.function+"("+joinQ.left.attrs[0].attr+")");
+								simpleQRML=simpleQRML.replace(joinQ.left.attrs[0].attr,joinQ.right.function+"("+joinQ.left.attrs[0].attr+")");
+							}
+							if (joinQ.type=="like"){
+								whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" LIKE '%").concat(joinQ.right.value).concat("%' AND ");
+							}
+							if (joinQ.type=='le'){
+								whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" < ").concat(joinQ.right.value).concat(" AND ");
+							}
+							
+							if (joinQ.type=='leq'){
+								whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" <= ").concat(joinQ.right.value).concat(" AND ");
+							}
+							
+							if (joinQ.type=='gt'){
+								whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" > ").concat(joinQ.right.value).concat(" AND ");
+							}
+							
+							if (joinQ.type=='geq'){
+								whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(joinQ.left.attrs[0].attr).concat(" >= ").concat(joinQ.right.value).concat(" AND ");
+							}
+							if (joinQ.type=='eq' && typeof(joinQ.right.rel)!=='undefined'){							
+								if (!lsTables.includes(joinQ.left.rel))
+									lsTables.push(joinQ.left.rel)
+								if (!lsTables.includes(joinQ.right.rel))
+									lsTables.push(joinQ.right.rel)
+								let indexAtt=0;
+								joinQ.left.attrs.forEach(function(attribute){
+									whereQ=whereQ.concat(joinQ.left.rel).concat(".").concat(attribute.name).concat("=").concat(joinQ.right.rel).concat(".").concat(joinQ.right.attrs[indexAtt].name).concat(" AND ");
+									indexAtt++;
+								})
+							}	
+						});
+						whereQ=whereQ.slice(0,-5);
+					
 					}
-					q=q.concat(" FROM ");
+					qTri=qTri.concat(" FROM ");
 					simpleQRML=simpleQRML.concat(" FROM ");
 					if (lsTables.length==0){
-						q=q.concat(lastRel).concat(" ");
+						qTri=qTri.concat(lastRel).concat(" ");
 						simpleQRML=simpleQRML.concat(lastRel).concat(" ");
 					}else{					
 						lsTables.forEach(function(tableN,idx,array){
 							if (idx==array.length-1){
-								q=q.concat(rule.bind[tableN]).concat(" AS ").concat(tableN)
+								qTri=qTri.concat(rule.bind[tableN]).concat(" AS ").concat(tableN)
 								simpleQRML=simpleQRML.concat(rule.bind[tableN]).concat(" AS ").concat(tableN)
 							}else{
-								q=q.concat(rule.bind[tableN]).concat(" AS ").concat(tableN).concat(",")
+								qTri=qTri.concat(rule.bind[tableN]).concat(" AS ").concat(tableN).concat(",")
 								simpleQRML=simpleQRML.concat(rule.bind[tableN]).concat(" AS ").concat(tableN).concat(",")
 							}
 						})
 					}
-					q=q.concat(whereQ).concat(";\n")
+					triplesAllRML=triplesAllRML.concat(qTri).concat(whereQ).concat(" UNION ");
+					qTri=qTri.concat(whereQ).concat(";\n");									
 					simpleQRML=simpleQRML.concat(whereQ);
 				}
+				q=q.concat(qTri);
 				//add to RML query
 				tmQ=tmQ.concat('rr:logicalTable [ rr:sqlQuery """ ').concat(simpleQRML).concat('""" ];');								
 				tmQ=tmQ.concat("rr:subjectMap [");
@@ -411,15 +426,14 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 				tmQ=tmQ.concat("rr:predicate vocab:").concat(termP).concat(";");
 				tmQ=tmQ.concat("rr:objectMap [");
 				let termO=atom.args[2];
-				let objTerm=termO[0];
-				console.log(objTerm);
+				let objTerm=termO[0];				
 				if (typeof(objTerm.function)!=='undefined'){
 					tmQ=tmQ.concat('rr:template "').concat(tgds.functions[objTerm.function]).concat('/{').concat(objTerm.args[0].attr).concat('}"];');
 				}else{
 					tmQ=tmQ.concat('rr:column  "').concat(objTerm.attr).concat('"];');
 				}
-				tmQ=tmQ.concat("].\n")
-				file2RML=file2RML.concat(tmQ)
+				tmQ=tmQ.concat("].\n");
+				file2RML=file2RML.concat(tmQ);
 			}						
 			chase=chase.concat(q);
 			chaseQ=chaseQ.concat(q);
@@ -455,10 +469,12 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	schShex.forEach(function(tcs, type, miMapa){
 		tcs.forEach(function(tc){
 			schQ=schQ.concat("INSERT INTO ").concat(ShName).concat(" (typeS,label,typeO,mult) VALUES ('").concat(type).concat("','").concat(tc.label).concat("','").concat(tc.type).concat("','").concat(tc.mult).concat("');\n");
-			shexView=shexView.concat("SELECT ").concat(type).concat("' AS typeS,'").concat(tc.label).concat("' AS label,'").concat(tc.type).concat("' AS typeO,'").concat(tc.mult).concat("' AS mult").concat(" UNION ");
+			shexView=shexView.concat("SELECT '").concat(type).concat("' AS typeS,'").concat(tc.label).concat("' AS label,'").concat(tc.type).concat("' AS typeO,'").concat(tc.mult).concat("' AS mult").concat(" UNION ");
 		})
 	});
 	typesRML=typesRML.slice(0,-7).concat(") AS Ts");
+	console.log(triplesAllRML);
+	triplesAllRML=triplesAllRML.slice(0,-7).concat(") AS T");
 	shexView=shexView.slice(0,-7).concat(") AS Sh");
 	chase=chase.concat(c3).concat(schQ);
 	chaseQ=chaseQ.concat(c3).concat(schQ);
@@ -466,10 +482,10 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	let F="SELECT Ts.term,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM Shex AS Sh,Types AS Ts WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ty.type,T.p) FROM Triples as T, Types AS Ty WHERE T.s=Ty.term);\n";
 	let tripleSimulation="CREATE OR REPLACE VIEW TripleSim (s,p,o) AS SELECT * FROM Triples UNION ".concat(F);
 	
-	let tripleSimRML="SELECT Ts.term,Sh.label,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS typeO FROM "+shexView +","+typesRML+" WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ty.type,T.p) FROM Triples as T, "+typesRML+" AS Ts WHERE T.s=Ts.term);\n";
-	let qRML="<#TM>\n");
-	qRML=qRML.concat('rr:logicalTable [ rr:sqlQuery """ ').concat(tripleSimRML).concat('""" ];');
-	
+	let tripleSimRML="SELECT Ts.term as s,Sh.label as p,CASE WHEN Sh.typeO ='Literal' THEN '@PERU@' ELSE CONCAT('http://example.com/',Sh.typeO,'/','@PERU@')  END AS o FROM "+shexView +","+typesRML+" WHERE Ts.type=Sh.typeS AND Sh.mult IN ('1','+') AND CONCAT(Ts.term,Sh.typeS,Sh.label) NOT IN (SELECT CONCAT(T.s,Ts.type,T.p) FROM "+triplesAllRML+", "+typesRML+" WHERE T.s=Ts.term) ORDER BY Sh.label";
+	let qRML="<#TM>\n";
+	qRML=qRML.concat(this.buildRMLMap(tripleSimRML));	
+	file2RML=file2RML.concat(qRML);
 	
 	chaseQ=chaseQ.concat(allTri);
 	chase=chase.concat(allTri);
