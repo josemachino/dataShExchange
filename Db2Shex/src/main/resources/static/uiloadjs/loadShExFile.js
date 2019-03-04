@@ -47,73 +47,91 @@ doSearch: function( event ){
 	
     var reader = new FileReader();
     reader.onload = function onReaderLoad(event){        
-	    var obj = JSON.parse(event.target.result);        
-		mapSymbols=new Map();
+	    var obj = JSON.parse(event.target.result);
+	    mapSymbols=new Map();
 	    positionShexType=getPositionFromDB(graphTGDs)
-    
-	    obj.shapes.forEach(function(shape){
-	        if (shape.type=='Shape'){                
-	            tcs=[];
-	            if (shape.expression.type=='EachOf'){
-	                tc={};
-	                shape.expression.expressions.forEach(function(expression){                      
-	                    if (expression.type=='TripleConstraint'){
-	                        typeLabel='';
-	                        if (typeof(expression.valueExpr)==='string'){
-	                            typeLabel=expression.valueExpr.split('/').pop();
-	                        }else{
-	                            typeLabel='Literal';
-	                        }
-	                        multiplicity='';
-	                        if (typeof(expression.max)==='undefined' || expression.max==expression.min){
-	                            multiplicity='1';
-	                        }else{
-	                            if (expression.max==1 && expression.min==0){
-	                            	multiplicity='?';
-	                            }
-	                            if (expression.max==-1 && expression.min==0){
-	                            	multiplicity='*';
-	                            }
-	                            if (expression.max>1 && expression.min==0){
-	                            	multiplicity='+';
-	                            }
-	                        }
-	                        
-	                                        
-	                    tc={label:expression.predicate.split('/').pop(),type:typeLabel, mult:multiplicity};                        
-	                    tcs.push(tc);
-	                    }
-	                });      
-	                var num=mapSymbols.size+1;
-	                mapSymbols.set("f"+num,shape.id);
-	                var sExpression=createShexType(shape.id.split('/').pop(),tcs,positionShexType);
-	                let mapExpr=new Map();	                
-	                mapExpr.set(sExpression.attributes.id+","+sExpression.attributes.ports.items[1].id,tcs)
-	                expressions.set(sExpression.attributes.question,mapExpr)	                
-	                graphShex.addCell(sExpression);                
-	            }
-	            
-	        }
-	    });
-    
-	    //draw 	references from
-	    drawRefTypes(graphShex,expressions)	    
-	    joint.layout.DirectedGraph.layout(graphShex.getCells(),getLayoutOptionsNotVertices());
-	    let pos=getPositionFromDB(graphTGDs)
-	    graphShex.getCells().forEach(function(cell){	    	
-	    	if (!cell.isLink()){		    	
-		    	cell.set('position',{x:cell.get('position').x+pos.x,y:cell.get('position').y})
-		    	graphTGDs.addCell(cell)
-	    	}else{
-	    		let arrayVert=cell.get('vertices')
-	    		arrayVert.forEach(function(it){
-	    			it.x=it.x+pos.x
-	    		})
-	    		cell.set('vertices',arrayVert)
-	    		graphTGDs.addCell(cell)
-	    	}
-	    })
+	    //TODO IDENTIFY IF IT IS SHACL OR SHEX
+	    try{
+	    if(obj["@context"].includes("shex") && typeof(obj.shapes)!=="undefined"){
+	    	obj.shapes.forEach(function(shape){
+		        if (shape.type=='Shape'){                
+		            tcs=[];
+		            if (shape.expression.type=='EachOf'){
+		                tc={};
+		                shape.expression.expressions.forEach(function(expression){                      
+		                    if (expression.type=='TripleConstraint'){
+		                        typeLabel='';
+		                        if (typeof(expression.valueExpr)==='string'){
+		                            typeLabel=expression.valueExpr.split('/').pop();
+		                        }else{
+		                            typeLabel='Literal';
+		                        }
+		                        multiplicity='';
+		                        if (typeof(expression.max)==='undefined' || expression.max==expression.min){
+		                            multiplicity='1';
+		                        }else{
+		                            if (expression.max==1 && expression.min==0){
+		                            	multiplicity='?';
+		                            }
+		                            if (expression.max==-1 && expression.min==0){
+		                            	multiplicity='*';
+		                            }
+		                            if (expression.max>1 && expression.min==0){
+		                            	multiplicity='+';
+		                            }
+		                        }
+		                        
+		                                        
+		                    tc={label:expression.predicate.split('/').pop(),type:typeLabel, mult:multiplicity};                        
+		                    tcs.push(tc);
+		                    }
+		                });      
+		                var num=mapSymbols.size+1;
+		                mapSymbols.set("f"+num,shape.id);
+		                var sExpression=createShexType(shape.id.split('/').pop(),tcs,positionShexType);
+		                let mapExpr=new Map();	                
+		                mapExpr.set(sExpression.attributes.id+","+sExpression.attributes.ports.items[1].id,tcs)
+		                expressions.set(sExpression.attributes.question,mapExpr)	                
+		                graphShex.addCell(sExpression);                
+		            }
+		            
+		        }
+		    });
 	    
+		    //draw 	references from
+		    drawRefTypes(graphShex,expressions)	    
+		    joint.layout.DirectedGraph.layout(graphShex.getCells(),getLayoutOptionsNotVertices());
+		    let pos=getPositionFromDB(graphTGDs)
+		    graphShex.getCells().forEach(function(cell){	    	
+		    	if (!cell.isLink()){		    	
+			    	cell.set('position',{x:cell.get('position').x+pos.x,y:cell.get('position').y})
+			    	graphTGDs.addCell(cell)
+		    	}else{
+		    		let arrayVert=cell.get('vertices')
+		    		arrayVert.forEach(function(it){
+		    			it.x=it.x+pos.x
+		    		})
+		    		cell.set('vertices',arrayVert)
+		    		graphTGDs.addCell(cell)
+		    	}
+		    });
+	    }else{
+	    	//parse shacl
+	    	tcs=[];
+	    	.property.forEach(function(prop){
+	    		let typeLabel="";
+	    		if (typeof(prop.class)!=="undefined"){
+	    			typeLabel=prop.class;
+	    		}else{
+	    			typeLabel="Literal";
+	    		}
+	    		tc={label:prop.path,type:typeLabel, mult:prop.};
+	    		
+	    	});
+	    }
+	    }catch(err){
+	    	alert("Error in parsing ShEx or Shacl "+err.message)
+	    }
 		paperTGDs.fitToContent({padding: 50,allowNewOrigin: 'any' });
     };
     reader.readAsText(event.currentTarget.files[0]);    
