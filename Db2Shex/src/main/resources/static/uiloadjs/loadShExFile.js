@@ -64,7 +64,7 @@ doSearch: function( event ){
 		                        if (typeof(expression.valueExpr)==='string'){
 		                            typeLabel=expression.valueExpr.split('/').pop();
 		                        }else{
-		                            typeLabel='Literal';
+		                            typeLabel='Literal'; 
 		                        }
 		                        multiplicity='';
 		                        if (typeof(expression.max)==='undefined' || expression.max==expression.min){
