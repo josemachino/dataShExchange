@@ -1,3 +1,35 @@
+function addTC(prop,tcs){	
+	let typeLabel="";
+
+	let multiplicity='';
+    if (typeof(prop.maxCount)==='undefined' || prop.minCount==prop.maxCount){
+        multiplicity='1';
+    }else{
+        if (prop.maxCount==1 && (typeof(prop.minCount)==="undefined" || prop.minCount==0 )){
+        	multiplicity='?';
+        }
+        if (prop.maxCount==-1 && (typeof(prop.minCount)==="undefined" || prop.minCount==0)){
+        	multiplicity='*';
+        }
+        if ((typeof(prop.maxCount)==='undefined'||prop.maxCount>1) && prop.minCount==1){
+        	multiplicity='+';
+        }
+    }
+	if (typeof(prop.class)!=="undefined"){		
+		if (prop.class instanceof Array){
+			for (var typeL of prop.class){				
+				tcs.push({label:prop.path.split("/").pop(),type:typeL.split("/").pop(), mult:multiplicity});				
+			}
+		}else{
+			typeLabel=prop.class;
+			tcs.push({label:prop.path.split("/").pop(),type:typeLabel.split("/").pop(), mult:multiplicity});
+		}		
+	}else{		
+		typeLabel="Literal";
+		tcs.push({label:prop.path.split("/").pop(),type:typeLabel, mult:multiplicity});
+	}
+		
+}
 function getPositionFromDB(graphObj){
     var maxValue=0    
     var widthLocal=0
@@ -52,10 +84,12 @@ doSearch: function( event ){
 	    positionShexType=getPositionFromDB(graphTGDs)
 	    //TODO IDENTIFY IF IT IS SHACL OR SHEX
 	    try{
-	    if(obj["@context"].includes("shex") && typeof(obj.shapes)!=="undefined"){
+	    let contextObj=obj["@context"];
+	    console.log(typeof(contextObj));
+	    if(typeof(contextObj)==="string" && contextObj.includes("shex") && typeof(obj.shapes)!=="undefined"){	    	
 	    	obj.shapes.forEach(function(shape){
 		        if (shape.type=='Shape'){                
-		            tcs=[];
+		            let tcs=[];
 		            if (shape.expression.type=='EachOf'){
 		                tc={};
 		                shape.expression.expressions.forEach(function(expression){                      
@@ -76,7 +110,7 @@ doSearch: function( event ){
 		                            if (expression.max==-1 && expression.min==0){
 		                            	multiplicity='*';
 		                            }
-		                            if (expression.max>1 && expression.min==0){
+		                            if (expression.max>1 && expression.min==1){
 		                            	multiplicity='+';
 		                            }
 		                        }
@@ -98,9 +132,51 @@ doSearch: function( event ){
 		        }
 		    });
 	    
-		    //draw 	references from
-		    drawRefTypes(graphShex,expressions)	    
-		    joint.layout.DirectedGraph.layout(graphShex.getCells(),getLayoutOptionsNotVertices());
+		    
+	    }else{
+	    	//parse shacl
+	    	let tcs=[];
+	    	let shapes=obj['@graph'];
+	    	shapes.forEach(function(shape){
+	    		if (shape['@type']=="NodeShape"){
+	    			
+	    			let propArr=shape.property;	
+	    			if (typeof(propArr)!=="undefined"){
+		    			if (propArr instanceof Array){	    					    				
+		    				for (var prop of propArr){		    					
+		    					if (typeof(prop.path)==="string"){
+		    						addTC(prop,tcs);			    
+		    					}
+					    	};
+		    			}else{
+		    				if (typeof(propArr.path)==="string"){		    				
+		    					addTC(propArr,tcs);
+		    				}
+		    			}
+			    		var num=mapSymbols.size+1;
+			    		
+			    		let idText="";
+			    		if (shape['@id'].includes("http")){
+			    			idText=shape['@id'].split("/").pop();
+			    		}else{
+			    			idText=shape['@id'].split(":").pop();
+			    		}
+			    		mapSymbols.set("f"+num,idText);
+			    		var sExpression=createShexType(idText,tcs,positionShexType);		    		
+			    		let mapExpr=new Map();	                
+			    		mapExpr.set(sExpression.attributes.id+","+sExpression.attributes.ports.items[1].id,tcs)
+			    		expressions.set(sExpression.attributes.question,mapExpr)	                
+			    		graphShex.addCell(sExpression);
+	    			}
+	    		}
+	    	});	    		 
+	    }
+	    }catch(err){
+	    	alert("Error in parsing ShEx or Shacl "+err.message);	    	
+	    }	    
+	    if (graphShex.getCells().length>0){
+		    drawRefTypes(graphShex,expressions)	; 
+	    	joint.layout.DirectedGraph.layout(graphShex.getCells(),getLayoutOptionsNotVertices());
 		    let pos=getPositionFromDB(graphTGDs)
 		    graphShex.getCells().forEach(function(cell){	    	
 		    	if (!cell.isLink()){		    	
@@ -115,24 +191,8 @@ doSearch: function( event ){
 		    		graphTGDs.addCell(cell)
 		    	}
 		    });
-	    }else{
-	    	//parse shacl
-	    	tcs=[];
-	    	.property.forEach(function(prop){
-	    		let typeLabel="";
-	    		if (typeof(prop.class)!=="undefined"){
-	    			typeLabel=prop.class;
-	    		}else{
-	    			typeLabel="Literal";
-	    		}
-	    		tc={label:prop.path,type:typeLabel, mult:prop.};
-	    		
-	    	});
+			paperTGDs.fitToContent({padding: 50,allowNewOrigin: 'any' });
 	    }
-	    }catch(err){
-	    	alert("Error in parsing ShEx or Shacl "+err.message)
-	    }
-		paperTGDs.fitToContent({padding: 50,allowNewOrigin: 'any' });
     };
     reader.readAsText(event.currentTarget.files[0]);    
     
