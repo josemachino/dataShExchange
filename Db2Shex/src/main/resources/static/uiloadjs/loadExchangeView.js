@@ -1,5 +1,7 @@
 var containerJSONEditor = document.getElementById("tgds_list");
-var options = {};
+var options = {
+		mode:'view'	
+};
 var editorJSON = new JSONEditor(containerJSONEditor, options);
 var sideExchangeView = Backbone.View.extend({
 initialize: function(){
@@ -17,6 +19,12 @@ exchange:function(e){
 	var exchange=new Exchange();
 	
 	$("#ls_todo").html("");
+	let msgRule=exchange.checkComplete(exchange.stTGD(mapSymbols,graphTGDs,paperTGDs,mapTables));
+	if (msgRule.length>0){	
+		for (var msg of msgRule){
+			$("#ls_todo").append(msg);
+		}
+	}else{
 	exchange.generateQuery(mapSymbols,graphTGDs,paperTGDs,mapTableIdCanvas);	
 	
 	var linkC = document.createElement("a");
@@ -78,7 +86,7 @@ exchange:function(e){
     });  
     
 	
-	
+	}
 	}
 });
 

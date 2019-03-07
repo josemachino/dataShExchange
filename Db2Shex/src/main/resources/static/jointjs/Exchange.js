@@ -1,5 +1,15 @@
 //https://stackoverflow.com/questions/39059349/dynamic-predicate-in-r2rml
 function Exchange(){}
+//TODO IMPLEMENT DE VERIFICATION PROCESS THAT ALWAYS SHOULD BE TYPED the first element
+Exchange.prototype.checkComplete=function(jsonTGD){
+	let lsMsg=[];	
+	jsonTGD.rules.forEach(function(rule,i){
+		if (rule.yield.length!=2){
+			lsMsg.push("Error in rule "+i+". There must be a Triple Atom and Type Atom in the rule.");
+		}
+	});
+	return lsMsg;
+}
 
 Exchange.prototype.buildRMLMap=function(simpleQRML){
 	let qRML="";
@@ -290,6 +300,9 @@ Exchange.prototype.generateQuery = function(mapSymbols,graphST,paperTGDs,mapTabl
 	let max=Math.max.apply(Math, deePath);
 	//construct sql query
 	let tgds=this.stTGD(mapSymbols,graphST,paperTGDs,mapTables);
+	
+	
+	
 	let TyName="TypesFact";
 	let TriName="Triples";
 	let ShName="SHEX";
