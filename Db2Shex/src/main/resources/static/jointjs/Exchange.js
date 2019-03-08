@@ -1,9 +1,18 @@
 //https://stackoverflow.com/questions/39059349/dynamic-predicate-in-r2rml
 function Exchange(){}
 //TODO IMPLEMENT DE VERIFICATION PROCESS THAT ALWAYS SHOULD BE TYPED the first element
-Exchange.prototype.checkComplete=function(jsonTGD){
-	let lsMsg=[];	
-	jsonTGD.rules.forEach(function(rule,i){
+Exchange.prototype.checkComplete=function(jsonTGD,graphST){
+	let lsMsg=[];
+	let nattrlines=0;
+	for (let l of graphST.getLinks()){
+		if (l.attr('line/stroke')==attributeLinkColor || l.attr('line/stroke')==attributeRefLinkColor){
+			nattrlines++;
+		}
+	}
+	if (nattrlines!=jsonTGD.rules){
+		lsMsg.push("Error in rules");
+	}	
+	jsonTGD.rules.forEach(function(rule,i){		
 		if (rule.yield.length!=2){
 			lsMsg.push("Error in rule "+i+". There must be a Triple Atom and Type Atom in the rule.");
 		}

@@ -19,12 +19,13 @@ exchange:function(e){
 	var exchange=new Exchange();
 	
 	$("#ls_todo").html("");
-	let msgRule=exchange.checkComplete(exchange.stTGD(mapSymbols,graphTGDs,paperTGDs,mapTables));
-	if (msgRule.length>0){	
+	//let msgRule=exchange.checkComplete(exchange.stTGD(mapSymbols,graphTGDs,paperTGDs,mapTableIdCanvas),graphTGDs);
+	//console.log(msgRule);
+	/*if (msgRule.length>0){	
 		for (var msg of msgRule){
 			$("#ls_todo").append(msg);
 		}
-	}else{
+	}else{*/
 	exchange.generateQuery(mapSymbols,graphTGDs,paperTGDs,mapTableIdCanvas);	
 	
 	var linkC = document.createElement("a");
@@ -86,7 +87,7 @@ exchange:function(e){
     });  
     
 	
-	}
+	//}
 	}
 });
 

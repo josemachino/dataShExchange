@@ -135,11 +135,11 @@ doSearch: function( event ){
 		    
 	    }else{
 	    	//parse shacl
-	    	let tcs=[];
+	    	
 	    	let shapes=obj['@graph'];
 	    	shapes.forEach(function(shape){
 	    		if (shape['@type']=="NodeShape"){
-	    			
+	    			let tcs=[];
 	    			let propArr=shape.property;	
 	    			if (typeof(propArr)!=="undefined"){
 		    			if (propArr instanceof Array){	    					    				
@@ -161,7 +161,7 @@ doSearch: function( event ){
 			    		}else{
 			    			idText=shape['@id'].split(":").pop();
 			    		}
-			    		mapSymbols.set("f"+num,idText);
+			    		mapSymbols.set("f"+num,shape['@id']);
 			    		var sExpression=createShexType(idText,tcs,positionShexType);		    		
 			    		let mapExpr=new Map();	                
 			    		mapExpr.set(sExpression.attributes.id+","+sExpression.attributes.ports.items[1].id,tcs)
@@ -175,7 +175,11 @@ doSearch: function( event ){
 	    	alert("Error in parsing ShEx or Shacl "+err.message);	    	
 	    }	    
 	    if (graphShex.getCells().length>0){
-		    drawRefTypes(graphShex,expressions)	; 
+	    	try{
+		    drawRefTypes(graphShex,expressions)	;
+	    	}catch(errExpr){
+	    		alert("Error in drawing references "+errExpr.message+". Review if the schema has everything specified.");	
+	    	}
 	    	joint.layout.DirectedGraph.layout(graphShex.getCells(),getLayoutOptionsNotVertices());
 		    let pos=getPositionFromDB(graphTGDs)
 		    graphShex.getCells().forEach(function(cell){	    	
