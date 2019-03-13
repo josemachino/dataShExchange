@@ -27,7 +27,7 @@ p{
 
 /*SIDE BAR RIGHT STYLE*/
 #sidebar-right{
-    min-width: 650px;
+    min-width: 450px;
     max-width: 650px;
 }
 
@@ -79,7 +79,7 @@ p{
 	border:solid 1px #000;
     background-color:#7386D5;
     padding:2px;
-    width:150px;    
+    width:100px;    
 	display:inline-block;
     text-align:center;
 }
@@ -94,12 +94,14 @@ p{
 	 word-wrap:break-word;
 }
 .link_tgd{
-    width:210px;
+    /*width:210px;*/
+    width:115px;
     display:inline-block;
     text-align:center;
 }
 .link_tgdG{
-    width:250px;
+    /*width:250px;*/
+    width:151px;
     display:inline-block;
     text-align:center;
 }

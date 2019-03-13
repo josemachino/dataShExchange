@@ -1704,7 +1704,7 @@ function linkShex(g,source, portSource, target,portTarget,vertices) {
     var link = new joint.shapes.standard.Link({
         source: { id: source, port:portSource},
         target: { id: target , port:portTarget},
-        attrs:{line:{stroke:'#D7BCBC'}},
+        attrs:{line:{stroke:'#1a2832'}},
         router: { name: 'manhattan' },
         connector: { name: 'jumpover' },
         vertices: vertices || []

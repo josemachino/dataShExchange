@@ -19,8 +19,8 @@ exchange:function(e){
 	var exchange=new Exchange();
 	
 	$("#ls_todo").html("");
-	//let msgRule=exchange.checkComplete(exchange.stTGD(mapSymbols,graphTGDs,paperTGDs,mapTableIdCanvas),graphTGDs);
-	//console.log(msgRule);
+	let msgRule=exchange.checkComplete(exchange.stTGD(mapSymbols,graphTGDs,paperTGDs,mapTableIdCanvas),graphTGDs);
+	console.log(msgRule);
 	/*if (msgRule.length>0){	
 		for (var msg of msgRule){
 			$("#ls_todo").append(msg);
