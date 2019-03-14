@@ -27,7 +27,7 @@ p{
 
 /*SIDE BAR RIGHT STYLE*/
 #sidebar-right{
-    min-width: 450px;
+    min-width: 650px;
     max-width: 650px;
 }
 
@@ -94,14 +94,14 @@ p{
 	 word-wrap:break-word;
 }
 .link_tgd{
-    /*width:210px;*/
-    width:115px;
+    width:210px;
+    /*width:115px;*/
     display:inline-block;
     text-align:center;
 }
 .link_tgdG{
-    /*width:250px;*/
-    width:151px;
+    width:250px;
+    /*width:151px;*/
     display:inline-block;
     text-align:center;
 }
