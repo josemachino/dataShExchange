@@ -84,7 +84,47 @@ Exchange.prototype.getTokens=function (value){
     }
     tokens.push(value.substring(j,i));
     return tokens;
-}
+};
+
+Exchange.prototype.GML=function(mapSymbols,rows,mapTables){
+	let comparisonOp=["le","leq","gt","geq"];
+	console.log(mapSymbols);	
+	let mapLines=new Map();
+	rows.forEach(function(row){				
+		if (row.pid==0){
+			
+			
+			let entities= [];
+			$('<div>', {html: row.ex }).find('span').each(function(){
+				entities.push( $(this).text() );
+			});
+			let gml="\n=>\n";
+			let annotations=[];
+			$('<div>', {html: row.ex }).find('').each(function(){
+				entities.push( $(this).text() );
+			});
+			console.log(entities);
+			let iri=;
+			let funI=iri.split('(');
+			gml=gml.concat(funI[0]).concat('(').concat(entities[0]).concat('.').concat(funI[1]).concat(' as ').concat(entities[1]).concat('\n');
+			let objQ={query:entities[0],des:gml};
+			mapLines.set(row.id,objQ);
+		}else{
+			let entities= $('div.li_body_tgd', row.ex).map(function(){
+			    return $(this).text();
+			}).get();
+			=gml.concat(':').concat(entities[1]).concat(' ').concat(entities[0]).concat(';\n');
+			let path=$('div.path_tgd', row.ex).map(function(){
+			    return $(this).text();
+			}).get();
+			/*let iri=$('div.path_tgd', row.ex).map(function(){
+			    return $(this).text();
+			}).get();*/
+			console.log("attribute map");
+			console.log(row.ex);
+		}
+	});
+};
 
 Exchange.prototype.stTGD=function(mapSymbols,graph,paper,mapTables){
 	let comparisonOp=["le","leq","gt","geq"];

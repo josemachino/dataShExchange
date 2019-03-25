@@ -12,7 +12,10 @@ events: {
 },
 hideOthers:function(e){
     if ($(e.target).parents('li')[0].id=="tgd"){        
-    	editorJSON.set(stTGD2(graphTGDs,paperTGDs,mapTableIdCanvas));        
+    	//editorJSON.set(stTGD2(graphTGDs,paperTGDs,mapTableIdCanvas));
+    	var exchange=new Exchange();
+    	exchange.GML(mapSymbols,$table.bootstrapTable('getData'),mapTableIdCanvas);
+    	editor.setText("");
     }
     if($(e.target).parents('li')[0].id=="testing"){    	
     	window.open("SpecRunner.html");

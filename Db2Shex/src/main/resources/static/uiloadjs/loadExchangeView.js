@@ -1,8 +1,8 @@
-var containerJSONEditor = document.getElementById("tgds_list");
-var options = {
-		mode:'view'	
-};
-var editorJSON = new JSONEditor(containerJSONEditor, options);
+var containerEditor = document.getElementById("tgds_list");
+var optionsQuill={readOnly: true, theme: 'snow'};
+//var optionsJSON = {mode:'view'};
+//var editorJSON = new JSONEditor(containerEditor, optionsJSON);
+var editor=new Quill(containerEditor, optionsQuill);
 var sideExchangeView = Backbone.View.extend({
 initialize: function(){
     this.render();
