@@ -100,30 +100,52 @@ Exchange.prototype.GML=function(mapSymbols,rows,mapTables){
 			});
 			let gml="\n=>\n";
 			let annotations=[];
-			$('<div>', {html: row.ex }).find('').each(function(){
-				entities.push( $(this).text() );
-			});
-			console.log(entities);
-			let iri=;
+			$('<div>', {html: row.ex }).find('p').each(function(){
+				annotations.push( $(this).text() );
+			});			
+			let iri=annotations[0];
 			let funI=iri.split('(');
 			gml=gml.concat(funI[0]).concat('(').concat(entities[0]).concat('.').concat(funI[1]).concat(' as ').concat(entities[1]).concat('\n');
-			let objQ={query:entities[0],des:gml};
+			let objQ={query:[entities[0]],des:gml};
 			mapLines.set(row.id,objQ);
 		}else{
+			let detailTGD=mapLines.get(row.pid);
+			
 			let entities= $('div.li_body_tgd', row.ex).map(function(){
 			    return $(this).text();
 			}).get();
-			=gml.concat(':').concat(entities[1]).concat(' ').concat(entities[0]).concat(';\n');
+			
 			let path=$('div.path_tgd', row.ex).map(function(){
 			    return $(this).text();
 			}).get();
-			/*let iri=$('div.path_tgd', row.ex).map(function(){
+			let taNames=this.getTokens(path[0]);
+			
+			console.log(taNames);
+			let iri=$('div.iri_tgd', row.ex).map(function(){
 			    return $(this).text();
-			}).get();*/
+			}).get();
+			if (iri.length>0){
+				let fIri=iri[0].split("(");
+				detailTGD.des=detailTGD.des.concat('\t:').concat(entities[1]).concat(' ').concat(fIri[0]).concat("(").concat(taNames[0]).concat(".").concat(entities[0]).concat(fIri[1]).concat(';\n');
+			}else{
+				detailTGD.des=detailTGD.des.concat('\t:').concat(entities[1]).concat(' ').concat(taNames[0]).concat(".").concat(entities[0]).concat(';\n');
+			}
 			console.log("attribute map");
 			console.log(row.ex);
 		}
 	});
+	console.log(mapLines);
+	let mapToStr="";
+	for (var value of mapLines.values()) {
+		 if (value.query.length>1){
+			 mapToStr=mapToStr.concat(value.query[0]).concat(' WHERE ').concat(value.query[1]);
+		 }else{
+			 mapToStr=mapToStr.concat(value.query[0]);
+		 }
+		 mapToStr=mapToStr.concat(value.des.substr(0,value.des.length-2)).concat(".\n");
+	}
+	console.log(mapToStr);
+	return mapToStr;
 };
 
 Exchange.prototype.stTGD=function(mapSymbols,graph,paper,mapTables){

@@ -39,7 +39,26 @@ events: {
      "click .edit_green_tgd":"modifyLinkGreen",
      "click .edit_red_tgd":"modifyLinkRed",
      "click .rem_param_blue_tgd":"removeParam",
-     "click #rightCollapsed":"activate"
+     "click #rightCollapsed":"activate",
+     "click .edit_param_green":"editParamLinkGreen",
+     "click .rem_param_green_tgd":"removeParamGreen"
+},
+removeParamGreen:function(e){
+	//TODO
+	console.log("implement")
+},
+editParamLinkGreen:function(e){
+	//TODO
+	let auxLink;
+    for (var link of graphTGDs.getLinks()){        
+        if (link.id==e.currentTarget.id){
+            auxLink=link;
+            break;
+        }
+    }
+    let linkView=auxLink.findView(paperTGDs);
+    loadWhereParam(auxLink,linkView.sourceView.model.attributes.options);
+    
 },
 activate:function(e){    
     $('#sidebar-right').toggleClass('active');

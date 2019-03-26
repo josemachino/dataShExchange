@@ -1,11 +1,10 @@
 //TODO
 /*
- * Set the functions iris in the variable in stTGD2 and in jsoneditor
- * Edit TGDs mapping view
- * Deleting link green many times , it arrives when it does not remove the blue links
- * Deleting red links cause problems
- * Recommend what to do when user is going to exchange
+ *change background when is a different path
  */
+//https://stackoverflow.com/questions/48915931/bootstrap-table-how-to-set-table-row-background-color
+//https://bootstrap-table.com/docs/api/table-options/
+//http://visjs.org/docs/network/
 //https://es.slideshare.net/juansequeda/rdb2-rdf-tutorial-iswc2013
 //https://dzone.com/articles/writing-web-based-client-side-unit-tests-with-jasm
 //https://jasmine.github.io/tutorials/your_first_suite
@@ -1229,7 +1228,18 @@ function drawNewRedLinkInTable(redLink,sHead,sAtt,path,fObject,tHead){
 }
 
 function drawNewGreenLinkInTable(greenLink,sHead,fSubject,tHead){    
-    let graphicTGDparent=$('<div>').append($('<span>').attr('class','li_tgd').append(sHead)).append($('<div>').attr({'class':'link_tgdG'}).append($('<p>').attr({id:"text_"+greenLink.id}).append(fSubject)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:greenLink.id,class:'edit_green_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLineG}).append($('<line>').attr({class:'arrowGreen',x1:0,x2:widthSVGLineG,y1:10,y2:10})))).append($('<span>').attr('class', 'li_tgd').append(tHead)).remove().html();
+    let graphicTGDparent=$('<div>').append(
+    		$('<span>').attr('class','li_tgd').append(sHead)).
+    		append($('<div>').attr({'class':'link_tgdG'}).
+    				append($('<p>').attr({id:"text_"+greenLink.id}).
+    						append(fSubject)).
+    						append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:greenLink.id,class:'edit_green_tgd'}).append($('<i>').attr('class','fas fa-edit'))).
+    						append($('<svg>').attr({height:'17px',width:widthSVGForLineG}).append($('<line>').attr({class:'arrowGreen',x1:0,x2:widthSVGLineG,y1:10,y2:10}))).
+    						append($('<div>').attr({id:"param_"+greenLink.id,class:"param_tgd"}).
+    								append($('<a>').attr({'data-tooltip':'true',title:'Edit Parameters',id:greenLink.id,class:"edit_param_green"}).append($('<i>').attr('class','fas fa-edit'))).
+    								append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:greenLink.id,class:"rem_param_green_tgd"}).
+    										append($('<i>').attr('class','fas fa-trash-alt'))))).
+    										append($('<span>').attr('class', 'li_tgd').append(tHead)).remove().html();
     let ident=greenLink.id;
     $table.bootstrapTable('append',[{pid:0,id:ident,ex:graphicTGDparent}])
     $table.treegrid({treeColumn: 1,expanderExpandedClass: 'glyphicon glyphicon-minus',
@@ -2132,4 +2142,14 @@ function update(svg,force,graph){
 	  .linkDistance(100)
       .start()
 	  ;
+}
+function loadWhereParam(link,attributes){
+	console.log(attributes);
+	
+	$('#exampleModal').modal('show');
+	$('#queryBuilder').queryBuilder({filters:[{ id: 'name',
+	    field:'name',
+	    type: 'string',
+	    operators: 'equal'}]});
+		    
 }
