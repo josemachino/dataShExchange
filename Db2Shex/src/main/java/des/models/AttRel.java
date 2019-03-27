@@ -6,19 +6,30 @@ public class AttRel {
 	private String id;
 	private String text;
 	private boolean iskey;
+	private String type;
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
 	private ReFK ref;
 
-	public AttRel(String string, String name, boolean contains) {
+	public AttRel(String string, String name, boolean contains,String type) {
 		this.setId(string);
 		this.setText(name);
 		this.setIskey(contains);
+		this.setType(type);
 		this.ref=null;
 	}
 	
-	public AttRel(String string, String name, boolean contains,ReFK ref) {
+	public AttRel(String string, String name, boolean contains,String type,ReFK ref) {
 		this.setId(string);
 		this.setText(name);
 		this.setIskey(contains);
+		this.setType(type);
 		this.ref=ref;
 	}
 

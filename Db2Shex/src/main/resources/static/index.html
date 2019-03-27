@@ -5,11 +5,15 @@
 	<meta charset="utf-8" />
 	<meta content="width=device-width, initial-scale=1.0" name="viewport" />
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/jointjs/2.2.0/joint.css" rel="stylesheet" type="text/css" /><!--<link rel="stylesheet" type="text/css" href="joint.ui.paperScroller.min.css">-->
-	<!--BOOTSTRAP -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
-	<link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" rel="stylesheet" /><script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 	<!-- Our Custom CSS -->
 	<link href="css/style4.css" rel="stylesheet" />
+	<!--BOOTSTRAP CSS -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+	<link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" rel="stylesheet" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous">	</script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
+	
 	<!--BOOTSTRAP -->
 	<!-- Font Awesome JS 
     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
@@ -52,6 +56,7 @@
     <script src="jsoneditor/jsoneditor.min.js"></script>
     -->
     <!-- QUery Builder -->
+    <script src="js/moment.js"></script>
     <link href="css/query-builder.default.css" rel="stylesheet" type="text/css">
     <script src="js/query-builder.standalone.js"></script>
 <!--     https://github.com/jimmywarting/StreamSaver.js-->
@@ -104,7 +109,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+        <h5 class="modal-title" id="exampleModalLongTitle">Add Conditions</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -114,7 +119,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-primary" id="saveGreenParam">Save</button>
       </div>
     </div>
   </div>
@@ -246,6 +251,13 @@
 	$table.treegrid({treeColumn: 1,expanderExpandedClass: 'glyphicon glyphicon-minus',
         expanderCollapsedClass: 'glyphicon glyphicon-plus'});
 	$('#ls_todo').hide();	
+	//$('#saveGreenParam').click(function(){
+		
+		//let conditions=$('#queryBuilder').queryBuilder('getRules',{ skip_empty: true });
+		
+		//$('#exampleModal').modal('hide');
+		//$('#queryBuilder').queryBuilder('reset');
+	//});
 	</script>
 </body>
 </html>
