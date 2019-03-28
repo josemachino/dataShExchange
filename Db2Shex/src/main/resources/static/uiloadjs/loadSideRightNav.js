@@ -45,7 +45,18 @@ events: {
 },
 removeParamGreen:function(e){
 	//TODO
-	console.log("implement")
+	let auxLink;
+    for (var link of graphTGDs.getLinks()){        
+        if (link.id==e.currentTarget.id){
+            auxLink=link;
+            break;
+        }
+    }
+    if (auxLink.labels().length>1){
+        auxLink.removeLabel(-1)
+        //update link 
+        updateParamGreenLink(auxLink.id);
+    }
 },
 editParamLinkGreen:function(e){
 	//TODO

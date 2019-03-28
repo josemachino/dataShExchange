@@ -1,6 +1,6 @@
-p{
-    display:inline;
-    color:black !important;
+/*TODO DIV INLINE FOR TGDS ENTITY LINK*/
+fieldset{
+   border:1px solid #cccc;
 }
 .path_tgd{
 	display:inline;

@@ -1231,12 +1231,12 @@ function buildGreenLink(greenLink,sHead,fSubject,tHead,condition){
 	return $('<div>').append(
     		$('<span>').attr('class','li_tgd').append(sHead)).
     		append($('<div>').attr({'class':'link_tgdG'}).
-    				append($('<p>').attr({id:"text_"+greenLink.id}).
+    				append($('<div>').attr({id:"text_"+greenLink.id}).
     						append(fSubject)).
     						append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:greenLink.id,class:'edit_green_tgd'}).append($('<i>').attr('class','fas fa-edit'))).
     						append($('<svg>').attr({height:'17px',width:widthSVGForLineG}).append($('<line>').attr({class:'arrowGreen',x1:0,x2:widthSVGLineG,y1:10,y2:10}))).
     						append($('<div>').attr({id:"param_"+greenLink.id,class:"param_tgd"}).
-    								append($('<p>').attr({id:"",class:"tgd_cond"}).append(condition)).
+    								append($('<div>').attr({id:"",class:"tgd_cond"}).append(condition)).
     								append($('<a>').attr({'data-tooltip':'true',title:'Edit Parameters',id:greenLink.id,class:"edit_param_green"}).append($('<i>').attr('class','fas fa-edit'))).
     								append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:greenLink.id,class:"rem_param_green_tgd"}).
     										append($('<i>').attr('class','fas fa-trash-alt'))))).
@@ -2148,11 +2148,21 @@ function update(svg,force,graph){
       .start()
 	  ;
 }
+function updateParamGreenLink(pid){
+	let objGraphic=$table.bootstrapTable('getRowByUniqueId',pid);            
+    console.log($(objGraphic.ex));
+    //TODO review if is correct the index
+    var sHead=$(objGraphic.ex)[0].lastChild.textContent;
+    var fSubject=$(objGraphic.ex)[1].firstChild.textContent;                
+    var tHead=$(objGraphic.ex)[2].lastChild.textContent;
+    
+    let graphicTGD=buildGreenLink(link,sHead,fSubject,tHead,"");                
+    $table.bootstrapTable('updateByUniqueId',{id:pid,row:{ex:graphicTGD}})
+}
 function loadWhereParam(link,attributes){	
 	let filAtt=[];
 	attributes.forEach(function(att){
-		if (att.iskey==false){
-			console.log(att)
+		if (att.iskey==false){			
 			if (att.type=='date'){
 				filAtt.push({id:att.id,field:att.text,type:att.type,
 					validation: {format: 'YYYY/MM/DD'},
@@ -2195,15 +2205,27 @@ function loadWhereParam(link,attributes){
         onConfirm: function(a) {                                 
         	let conditions=$('#queryB').queryBuilder('getRules',{ skip_empty: true });
         	if (conditions!=null && conditions.valid==true){
-        		let condToStr=getCondWhere(conditions);
-        		link.appendLabel({attrs: {text: {text: condToStr}}});
+        		console.log(conditions);
+        		let condToStr=getCondWhere(conditions.rules);
+        		link.appendLabel({
+        			markup: [{tagName: 'rect',selector: 'labelBody'}, {tagName: 'text',selector: 'text'}],
+                    attrs: {
+                        text: {
+                            text: condToStr,
+                            fill: '#7c68fc',
+                            fontFamily: 'sans-serif',
+                            textAnchor: 'middle',
+                            textVerticalAnchor: 'middle'
+                        },
+                        labelBody: {ref: 'text',refX: -5,refY: -5,refWidth: '100%',refHeight: '100%',refWidth2: 10,refHeight2: 10,stroke: '#7c68fc',fill: 'white',strokeWidth: 2,rx: 5,ry: 5}
+                    },position: {offset: -40}});
         		
         		let objGraphic=$table.bootstrapTable('getRowByUniqueId',link.id);            
-                console.log(objGraphic);
+                console.log($(objGraphic.ex));
                 //TODO review if is correct the index
-                var sHead=$(objGraphic.ex)[2].lastChild.textContent;
-                var fSubject=$(objGraphic.ex)[3].firstChild.textContent;                
-                var tHead=$(objGraphic.ex)[4].lastChild.textContent;
+                var sHead=$(objGraphic.ex)[0].lastChild.textContent;
+                var fSubject=$(objGraphic.ex)[1].firstChild.textContent;                
+                var tHead=$(objGraphic.ex)[2].lastChild.textContent;
                 
                 let graphicTGD=buildGreenLink(link,sHead,fSubject,tHead,condToStr);                
                 $table.bootstrapTable('updateByUniqueId',{id:link.id,row:{ex:graphicTGD}})
@@ -2217,14 +2239,34 @@ function loadWhereParam(link,attributes){
     $('#queryB').queryBuilder({filters:filAtt});	
 			    
 }
+function operatorStrToChar(operator){
+	switch(operator){
+	case "equal":
+		return "=";
+	case "not equal":
+		return "!=";
+	case "less":
+		return "<";
+	case "less or equal":
+		return "<=";
+	case "greater":
+		return ">";
+	case "greater or equal":
+		return ">=";		
+	}
+}
 /**
  * This method returns where statement 
  * */
 function getCondWhere(conditions){
 	let stmt="";
-	conditions.forEach(function(cond){
-		console.log(cond);
-		stmt=stmt.concat(cond.field);
+	conditions.forEach(function(cond){		
+		if (cond.operator=="between"){
+			stmt=stmt.concat(cond.field).concat(">=").concat(cond.value[0]).concat(" AND ").concat(cond.field).concat("<=").concat(cond.value[1]);
+		}else{
+			stmt=stmt.concat(cond.field).concat(operatorStrToChar(cond.operator)).concat(cond.value);
+		}
+		
 	});
 	return stmt;
 }

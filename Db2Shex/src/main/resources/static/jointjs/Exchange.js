@@ -92,7 +92,7 @@ Exchange.prototype.GML=function(mapSymbols,rows,mapTables){
 	let mapLines=new Map();
 	rows.forEach(function(row){				
 		if (row.pid==0){
-			
+			//TODO CHOOSE THE PATH LONG AND ALSO THE WHERE CONDITIONS
 			
 			let entities= [];
 			$('<div>', {html: row.ex }).find('span').each(function(){
@@ -100,7 +100,7 @@ Exchange.prototype.GML=function(mapSymbols,rows,mapTables){
 			});
 			let gml="\n=>\n";
 			let annotations=[];
-			$('<div>', {html: row.ex }).find('p').each(function(){
+			$('<div>', {html: row.ex }).find('div').each(function(){
 				annotations.push( $(this).text() );
 			});			
 			let iri=annotations[0];
@@ -126,12 +126,10 @@ Exchange.prototype.GML=function(mapSymbols,rows,mapTables){
 			}).get();
 			if (iri.length>0){
 				let fIri=iri[0].split("(");
-				detailTGD.des=detailTGD.des.concat('\t:').concat(entities[1]).concat(' ').concat(fIri[0]).concat("(").concat(taNames[0]).concat(".").concat(entities[0]).concat(fIri[1]).concat(';\n');
+				detailTGD.des=detailTGD.des.concat('\t:').concat(entities[1]).concat(' ').concat(fIri[0]).concat("(").concat(taNames[0]).concat(".").concat(fIri[1]).concat(';\n');
 			}else{
 				detailTGD.des=detailTGD.des.concat('\t:').concat(entities[1]).concat(' ').concat(taNames[0]).concat(".").concat(entities[0]).concat(';\n');
 			}
-			console.log("attribute map");
-			console.log(row.ex);
 		}
 	});
 	console.log(mapLines);

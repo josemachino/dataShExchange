@@ -1,5 +1,5 @@
 var containerEditor = document.getElementById("tgds_list");
-var optionsQuill={readOnly: true, theme: 'snow'};
+var optionsQuill={readOnly: true, theme: 'bubble'};
 //var optionsJSON = {mode:'view'};
 //var editorJSON = new JSONEditor(containerEditor, optionsJSON);
 var editor=new Quill(containerEditor, optionsQuill);

@@ -219,7 +219,11 @@
         </div>
     </script>
 <script type="text/template" id="tgd_template">
-<div id="tgds_list" style="400px"></div>
+<fieldset>
+<legend style="color:blue;font-weight:bold;">GML</legend>
+<div id="tgds_list" style="400px">	
+</div>
+</fieldset>
 </script>
 <script type="text/javascript" src="uiloadjs/loadSideNav.js"></script>
 <script type="text/javascript" src="uiloadjs/loadSideRightNav.js"></script>
@@ -251,13 +255,7 @@
 	$table.treegrid({treeColumn: 1,expanderExpandedClass: 'glyphicon glyphicon-minus',
         expanderCollapsedClass: 'glyphicon glyphicon-plus'});
 	$('#ls_todo').hide();	
-	//$('#saveGreenParam').click(function(){
-		
-		//let conditions=$('#queryBuilder').queryBuilder('getRules',{ skip_empty: true });
-		
-		//$('#exampleModal').modal('hide');
-		//$('#queryBuilder').queryBuilder('reset');
-	//});
+	
 	</script>
 </body>
 </html>
