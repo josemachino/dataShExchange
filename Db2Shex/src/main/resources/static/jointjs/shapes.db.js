@@ -1227,8 +1227,8 @@ function drawNewRedLinkInTable(redLink,sHead,sAtt,path,fObject,tHead){
     $table.bootstrapTable('append',[{pid:parentId,id:redLink.id,ex:graphicTGD}])
 }
 
-function drawNewGreenLinkInTable(greenLink,sHead,fSubject,tHead){    
-    let graphicTGDparent=$('<div>').append(
+function buildGreenLink(greenLink,sHead,fSubject,tHead,condition){
+	return $('<div>').append(
     		$('<span>').attr('class','li_tgd').append(sHead)).
     		append($('<div>').attr({'class':'link_tgdG'}).
     				append($('<p>').attr({id:"text_"+greenLink.id}).
@@ -1236,10 +1236,15 @@ function drawNewGreenLinkInTable(greenLink,sHead,fSubject,tHead){
     						append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:greenLink.id,class:'edit_green_tgd'}).append($('<i>').attr('class','fas fa-edit'))).
     						append($('<svg>').attr({height:'17px',width:widthSVGForLineG}).append($('<line>').attr({class:'arrowGreen',x1:0,x2:widthSVGLineG,y1:10,y2:10}))).
     						append($('<div>').attr({id:"param_"+greenLink.id,class:"param_tgd"}).
+    								append($('<p>').attr({id:"",class:"tgd_cond"}).append(condition)).
     								append($('<a>').attr({'data-tooltip':'true',title:'Edit Parameters',id:greenLink.id,class:"edit_param_green"}).append($('<i>').attr('class','fas fa-edit'))).
     								append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:greenLink.id,class:"rem_param_green_tgd"}).
     										append($('<i>').attr('class','fas fa-trash-alt'))))).
-    										append($('<span>').attr('class', 'li_tgd').append(tHead)).remove().html();
+    										append($('<span>').attr('class', 'li_tgd').append(tHead)).remove().html();	 
+}
+
+function drawNewGreenLinkInTable(greenLink,sHead,fSubject,tHead){    
+    let graphicTGDparent=buildGreenLink(greenLink,sHead,fSubject,tHead,"");
     let ident=greenLink.id;
     $table.bootstrapTable('append',[{pid:0,id:ident,ex:graphicTGDparent}])
     $table.treegrid({treeColumn: 1,expanderExpandedClass: 'glyphicon glyphicon-minus',
@@ -2190,21 +2195,17 @@ function loadWhereParam(link,attributes){
         onConfirm: function(a) {                                 
         	let conditions=$('#queryB').queryBuilder('getRules',{ skip_empty: true });
         	if (conditions!=null && conditions.valid==true){
-        		
-        		link.appendLabel({attrs: {text: {text: }}});
+        		let condToStr=getCondWhere(conditions);
+        		link.appendLabel({attrs: {text: {text: condToStr}}});
         		
         		let objGraphic=$table.bootstrapTable('getRowByUniqueId',link.id);            
-                //var sourceHead=$(objGraphic.ex)[0].firstChild.textContent;
-                var sourceAtt=$(objGraphic.ex)[2].lastChild.textContent;
-                var path=$(objGraphic.ex)[3].firstChild.textContent;
-                //var tHead=$(objGraphic.ex)[2].firstChild.textContent;
-                var tAtt=$(objGraphic.ex)[4].lastChild.textContent;
+                console.log(objGraphic);
+                //TODO review if is correct the index
+                var sHead=$(objGraphic.ex)[2].lastChild.textContent;
+                var fSubject=$(objGraphic.ex)[3].firstChild.textContent;                
+                var tHead=$(objGraphic.ex)[4].lastChild.textContent;
                 
-                //This was when header was added in blue link
-                //let graphicTGD=$('<div>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_head_tgd').append(sourceHead)).append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append(path)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({id:"param_"+currentLink.id,class:"param_tgd"}).append(constraintAtt)).append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:currentLink.id,class:'rem_param_blue_tgd'}).append($('<i>').attr('class','fas fa-trash-alt')))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_head_tgd').append(tHead)).append($('<div>').attr('class','li_body_tgd').append(tAtt))).remove().html();
-                //this without header
-                let graphicTGD=$('<div>').append('<i class="fas fa-dot-circle"></i><i class="fas fa-ellipsis-h"></i>').append($('<div>').attr('class','li_tgd').append($('<div>').attr('class','li_body_tgd').append(sourceAtt))).append($('<div>').attr('class','link_tgd').append($('<div>').attr({class:"path_tgd"}).append(path)).append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:currentLink.id,class:'edit_tgd'}).append($('<i>').attr('class','fas fa-edit'))).append($('<svg>').attr({height:'17px',width:widthSVGForLine}).append($('<line>').attr({class:'arrowBlue',x1:0,x2:widthSVGLine,y1:10,y2:10}))).append($('<div>').attr({id:"param_"+currentLink.id,class:"param_tgd"}).append(constraintAtt)).append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:currentLink.id,class:'rem_param_blue_tgd'}).append($('<i>').attr('class','fas fa-trash-alt')))).append($('<div>').attr('class', 'li_tgd').append($('<div>').attr('class','li_body_tgd').append(tAtt))).remove().html();
-                //TODO when update is deleting parent id and also the icons
+                let graphicTGD=buildGreenLink(link,sHead,fSubject,tHead,condToStr);                
                 $table.bootstrapTable('updateByUniqueId',{id:link.id,row:{ex:graphicTGD}})
         	}        	
         },        
@@ -2215,4 +2216,15 @@ function loadWhereParam(link,attributes){
 	
     $('#queryB').queryBuilder({filters:filAtt});	
 			    
+}
+/**
+ * This method returns where statement 
+ * */
+function getCondWhere(conditions){
+	let stmt="";
+	conditions.forEach(function(cond){
+		console.log(cond);
+		stmt=stmt.concat(cond.field);
+	});
+	return stmt;
 }
