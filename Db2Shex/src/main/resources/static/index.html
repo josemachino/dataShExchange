@@ -207,13 +207,14 @@
 		<div class="form-group">
 		   <button class="btn" id="exportst" type="button" data-toggle="tooltip" data-placement="right" title="Export"> <i class="fas fa-file-export"></i></button>
 		   <button class="btn" id="undost" type="button" data-toggle="tooltip" data-placement="right" title="Undo" ><i class="fas fa-undo"></i></button>
-		   <button class="btn" id="savest" type="button" data-toggle="tooltip" data-placement="right" title="Save"><i class="far fa-save"></i></button>			
+		   <button class="btn" id="savest" type="button" data-toggle="tooltip" data-placement="right" title="Save"><i class="far fa-save"></i></button>
+		   <button class="btn" id="conf" type="button" data-toggle="tooltip" data-placement="right" title="Line Configuration"><i class="fas fa-user-cog"></i></button>			
 		</div>
 		<div class="form-group">
 			<label for="importst">Import Graphic File</label>
 		   <input id="importst" type="file" placeholder="Import Graphics" class="form-control-file form-control"/> 
 		</div>        
-        <table id="table" class="table table-striped" data-toggle="table" data-search="false" data-unique-id="id">            
+        <table id="table" class="table" data-toggle="table" data-search="false" data-unique-id="id">            
         </table>                   
         <div id="syntax_tgds"> </div>
         </div>
@@ -248,14 +249,26 @@
 	    }
 	  }
 	var $table = $('#table');//,idField:'id',
-	$table.bootstrapTable({ columns:[{field:'pid',title:'pIdLink',class:"w-25",visible:false},{field:'id',title:'IdLink',class:"w-25",visible:false},{field:'ex',title:'Expression',sortable:"true",searchable:true},{field:'operate',title:'Delete',align:'center', events: window.operateEvents,formatter: operateFormatter,width:'10px'}],
+	$table.bootstrapTable({ columns:[{field:'pid',title:'pIdLink',class:"w-25",visible:false},{field:'id',title:'IdLink',class:"w-25",visible:false},{field:'ex',title:'Expression',sortable:"true",searchable:true},
+		{field:'operate',title:'Delete',align:'center', events: window.operateEvents,formatter: operateFormatter,width:'10px'}],
 	treeShowField:'ex',parentIdField:'pid'
 	});
 	//onChange:function(){$table.bootstrapTable('resetWidth')}
 	$table.treegrid({treeColumn: 1,expanderExpandedClass: 'glyphicon glyphicon-minus',
         expanderCollapsedClass: 'glyphicon glyphicon-plus'});
 	$('#ls_todo').hide();	
+	//function rowStyle(row,index){
 	
+	//	return {css:{color: '#'+Math.floor(Math.random() * 16777215).toString(16)}}
+	//}
+	/*,
+		cellStyle: function (value, row, index) {
+			return {	          
+	            css: {
+	                "color": "blue"
+	            }
+	        };https://github.com/wenzhixin/bootstrap-table/issues/221
+		}*/
 	</script>
 </body>
 </html>

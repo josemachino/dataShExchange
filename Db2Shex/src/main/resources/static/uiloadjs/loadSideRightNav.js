@@ -34,6 +34,7 @@ events: {
      "click #exportst":"export",  
      "click #undost":"undost",
      "click #savest":"savest",
+     "click #conf":"configure",
      "change input[type=file]":"import",
      "click .edit_tgd":"modifyTGD",
      "click .edit_green_tgd":"modifyLinkGreen",
@@ -42,6 +43,9 @@ events: {
      "click #rightCollapsed":"activate",
      "click .edit_param_green":"editParamLinkGreen",
      "click .rem_param_green_tgd":"removeParamGreen"
+},
+configure:function(e){
+	loadConfModal();
 },
 removeParamGreen:function(e){
 	//TODO

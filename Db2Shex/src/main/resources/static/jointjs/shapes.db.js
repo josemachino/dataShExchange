@@ -1231,12 +1231,12 @@ function buildGreenLink(greenLink,sHead,fSubject,tHead,condition){
 	return $('<div>').append(
     		$('<span>').attr('class','li_tgd').append(sHead)).
     		append($('<div>').attr({'class':'link_tgdG'}).
-    				append($('<div>').attr({id:"text_"+greenLink.id}).
+    				append($('<div>').attr({id:"text_"+greenLink.id,class:"iri_tgd"}).
     						append(fSubject)).
     						append($('<a>').attr({'data-tooltip':'true',title:'Edit',id:greenLink.id,class:'edit_green_tgd'}).append($('<i>').attr('class','fas fa-edit'))).
     						append($('<svg>').attr({height:'17px',width:widthSVGForLineG}).append($('<line>').attr({class:'arrowGreen',x1:0,x2:widthSVGLineG,y1:10,y2:10}))).
     						append($('<div>').attr({id:"param_"+greenLink.id,class:"param_tgd"}).
-    								append($('<div>').attr({id:"",class:"tgd_cond"}).append(condition)).
+    								append($('<div>').attr({class:"tgd_cond"}).append(condition)).
     								append($('<a>').attr({'data-tooltip':'true',title:'Edit Parameters',id:greenLink.id,class:"edit_param_green"}).append($('<i>').attr('class','fas fa-edit'))).
     								append($('<a>').attr({'data-tooltip':'true',title:'Remove Parameters',id:greenLink.id,class:"rem_param_green_tgd"}).
     										append($('<i>').attr('class','fas fa-trash-alt'))))).
@@ -2264,9 +2264,90 @@ function getCondWhere(conditions){
 		if (cond.operator=="between"){
 			stmt=stmt.concat(cond.field).concat(">=").concat(cond.value[0]).concat(" AND ").concat(cond.field).concat("<=").concat(cond.value[1]);
 		}else{
-			stmt=stmt.concat(cond.field).concat(operatorStrToChar(cond.operator)).concat(cond.value);
+			if (cond.type=="double"|| cond.type=="integer" )
+				stmt=stmt.concat(cond.field).concat(operatorStrToChar(cond.operator)).concat(cond.value);
+			else
+				stmt=stmt.concat(cond.field).concat(operatorStrToChar(cond.operator)).concat('"').concat(cond.value).concat('"');
 		}
 		
 	});
 	return stmt;
+}
+
+/**
+ *This method pop up a modal where user chooses a color
+ **/
+function loadConfModal(){
+	var CustomView = Backbone.View.extend({
+        initialize: function() {
+            
+        },
+        render: function() {                             
+            var divForm1 = document.createElement("div");
+            divForm1.setAttribute("class","form-group");
+            
+            var inputEntityLineColor=document.createElement("input");
+            inputEntityLineColor.setAttribute("id","entColor");
+            inputEntityLineColor.setAttribute("class","form-control");
+            inputEntityLineColor.setAttribute("type","color");
+            inputEntityLineColor.setAttribute("name","Entity Line");
+            inputEntityLineColor.setAttribute("value",subjectLinkColor);
+            
+            var inputAttLineColor=document.createElement("input");
+            inputAttLineColor.setAttribute("id","attColor");
+            inputAttLineColor.setAttribute("class","form-control");
+            inputAttLineColor.setAttribute("type","color");
+            inputAttLineColor.setAttribute("name","Attribute Line");
+            inputAttLineColor.setAttribute("value",attributeLinkColor);
+            
+            var inputAttRefLineColor=document.createElement("input");
+            inputAttRefLineColor.setAttribute("id","refColor");
+            inputAttRefLineColor.setAttribute("class","form-control");
+            inputAttRefLineColor.setAttribute("type","color");
+            inputAttRefLineColor.setAttribute("name","Attribute Reference Line");
+            inputAttRefLineColor.setAttribute("value",attributeRefLinkColor);
+            divForm1.appendChild(inputEntityLineColor);
+            divForm1.appendChild(inputAttLineColor);
+            divForm1.appendChild(inputAttRefLineColor);
+            this.$el.html(divForm1);                
+            return this;
+        },
+
+    });
+    var modal = new BackboneBootstrapModals.ConfirmationModal({        
+        headerViewOptions:{showClose:false, label: 'Configure color lines'},
+        bodyView: CustomView,
+        bodyViewOptions: { },
+        onConfirm: function() {
+        	const colorSet=new Set([$('#entColor').val(),$('#attColor').val(),$('#refColor').val()]);
+        	if (colorSet.size!=3){
+        		alert("Color lines should be different!");
+        	}
+        	if (colorSet.has("#000000")){
+        		alert("Black color should not be used");
+        	}
+        	
+        	for (var link of graphTGDs.getLinks()){
+        		if (link.attr('line/stroke')==subjectLinkColor){
+        			link.attr('line/stroke')=$('#entColor').val();        			
+        		}
+        		if (link.attr('line/stroke')==attributeLinkColor){
+        			link.attr('line/stroke')=$('#attColor').val();
+        		}
+        		if (link.attr('line/stroke')==attributeRefLinkColor){
+        			link.attr('line/stroke')=$('#refColor').val();
+        		}
+        	}
+        	subjectLinkColor=$('#entColor').val();        	      
+        	attributeLinkColor=$('#attColor').val();                	
+        	attributeRefLinkColor=$('#refColor').val();
+        	
+        	/*graphTGDs.getElements().forEach(function(){
+        		
+        	});*/
+        },
+        onCancel: function(){
+        }        
+    });
+    modal.render();
 }

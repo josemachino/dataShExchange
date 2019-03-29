@@ -1,4 +1,13 @@
 /*TODO DIV INLINE FOR TGDS ENTITY LINK*/
+.form-control{
+	height:40px;
+}
+.iri_tgd{
+	display:inline;
+}
+.tgd_cond{
+	display:inline;
+}
 fieldset{
    border:1px solid #cccc;
 }

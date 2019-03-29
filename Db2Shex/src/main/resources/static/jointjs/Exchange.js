@@ -100,13 +100,21 @@ Exchange.prototype.GML=function(mapSymbols,rows,mapTables){
 			});
 			let gml="\n=>\n";
 			let annotations=[];
-			$('<div>', {html: row.ex }).find('div').each(function(){
+			$('<div>', {html: row.ex }).find('div.iri_tgd').each(function(){
 				annotations.push( $(this).text() );
 			});			
 			let iri=annotations[0];
 			let funI=iri.split('(');
 			gml=gml.concat(funI[0]).concat('(').concat(entities[0]).concat('.').concat(funI[1]).concat(' as ').concat(entities[1]).concat('\n');
-			let objQ={query:[entities[0]],des:gml};
+			//set the where it there is
+			$('<div>', {html: row.ex }).find('div.tgd_cond').each(function(){
+				annotations.push( $(this).text() );
+			});
+			let header=[entities[0]];
+			if (annotations.length>1 && annotations[1].length>0){
+				header.push(annotations[1]);
+			}
+			let objQ={query:header,des:gml};
 			mapLines.set(row.id,objQ);
 		}else{
 			let detailTGD=mapLines.get(row.pid);
@@ -121,6 +129,14 @@ Exchange.prototype.GML=function(mapSymbols,rows,mapTables){
 			let taNames=this.getTokens(path[0]);
 			
 			console.log(taNames);
+			
+			if (taNames.length>1){
+				for (let i=0;i<taNames.length-1;i++){
+					if (!detailTGD.query[0].includes(taNames[i])){
+						detailTGD.query[0]=detailTGD.query[0].concat(" JOIN ").concat(taNames[i]);
+					}					
+				}				
+			}
 			let iri=$('div.iri_tgd', row.ex).map(function(){
 			    return $(this).text();
 			}).get();
@@ -132,7 +148,7 @@ Exchange.prototype.GML=function(mapSymbols,rows,mapTables){
 			}
 		}
 	});
-	console.log(mapLines);
+	
 	let mapToStr="";
 	for (var value of mapLines.values()) {
 		 if (value.query.length>1){
@@ -142,7 +158,7 @@ Exchange.prototype.GML=function(mapSymbols,rows,mapTables){
 		 }
 		 mapToStr=mapToStr.concat(value.des.substr(0,value.des.length-2)).concat(".\n");
 	}
-	console.log(mapToStr);
+	
 	return mapToStr;
 };
 
